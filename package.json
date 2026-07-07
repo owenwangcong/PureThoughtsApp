@@ -1,0 +1,18 @@
+{
+  "name": "purethoughtsapp",
+  "version": "1.0.0",
+  "description": "面向全球华人共修团体的功课报数与学修一体化 App(iOS + Android)。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "supabase": "^2.109.1"
+  }
+}

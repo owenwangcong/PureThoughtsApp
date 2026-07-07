@@ -1,0 +1,44 @@
+# --- 通用 ---
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# --- IDE ---
+.idea/
+.vscode/
+*.iml
+
+# --- Flutter / Dart(app/ 工程创建后生效)---
+app/.dart_tool/
+app/.packages
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/coverage/
+# 注:app/pubspec.lock 应入库(应用工程锁定依赖版本),故不忽略
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/ephemeral/
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+app/*.g.dart.bak
+
+# --- 密钥 / 环境变量(严禁入库)---
+.env
+.env.*
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+supabase/.env
+supabase/functions/**/.env
+
+# --- Node(仅用于 Supabase CLI)---
+node_modules/
+
+# --- Supabase 本地开发 ---
+supabase/.temp/
+supabase/.branches/
