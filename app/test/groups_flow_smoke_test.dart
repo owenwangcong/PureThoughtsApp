@@ -86,5 +86,25 @@ void main() {
     final memberNames =
         await joiner.from('group_member_display').select('display_name').eq('group_id', gid);
     expect(memberNames.length, 2);
+
+    // ---- 生命周期(P1.4):转让 → 新群主重置码 → 原群主退群 → 解散 ----
+    await owner.rpc('transfer_group_ownership',
+        params: {'p_group_id': gid, 'p_new_owner': joiner.auth.currentUser!.id});
+    final newCode =
+        await joiner.rpc('reset_group_join_code', params: {'p_group_id': gid}) as String;
+    expect(newCode.length, 8);
+    expect(newCode, isNot(code));
+
+    // 原群主已是普通成员,可退群
+    await owner
+        .from('group_members')
+        .update({'status': 'left'})
+        .eq('group_id', gid)
+        .eq('user_id', owner.auth.currentUser!.id);
+
+    // 新群主解散;群对成员不可见(顺便清理本次测试数据)
+    await joiner.rpc('dissolve_group', params: {'p_group_id': gid});
+    final gone = await joiner.from('groups').select('id').eq('id', gid);
+    expect(gone, isEmpty);
   });
 }
