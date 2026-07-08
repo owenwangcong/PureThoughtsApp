@@ -42,7 +42,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `app/` — Flutter 工程(package `pure_thoughts`,org `com.purethoughts`,iOS + Android)
   - `lib/core/` 环境与设置 · `lib/features/<模块>/` 按功能分目录 · `lib/l10n/` ARB(zh_Hant 模板)
   - 环境经 `--dart-define`(SUPABASE_URL / SUPABASE_ANON_KEY / SENTRY_DSN),默认本地栈;Android 模拟器用 `http://10.0.2.2:54321`
-- `supabase/migrations/` — 数据库 migration SQL;`supabase/tests/` — pgTAP;`supabase/functions/` — Edge Functions(待建)
+- `supabase/migrations/` — 数据库 migration SQL;`supabase/tests/` — pgTAP;`supabase/functions/` — Edge Functions(本地栈自动 serve;**新增函数后需 `npx supabase stop && start` 重载**)
 
 ## 常用命令
 

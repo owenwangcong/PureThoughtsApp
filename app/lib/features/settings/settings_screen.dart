@@ -157,7 +157,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
           ),
 
-          // ---- 登出 ----
+          const Divider(height: 32),
+
+          // ---- 隐私与合规 ----
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: Text(l10n.privacyPolicy),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/privacy'),
+          ),
+          if (profile.value?['is_app_admin'] == true)
+            ListTile(
+              leading: const Icon(Icons.flag_outlined),
+              title: Text(l10n.adminReports),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/admin/reports'),
+            ),
+
+          // ---- 登出 / 删除账号 ----
           if (user != null) ...[
             const Divider(height: 32),
             FilledButton.tonal(
@@ -168,9 +185,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
               child: Text(l10n.authSignOut),
             ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => _deleteAccount(context),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: Text(l10n.deleteAccount),
+            ),
           ],
         ],
       ),
     );
+  }
+
+  /// 账号删除(PRD §10.1,上架硬需求):二次确认 → Edge Function →
+  /// 删号 + 报数匿名化保留群总量;活跃群群主须先转让/解散。
+  Future<void> _deleteAccount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteAccount),
+        content: Text(l10n.deleteAccountWarn),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.deleteAccount),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    try {
+      await Supabase.instance.client.functions.invoke('delete-account');
+      try {
+        await Supabase.instance.client.auth.signOut();
+      } catch (_) {}
+      router.go('/');
+    } on FunctionException catch (e) {
+      final code = (e.details is Map) ? (e.details as Map)['error'] : null;
+      messenger.showSnackBar(SnackBar(
+        content: Text(code == 'owner_of_active_group'
+            ? l10n.deleteOwnerBlocked
+            : '${l10n.authFailed}$e'),
+      ));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+    }
   }
 }

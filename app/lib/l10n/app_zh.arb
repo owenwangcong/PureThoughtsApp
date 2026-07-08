@@ -102,5 +102,20 @@
   "historyTitle": "歷史查看",
   "pickDate": "選擇日期",
   "noDataToday": "今日尚未報數",
-  "reportedToday": "今日已報人數"
+  "reportedToday": "今日已報人數",
+  "reportAction": "檢舉",
+  "reportGroup": "檢舉群組",
+  "reportReasonLabel": "原因",
+  "reportSubmitted": "已提交檢舉,管理員會盡快處理",
+  "blockUser": "封鎖此用戶",
+  "unblockUser": "解除封鎖",
+  "privacyPolicy": "隱私政策",
+  "communityGuidelines": "社區規範",
+  "eulaAgreeFinish": "同意並完成",
+  "deleteAccount": "刪除帳號",
+  "deleteAccountWarn": "帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?",
+  "deleteOwnerBlocked": "您仍是群組群主,請先轉讓或解散群組,再刪除帳號。",
+  "adminReports": "檢舉處理",
+  "markResolved": "標記已處理",
+  "banUser": "封禁該用戶"
 }

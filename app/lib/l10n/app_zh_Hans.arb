@@ -102,5 +102,20 @@
   "historyTitle": "历史查看",
   "pickDate": "选择日期",
   "noDataToday": "今日尚未报数",
-  "reportedToday": "今日已报人数"
+  "reportedToday": "今日已报人数",
+  "reportAction": "举报",
+  "reportGroup": "举报群组",
+  "reportReasonLabel": "原因",
+  "reportSubmitted": "已提交举报,管理员会尽快处理",
+  "blockUser": "拉黑此用户",
+  "unblockUser": "取消拉黑",
+  "privacyPolicy": "隐私政策",
+  "communityGuidelines": "社区规范",
+  "eulaAgreeFinish": "同意并完成",
+  "deleteAccount": "删除账号",
+  "deleteAccountWarn": "账号与个人资料将被永久删除,无法恢复;您的历史报数将匿名保留于群统计中。确定删除?",
+  "deleteOwnerBlocked": "您仍是群组群主,请先转让或解散群组,再删除账号。",
+  "adminReports": "举报处理",
+  "markResolved": "标记已处理",
+  "banUser": "封禁该用户"
 }

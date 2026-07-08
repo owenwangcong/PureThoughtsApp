@@ -715,6 +715,96 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'今日已報人數'**
   String get reportedToday;
+
+  /// No description provided for @reportAction.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'檢舉'**
+  String get reportAction;
+
+  /// No description provided for @reportGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'檢舉群組'**
+  String get reportGroup;
+
+  /// No description provided for @reportReasonLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'原因'**
+  String get reportReasonLabel;
+
+  /// No description provided for @reportSubmitted.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已提交檢舉,管理員會盡快處理'**
+  String get reportSubmitted;
+
+  /// No description provided for @blockUser.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'封鎖此用戶'**
+  String get blockUser;
+
+  /// No description provided for @unblockUser.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'解除封鎖'**
+  String get unblockUser;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'隱私政策'**
+  String get privacyPolicy;
+
+  /// No description provided for @communityGuidelines.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'社區規範'**
+  String get communityGuidelines;
+
+  /// No description provided for @eulaAgreeFinish.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'同意並完成'**
+  String get eulaAgreeFinish;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'刪除帳號'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountWarn.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?'**
+  String get deleteAccountWarn;
+
+  /// No description provided for @deleteOwnerBlocked.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'您仍是群組群主,請先轉讓或解散群組,再刪除帳號。'**
+  String get deleteOwnerBlocked;
+
+  /// No description provided for @adminReports.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'檢舉處理'**
+  String get adminReports;
+
+  /// No description provided for @markResolved.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'標記已處理'**
+  String get markResolved;
+
+  /// No description provided for @banUser.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'封禁該用戶'**
+  String get banUser;
 }
 
 class _AppLocalizationsDelegate
