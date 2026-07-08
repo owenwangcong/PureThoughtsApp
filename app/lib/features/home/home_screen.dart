@@ -71,6 +71,11 @@ class HomeScreen extends ConsumerWidget {
           else
             _NotificationBell(onTap: () => context.push('/notifications')),
           IconButton(
+            tooltip: l10n.toolsTitle,
+            icon: const Icon(Icons.self_improvement),
+            onPressed: () => context.push('/tools'),
+          ),
+          IconButton(
             tooltip: l10n.settingsTitle,
             icon: const Icon(Icons.settings),
             onPressed: () => context.push('/settings'),
