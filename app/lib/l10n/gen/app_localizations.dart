@@ -301,6 +301,120 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'其他地區'**
   String get regionOther;
+
+  /// No description provided for @groupsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'我的群組'**
+  String get groupsTitle;
+
+  /// No description provided for @createGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'建立群組'**
+  String get createGroup;
+
+  /// No description provided for @joinGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'申請入群'**
+  String get joinGroup;
+
+  /// No description provided for @groupName.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群組名稱'**
+  String get groupName;
+
+  /// No description provided for @groupDescription.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群組簡介'**
+  String get groupDescription;
+
+  /// No description provided for @joinCodeLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群 ID'**
+  String get joinCodeLabel;
+
+  /// No description provided for @applyMessageLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'申請說明'**
+  String get applyMessageLabel;
+
+  /// No description provided for @submit.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提交'**
+  String get submit;
+
+  /// No description provided for @cancel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'取消'**
+  String get cancel;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'審核中'**
+  String get statusPending;
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群主'**
+  String get roleOwner;
+
+  /// No description provided for @members.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'成員'**
+  String get members;
+
+  /// No description provided for @pendingApplications.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'入群審核'**
+  String get pendingApplications;
+
+  /// No description provided for @approve.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'通過'**
+  String get approve;
+
+  /// No description provided for @reject.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'拒絕'**
+  String get reject;
+
+  /// No description provided for @copied.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已複製'**
+  String get copied;
+
+  /// No description provided for @joinRequested.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已提交申請,等待群主審核'**
+  String get joinRequested;
+
+  /// No description provided for @groupCreated.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群組已建立'**
+  String get groupCreated;
+
+  /// No description provided for @announcement.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'公告'**
+  String get announcement;
 }
 
 class _AppLocalizationsDelegate

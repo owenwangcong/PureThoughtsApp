@@ -75,7 +75,30 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: types.when(
+      body: Column(
+        children: [
+          if (user != null)
+            ListTile(
+              leading: const Icon(Icons.groups),
+              title: Text(l10n.groupsTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/groups'),
+            ),
+          if (user != null) const Divider(height: 1),
+          Expanded(child: _buildPracticeList(context, ref, l10n, locale, types)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPracticeList(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    Locale locale,
+    AsyncValue<List<PracticeType>> types,
+  ) {
+    return types.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: Column(
@@ -106,7 +129,6 @@ class HomeScreen extends ConsumerWidget {
                   );
                 },
               ),
-      ),
     );
   }
 }

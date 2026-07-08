@@ -5,6 +5,8 @@ import 'core/settings.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
+import 'features/groups/group_detail_screen.dart';
+import 'features/groups/groups_screen.dart';
 import 'features/settings/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -21,6 +23,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
       GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+      GoRoute(path: '/groups', builder: (context, state) => const GroupsScreen()),
+      GoRoute(
+        path: '/groups/:gid',
+        builder: (context, state) =>
+            GroupDetailScreen(groupId: state.pathParameters['gid']!),
+      ),
     ],
   );
 });

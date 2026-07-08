@@ -109,6 +109,63 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get regionOther => '其他地區';
+
+  @override
+  String get groupsTitle => '我的群組';
+
+  @override
+  String get createGroup => '建立群組';
+
+  @override
+  String get joinGroup => '申請入群';
+
+  @override
+  String get groupName => '群組名稱';
+
+  @override
+  String get groupDescription => '群組簡介';
+
+  @override
+  String get joinCodeLabel => '群 ID';
+
+  @override
+  String get applyMessageLabel => '申請說明';
+
+  @override
+  String get submit => '提交';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get statusPending => '審核中';
+
+  @override
+  String get roleOwner => '群主';
+
+  @override
+  String get members => '成員';
+
+  @override
+  String get pendingApplications => '入群審核';
+
+  @override
+  String get approve => '通過';
+
+  @override
+  String get reject => '拒絕';
+
+  @override
+  String get copied => '已複製';
+
+  @override
+  String get joinRequested => '已提交申請,等待群主審核';
+
+  @override
+  String get groupCreated => '群組已建立';
+
+  @override
+  String get announcement => '公告';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -216,6 +273,63 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get regionOther => '其他地区';
+
+  @override
+  String get groupsTitle => '我的群组';
+
+  @override
+  String get createGroup => '创建群组';
+
+  @override
+  String get joinGroup => '申请入群';
+
+  @override
+  String get groupName => '群组名称';
+
+  @override
+  String get groupDescription => '群组简介';
+
+  @override
+  String get joinCodeLabel => '群 ID';
+
+  @override
+  String get applyMessageLabel => '申请说明';
+
+  @override
+  String get submit => '提交';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get statusPending => '审核中';
+
+  @override
+  String get roleOwner => '群主';
+
+  @override
+  String get members => '成员';
+
+  @override
+  String get pendingApplications => '入群审核';
+
+  @override
+  String get approve => '通过';
+
+  @override
+  String get reject => '拒绝';
+
+  @override
+  String get copied => '已复制';
+
+  @override
+  String get joinRequested => '已提交申请,等待群主审核';
+
+  @override
+  String get groupCreated => '群组已创建';
+
+  @override
+  String get announcement => '公告';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -323,4 +437,61 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get regionOther => '其他地區';
+
+  @override
+  String get groupsTitle => '我的群組';
+
+  @override
+  String get createGroup => '建立群組';
+
+  @override
+  String get joinGroup => '申請入群';
+
+  @override
+  String get groupName => '群組名稱';
+
+  @override
+  String get groupDescription => '群組簡介';
+
+  @override
+  String get joinCodeLabel => '群 ID';
+
+  @override
+  String get applyMessageLabel => '申請說明';
+
+  @override
+  String get submit => '提交';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get statusPending => '審核中';
+
+  @override
+  String get roleOwner => '群主';
+
+  @override
+  String get members => '成員';
+
+  @override
+  String get pendingApplications => '入群審核';
+
+  @override
+  String get approve => '通過';
+
+  @override
+  String get reject => '拒絕';
+
+  @override
+  String get copied => '已複製';
+
+  @override
+  String get joinRequested => '已提交申請,等待群主審核';
+
+  @override
+  String get groupCreated => '群組已建立';
+
+  @override
+  String get announcement => '公告';
 }
