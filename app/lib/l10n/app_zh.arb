@@ -52,5 +52,16 @@
   "copied": "已複製",
   "joinRequested": "已提交申請,等待群主審核",
   "groupCreated": "群組已建立",
-  "announcement": "公告"
+  "announcement": "公告",
+  "editAnnouncement": "編輯公告",
+  "leaveGroup": "退出群組",
+  "removeMember": "移除成員",
+  "transferOwner": "轉讓群主",
+  "dissolveGroup": "解散群組",
+  "resetJoinCode": "重置群 ID",
+  "confirmLeave": "確定退出此群組?歷史報數將保留。",
+  "confirmRemove": "確定移除該成員?其歷史報數將保留。",
+  "confirmTransfer": "確定將群主轉讓給此成員?轉讓後您將成為普通成員。",
+  "confirmDissolve": "解散後群組對所有成員不可見,且無法恢復。確定解散?",
+  "confirmResetCode": "舊群 ID 將立即失效,確定重置?"
 }

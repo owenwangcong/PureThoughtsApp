@@ -166,6 +166,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get announcement => '公告';
+
+  @override
+  String get editAnnouncement => '編輯公告';
+
+  @override
+  String get leaveGroup => '退出群組';
+
+  @override
+  String get removeMember => '移除成員';
+
+  @override
+  String get transferOwner => '轉讓群主';
+
+  @override
+  String get dissolveGroup => '解散群組';
+
+  @override
+  String get resetJoinCode => '重置群 ID';
+
+  @override
+  String get confirmLeave => '確定退出此群組?歷史報數將保留。';
+
+  @override
+  String get confirmRemove => '確定移除該成員?其歷史報數將保留。';
+
+  @override
+  String get confirmTransfer => '確定將群主轉讓給此成員?轉讓後您將成為普通成員。';
+
+  @override
+  String get confirmDissolve => '解散後群組對所有成員不可見,且無法恢復。確定解散?';
+
+  @override
+  String get confirmResetCode => '舊群 ID 將立即失效,確定重置?';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -330,6 +363,39 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get announcement => '公告';
+
+  @override
+  String get editAnnouncement => '编辑公告';
+
+  @override
+  String get leaveGroup => '退出群组';
+
+  @override
+  String get removeMember => '移除成员';
+
+  @override
+  String get transferOwner => '转让群主';
+
+  @override
+  String get dissolveGroup => '解散群组';
+
+  @override
+  String get resetJoinCode => '重置群 ID';
+
+  @override
+  String get confirmLeave => '确定退出此群组?历史报数将保留。';
+
+  @override
+  String get confirmRemove => '确定移除该成员?其历史报数将保留。';
+
+  @override
+  String get confirmTransfer => '确定将群主转让给此成员?转让后您将成为普通成员。';
+
+  @override
+  String get confirmDissolve => '解散后群组对所有成员不可见,且无法恢复。确定解散?';
+
+  @override
+  String get confirmResetCode => '旧群 ID 将立即失效,确定重置?';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -494,4 +560,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get announcement => '公告';
+
+  @override
+  String get editAnnouncement => '編輯公告';
+
+  @override
+  String get leaveGroup => '退出群組';
+
+  @override
+  String get removeMember => '移除成員';
+
+  @override
+  String get transferOwner => '轉讓群主';
+
+  @override
+  String get dissolveGroup => '解散群組';
+
+  @override
+  String get resetJoinCode => '重置群 ID';
+
+  @override
+  String get confirmLeave => '確定退出此群組?歷史報數將保留。';
+
+  @override
+  String get confirmRemove => '確定移除該成員?其歷史報數將保留。';
+
+  @override
+  String get confirmTransfer => '確定將群主轉讓給此成員?轉讓後您將成為普通成員。';
+
+  @override
+  String get confirmDissolve => '解散後群組對所有成員不可見,且無法恢復。確定解散?';
+
+  @override
+  String get confirmResetCode => '舊群 ID 將立即失效,確定重置?';
 }

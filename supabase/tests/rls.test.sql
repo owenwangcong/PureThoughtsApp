@@ -8,7 +8,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(31);
+select plan(40);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -232,6 +232,64 @@ select throws_ok($$
   update public.profiles set is_app_admin = true
   where id = '00000000-0000-0000-0000-00000000000b'
 $$, 'P0001', 'not allowed to change admin/ban fields', '用户不能自封管理员');
+
+-- ---------------------------------------------------------------- 群生命周期(P1.4)
+-- 群主 A 不能直接退群(须先转让)
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000a');
+select throws_ok($$
+  update public.group_members set status = 'left'
+  where group_id = '00000000-0000-0000-0000-0000000000d1'
+    and user_id  = '00000000-0000-0000-0000-00000000000a'
+$$, 'P0001', 'owner must transfer ownership before leaving', '群主不能直接退群');
+
+-- 转让给 B(approved 成员)
+select lives_ok($$
+  select public.transfer_group_ownership(
+    '00000000-0000-0000-0000-0000000000d1',
+    '00000000-0000-0000-0000-00000000000b')
+$$, '群主可转让给 approved 成员');
+
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000b');
+select is(
+  (select owner_id from public.groups where id = '00000000-0000-0000-0000-0000000000d1'),
+  '00000000-0000-0000-0000-00000000000b'::uuid, '转让后 owner_id 更新');
+select is(
+  (select role::text from public.group_members
+   where group_id = '00000000-0000-0000-0000-0000000000d1'
+     and user_id  = '00000000-0000-0000-0000-00000000000b'),
+  'owner', '转让后新群主 role=owner');
+
+-- 新群主 B 重置 join code(旧码失效,返回 8 位新码)
+select ok(
+  length(public.reset_group_join_code('00000000-0000-0000-0000-0000000000d1')) = 8,
+  '群主可重置 join code(8 位新码)');
+
+-- A(已转为普通成员)可退群
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000a');
+select lives_ok($$
+  update public.group_members set status = 'left'
+  where group_id = '00000000-0000-0000-0000-0000000000d1'
+    and user_id  = '00000000-0000-0000-0000-00000000000a'
+$$, '普通成员可退群');
+select is(
+  (select status::text from public.group_members
+   where group_id = '00000000-0000-0000-0000-0000000000d1'
+     and user_id  = '00000000-0000-0000-0000-00000000000a'),
+  'left', '退群后状态为 left');
+
+-- 新群主 B 解散群(经 RPC,软删),之后对成员不可见
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000b');
+select lives_ok($$
+  select public.dissolve_group('00000000-0000-0000-0000-0000000000d1')
+$$, '群主可解散群');
+select is(
+  (select count(*)::int from public.groups
+   where id = '00000000-0000-0000-0000-0000000000d1'),
+  0, '解散后群对成员不可见(软删)');
 
 select * from finish();
 rollback;

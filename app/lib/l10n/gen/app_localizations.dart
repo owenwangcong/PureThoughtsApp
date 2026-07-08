@@ -415,6 +415,72 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'公告'**
   String get announcement;
+
+  /// No description provided for @editAnnouncement.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'編輯公告'**
+  String get editAnnouncement;
+
+  /// No description provided for @leaveGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'退出群組'**
+  String get leaveGroup;
+
+  /// No description provided for @removeMember.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'移除成員'**
+  String get removeMember;
+
+  /// No description provided for @transferOwner.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'轉讓群主'**
+  String get transferOwner;
+
+  /// No description provided for @dissolveGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'解散群組'**
+  String get dissolveGroup;
+
+  /// No description provided for @resetJoinCode.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'重置群 ID'**
+  String get resetJoinCode;
+
+  /// No description provided for @confirmLeave.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定退出此群組?歷史報數將保留。'**
+  String get confirmLeave;
+
+  /// No description provided for @confirmRemove.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定移除該成員?其歷史報數將保留。'**
+  String get confirmRemove;
+
+  /// No description provided for @confirmTransfer.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定將群主轉讓給此成員?轉讓後您將成為普通成員。'**
+  String get confirmTransfer;
+
+  /// No description provided for @confirmDissolve.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'解散後群組對所有成員不可見,且無法恢復。確定解散?'**
+  String get confirmDissolve;
+
+  /// No description provided for @confirmResetCode.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'舊群 ID 將立即失效,確定重置?'**
+  String get confirmResetCode;
 }
 
 class _AppLocalizationsDelegate
