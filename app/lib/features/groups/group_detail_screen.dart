@@ -8,6 +8,8 @@ import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
+import '../moderation/moderation_providers.dart';
+import '../moderation/report_dialog.dart';
 import 'groups_providers.dart';
 
 /// 群详情:公告、群主区(群 ID 分享/重置、入群审核、成员管理)、成员列表、
@@ -143,6 +145,9 @@ class GroupDetailScreen extends ConsumerWidget {
                               .eq('user_id', user!.id);
                         }, popAfter: true);
                       }
+                    case 'report_group':
+                      await showReportDialog(context,
+                          targetType: 'group', targetId: groupId);
                   }
                 },
                 itemBuilder: (context) => [
@@ -151,8 +156,10 @@ class GroupDetailScreen extends ConsumerWidget {
                         value: 'announcement', child: Text(l10n.editAnnouncement)),
                     PopupMenuItem(value: 'reset_code', child: Text(l10n.resetJoinCode)),
                     PopupMenuItem(value: 'dissolve', child: Text(l10n.dissolveGroup)),
-                  ] else
+                  ] else ...[
                     PopupMenuItem(value: 'leave', child: Text(l10n.leaveGroup)),
+                    PopupMenuItem(value: 'report_group', child: Text(l10n.reportGroup)),
+                  ],
                 ],
               );
             },
@@ -225,56 +232,80 @@ class GroupDetailScreen extends ConsumerWidget {
                 members.when(
                   loading: () => const LinearProgressIndicator(),
                   error: (_, _) => Text(l10n.loadFailed),
-                  data: (list) => Column(
-                    children: [
-                      for (final m in list)
-                        ListTile(
-                          leading: const Icon(Icons.person_outline),
-                          title: Text(m['display_name'] as String? ?? ''),
-                          trailing: m['role'] == 'owner'
-                              ? Chip(label: Text(l10n.roleOwner))
-                              : (isOwner
-                                  ? PopupMenuButton<String>(
-                                      onSelected: (v) async {
-                                        final uid = m['user_id'] as String;
-                                        if (v == 'remove') {
-                                          if (await _confirm(context, l10n.confirmRemove) &&
-                                              context.mounted) {
-                                            await _run(context, ref, () async {
-                                              await Supabase.instance.client
-                                                  .from('group_members')
-                                                  .update({'status': 'removed'})
-                                                  .eq('group_id', groupId)
-                                                  .eq('user_id', uid);
-                                            });
+                  data: (list) {
+                    final blocks = ref.watch(myBlocksProvider).value ?? const <String>{};
+                    return Column(
+                      children: [
+                        for (final m in list)
+                          ListTile(
+                            leading: const Icon(Icons.person_outline),
+                            title: Text(m['display_name'] as String? ?? ''),
+                            trailing: m['role'] == 'owner'
+                                ? Chip(label: Text(l10n.roleOwner))
+                                : (m['user_id'] == user?.id
+                                    ? null
+                                    : PopupMenuButton<String>(
+                                        onSelected: (v) async {
+                                          final uid = m['user_id'] as String;
+                                          switch (v) {
+                                            case 'remove':
+                                              if (await _confirm(
+                                                      context, l10n.confirmRemove) &&
+                                                  context.mounted) {
+                                                await _run(context, ref, () async {
+                                                  await Supabase.instance.client
+                                                      .from('group_members')
+                                                      .update({'status': 'removed'})
+                                                      .eq('group_id', groupId)
+                                                      .eq('user_id', uid);
+                                                });
+                                              }
+                                            case 'transfer':
+                                              if (await _confirm(
+                                                      context, l10n.confirmTransfer) &&
+                                                  context.mounted) {
+                                                await _run(context, ref, () async {
+                                                  await Supabase.instance.client.rpc(
+                                                      'transfer_group_ownership',
+                                                      params: {
+                                                        'p_group_id': groupId,
+                                                        'p_new_owner': uid,
+                                                      });
+                                                });
+                                              }
+                                            case 'block':
+                                              await toggleBlock(
+                                                  uid, !blocks.contains(uid));
+                                              ref.invalidate(myBlocksProvider);
+                                            case 'report':
+                                              await showReportDialog(context,
+                                                  targetType: 'user', targetId: uid);
                                           }
-                                        } else if (v == 'transfer') {
-                                          if (await _confirm(context, l10n.confirmTransfer) &&
-                                              context.mounted) {
-                                            await _run(context, ref, () async {
-                                              await Supabase.instance.client.rpc(
-                                                  'transfer_group_ownership',
-                                                  params: {
-                                                    'p_group_id': groupId,
-                                                    'p_new_owner': uid,
-                                                  });
-                                            });
-                                          }
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                            value: 'transfer',
-                                            child: Text(l10n.transferOwner)),
-                                        PopupMenuItem(
-                                            value: 'remove',
-                                            child: Text(l10n.removeMember)),
-                                      ],
-                                    )
-                                  : null),
-                        ),
-                    ],
-                  ),
+                                        },
+                                        itemBuilder: (context) => [
+                                          if (isOwner) ...[
+                                            PopupMenuItem(
+                                                value: 'transfer',
+                                                child: Text(l10n.transferOwner)),
+                                            PopupMenuItem(
+                                                value: 'remove',
+                                                child: Text(l10n.removeMember)),
+                                          ],
+                                          PopupMenuItem(
+                                              value: 'block',
+                                              child: Text(
+                                                  blocks.contains(m['user_id'])
+                                                      ? l10n.unblockUser
+                                                      : l10n.blockUser)),
+                                          PopupMenuItem(
+                                              value: 'report',
+                                              child: Text(l10n.reportAction)),
+                                        ],
+                                      )),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -480,8 +511,12 @@ class _PendingSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final pending = ref.watch(pendingApplicationsProvider(groupId));
+    final blocks = ref.watch(myBlocksProvider).value ?? const <String>{};
     return pending.maybeWhen(
-      data: (list) => list.isEmpty
+      data: (raw) {
+        // 已拉黑用户的申请不展示(PRD §10.2)
+        final list = raw.where((p) => !blocks.contains(p['user_id'])).toList();
+        return list.isEmpty
           ? const SizedBox.shrink()
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +546,8 @@ class _PendingSection extends ConsumerWidget {
                     ),
                   ),
               ],
-            ),
+            );
+      },
       orElse: () => const SizedBox.shrink(),
     );
   }

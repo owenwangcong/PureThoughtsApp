@@ -316,6 +316,51 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reportedToday => '今日已報人數';
+
+  @override
+  String get reportAction => '檢舉';
+
+  @override
+  String get reportGroup => '檢舉群組';
+
+  @override
+  String get reportReasonLabel => '原因';
+
+  @override
+  String get reportSubmitted => '已提交檢舉,管理員會盡快處理';
+
+  @override
+  String get blockUser => '封鎖此用戶';
+
+  @override
+  String get unblockUser => '解除封鎖';
+
+  @override
+  String get privacyPolicy => '隱私政策';
+
+  @override
+  String get communityGuidelines => '社區規範';
+
+  @override
+  String get eulaAgreeFinish => '同意並完成';
+
+  @override
+  String get deleteAccount => '刪除帳號';
+
+  @override
+  String get deleteAccountWarn => '帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?';
+
+  @override
+  String get deleteOwnerBlocked => '您仍是群組群主,請先轉讓或解散群組,再刪除帳號。';
+
+  @override
+  String get adminReports => '檢舉處理';
+
+  @override
+  String get markResolved => '標記已處理';
+
+  @override
+  String get banUser => '封禁該用戶';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -630,6 +675,51 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get reportedToday => '今日已报人数';
+
+  @override
+  String get reportAction => '举报';
+
+  @override
+  String get reportGroup => '举报群组';
+
+  @override
+  String get reportReasonLabel => '原因';
+
+  @override
+  String get reportSubmitted => '已提交举报,管理员会尽快处理';
+
+  @override
+  String get blockUser => '拉黑此用户';
+
+  @override
+  String get unblockUser => '取消拉黑';
+
+  @override
+  String get privacyPolicy => '隐私政策';
+
+  @override
+  String get communityGuidelines => '社区规范';
+
+  @override
+  String get eulaAgreeFinish => '同意并完成';
+
+  @override
+  String get deleteAccount => '删除账号';
+
+  @override
+  String get deleteAccountWarn => '账号与个人资料将被永久删除,无法恢复;您的历史报数将匿名保留于群统计中。确定删除?';
+
+  @override
+  String get deleteOwnerBlocked => '您仍是群组群主,请先转让或解散群组,再删除账号。';
+
+  @override
+  String get adminReports => '举报处理';
+
+  @override
+  String get markResolved => '标记已处理';
+
+  @override
+  String get banUser => '封禁该用户';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -944,4 +1034,49 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get reportedToday => '今日已報人數';
+
+  @override
+  String get reportAction => '檢舉';
+
+  @override
+  String get reportGroup => '檢舉群組';
+
+  @override
+  String get reportReasonLabel => '原因';
+
+  @override
+  String get reportSubmitted => '已提交檢舉,管理員會盡快處理';
+
+  @override
+  String get blockUser => '封鎖此用戶';
+
+  @override
+  String get unblockUser => '解除封鎖';
+
+  @override
+  String get privacyPolicy => '隱私政策';
+
+  @override
+  String get communityGuidelines => '社區規範';
+
+  @override
+  String get eulaAgreeFinish => '同意並完成';
+
+  @override
+  String get deleteAccount => '刪除帳號';
+
+  @override
+  String get deleteAccountWarn => '帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?';
+
+  @override
+  String get deleteOwnerBlocked => '您仍是群組群主,請先轉讓或解散群組,再刪除帳號。';
+
+  @override
+  String get adminReports => '檢舉處理';
+
+  @override
+  String get markResolved => '標記已處理';
+
+  @override
+  String get banUser => '封禁該用戶';
 }

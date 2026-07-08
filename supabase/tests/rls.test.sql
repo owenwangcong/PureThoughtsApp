@@ -8,7 +8,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(40);
+select plan(43);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -290,6 +290,25 @@ select is(
   (select count(*)::int from public.groups
    where id = '00000000-0000-0000-0000-0000000000d1'),
   0, '解散后群对成员不可见(软删)');
+
+-- ---------------------------------------------------------------- 账号删除匿名化(P1.9)
+-- 模拟删号(delete-account Edge Function 最终执行 auth.users 删除)
+select tests_logout();
+delete from auth.users where id = '00000000-0000-0000-0000-00000000000b';
+
+select is(
+  (select count(*)::int from public.profiles
+   where id = '00000000-0000-0000-0000-00000000000b'),
+  0, '删号后 profile 级联删除');
+
+select is(
+  (select count(*)::int from public.practice_logs
+   where reporter_id is null),
+  3, '删号后其报数 reporter 置空(匿名化),记录保留(含软删行)');
+
+select ok(
+  (select sum(quantity) from public.practice_logs where deleted_at is null) is not null,
+  '删号后群总量数据仍在(功德保留)');
 
 select * from finish();
 rollback;

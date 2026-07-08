@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/settings.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../legal/privacy_screen.dart';
 
-/// 首启引导:选语言 → 选字号 → 选地区(PRD §11)。
-/// 每步选择即时生效并持久化;完成后进入首页。
+/// 首启引导:选语言 → 选字号 → 选地区 → 社区规范同意(PRD §11 / §10.2)。
+/// 每步选择即时生效并持久化;最后一步「同意並完成」进入首页。
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -17,10 +18,13 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   var _step = 0;
 
+  static const _lastStep = 3;
+
   void _next() {
-    if (_step < 2) {
+    if (_step < _lastStep) {
       setState(() => _step++);
     } else {
+      // 「同意並完成」= 同意社区规范(EULA,PRD §10.2)
       ref.read(onboardingDoneProvider.notifier).markDone();
       context.go('/');
     }
@@ -32,7 +36,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final page = switch (_step) {
       0 => _LanguageStep(l10n: l10n),
       1 => _FontStep(l10n: l10n),
-      _ => _RegionStep(l10n: l10n),
+      2 => _RegionStep(l10n: l10n),
+      _ => _EulaStep(l10n: l10n),
     };
 
     return Scaffold(
@@ -46,7 +51,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               FilledButton(
                 onPressed: _next,
                 style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
-                child: Text(_step < 2 ? l10n.next : l10n.done),
+                child: Text(_step < _lastStep ? l10n.next : l10n.eulaAgreeFinish),
               ),
             ],
           ),
@@ -106,6 +111,27 @@ class _FontStep extends ConsumerWidget {
           label: 'x${scale.toStringAsFixed(1)}',
           onChanged: (v) => ref.read(fontScaleProvider.notifier).set(v),
         ),
+      ],
+    );
+  }
+}
+
+class _EulaStep extends ConsumerWidget {
+  const _EulaStep({required this.l10n});
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hans = ref.watch(localeProvider).scriptCode == 'Hans';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Text(l10n.communityGuidelines,
+              style: Theme.of(context).textTheme.headlineSmall),
+        ),
+        const SizedBox(height: 16),
+        Text(guidelinesText(hans)),
       ],
     );
   }

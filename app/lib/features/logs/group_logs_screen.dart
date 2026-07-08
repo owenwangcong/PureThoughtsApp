@@ -7,6 +7,8 @@ import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../groups/groups_providers.dart';
+import '../moderation/moderation_providers.dart';
+import '../moderation/report_dialog.dart';
 import 'logs_providers.dart';
 
 /// 本群报数记录:成员可见全部(PRD §12.3);
@@ -109,7 +111,14 @@ class GroupLogsScreen extends ConsumerWidget {
       body: logs.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(l10n.loadFailed)),
-        data: (list) {
+        data: (raw) {
+          // 已拉黑用户的报数不展示(PRD §10.2)
+          final blocks = ref.watch(myBlocksProvider).value ?? const <String>{};
+          final list = raw
+              .where((log) =>
+                  !blocks.contains(log['reporter_id']) &&
+                  !blocks.contains(log['subject_user_id']))
+              .toList();
           if (list.isEmpty) return Center(child: Text(l10n.emptyList));
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(groupLogsProvider(groupId)),
@@ -143,20 +152,24 @@ class GroupLogsScreen extends ConsumerWidget {
                     if (isProxy) '$reporter ${l10n.proxyBy}',
                     if (log['note'] != null) log['note'] as String,
                   ].join(' · ')),
-                  trailing: (canEdit || canDelete)
-                      ? PopupMenuButton<String>(
-                          onSelected: (v) {
-                            if (v == 'edit') _edit(context, ref, log);
-                            if (v == 'delete') _delete(context, ref, log['id'] as String);
-                          },
-                          itemBuilder: (context) => [
-                            if (canEdit)
-                              PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                            if (canDelete)
-                              PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
-                          ],
-                        )
-                      : null,
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (v) {
+                      if (v == 'edit') _edit(context, ref, log);
+                      if (v == 'delete') _delete(context, ref, log['id'] as String);
+                      if (v == 'report') {
+                        showReportDialog(context,
+                            targetType: 'log', targetId: log['id'] as String);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (canEdit)
+                        PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                      if (canDelete)
+                        PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                      if (!canEdit)
+                        PopupMenuItem(value: 'report', child: Text(l10n.reportAction)),
+                    ],
+                  ),
                 );
               },
             ),
