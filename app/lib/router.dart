@@ -6,6 +6,7 @@ import 'features/auth/auth_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/dashboard/group_stats_screen.dart';
+import 'features/events/calendar_screen.dart';
 import 'features/dashboard/my_dashboard_screen.dart';
 import 'features/groups/group_detail_screen.dart';
 import 'features/groups/groups_screen.dart';
@@ -62,6 +63,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => const NotificationsScreen()),
       GoRoute(path: '/vows', builder: (context, state) => const VowsScreen()),
       GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
+      GoRoute(path: '/calendar', builder: (context, state) => const CalendarScreen()),
       GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
       GoRoute(path: '/tools/counter', builder: (context, state) => const CounterScreen()),
       GoRoute(

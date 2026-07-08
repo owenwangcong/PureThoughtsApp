@@ -419,6 +419,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vowCongrats => '隨喜讚歎!發願圓滿';
 
   @override
+  String get calendarTitle => '活動日曆';
+
+  @override
+  String get createEvent => '新增活動';
+
+  @override
+  String get eventTitleLabel => '活動名稱';
+
+  @override
+  String get weeklyRepeat => '每週重複';
+
+  @override
+  String get eventCancelled => '本次取消';
+
+  @override
+  String get cancelOccurrence => '取消本次活動';
+
+  @override
+  String get eventTypePractice => '共修';
+
+  @override
+  String get eventTypeMeditation => '打坐';
+
+  @override
+  String get eventTypeTalk => '講法';
+
+  @override
+  String get eventTypeAssembly => '法會';
+
+  @override
   String get toolsTitle => '工具';
 
   @override
@@ -895,6 +925,36 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get vowCongrats => '随喜赞叹!发愿圆满';
 
   @override
+  String get calendarTitle => '活动日历';
+
+  @override
+  String get createEvent => '新增活动';
+
+  @override
+  String get eventTitleLabel => '活动名称';
+
+  @override
+  String get weeklyRepeat => '每周重复';
+
+  @override
+  String get eventCancelled => '本次取消';
+
+  @override
+  String get cancelOccurrence => '取消本次活动';
+
+  @override
+  String get eventTypePractice => '共修';
+
+  @override
+  String get eventTypeMeditation => '打坐';
+
+  @override
+  String get eventTypeTalk => '讲法';
+
+  @override
+  String get eventTypeAssembly => '法会';
+
+  @override
   String get toolsTitle => '工具';
 
   @override
@@ -1369,6 +1429,36 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get calendarTitle => '活動日曆';
+
+  @override
+  String get createEvent => '新增活動';
+
+  @override
+  String get eventTitleLabel => '活動名稱';
+
+  @override
+  String get weeklyRepeat => '每週重複';
+
+  @override
+  String get eventCancelled => '本次取消';
+
+  @override
+  String get cancelOccurrence => '取消本次活動';
+
+  @override
+  String get eventTypePractice => '共修';
+
+  @override
+  String get eventTypeMeditation => '打坐';
+
+  @override
+  String get eventTypeTalk => '講法';
+
+  @override
+  String get eventTypeAssembly => '法會';
 
   @override
   String get toolsTitle => '工具';
