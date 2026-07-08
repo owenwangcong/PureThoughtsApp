@@ -10,8 +10,8 @@
 
 | Phase | 内容 | 状态 | 进度 | 完成日期 |
 |---|---|---|:---:|---|
-| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 3/9 | — |
-| **P1** | MVP:核心闭环(群 + 报数 + 统计)+ 上架合规 | ⬜ 未开始 | 0/10 | — |
+| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 4/9(余 P0.1–0.5 待外部依赖) | — |
+| **P1** | MVP:核心闭环(群 + 报数 + 统计)+ 上架合规 | 🔄 进行中 | 0/10 | — |
 | **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | ⬜ 未开始 | 0/7 | — |
 | **P3** | 视频 + 在线经本 | ⬜ 未开始 | 0/3 | — |
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
@@ -58,7 +58,7 @@
 - [ ] **P0.5** 监控告警(S)— Uptime 监控 + 磁盘/CPU 告警。验收:模拟宕机能收到告警。
 - [x] **P0.6** Flutter 工程骨架(M)— `app/`(org com.purethoughts,iOS+Android):Riverpod 3 + go_router + supabase_flutter 2.15 + gen-l10n(zh_Hant 默认/zh_Hans/zh 回退)+ 全局字号缩放(0.8–2.0 与系统叠乘)+ sentry(DSN 为空不启用)+ dart-define 环境配置(默认本地栈)。验收 ✅ 2026-07-07:冒烟测试匿名读到 5 条全局功课清单、报数表被拒;`analyze` 0 issue;单测 4/4;debug APK 构建通过。注:真机/模拟器跑通放在 P1.1 随 Auth 界面一起验证;Android 模拟器连本地栈用 `10.0.2.2:54321`。
 - [x] **P0.7** 数据库 schema v1(L)— 16 表 + 枚举 + RLS + 6 个 RPC(join_group / delete_practice_log / 转让 / 重置码 / 取码 / vow_progress)+ 3 视图 + 触发器(自动 profile / 建群 / unit 快照 / proxy_names 记忆 / 代报通知 / 更新守卫),`supabase/migrations/20260707000001_init_schema.sql`;pgTAP 测试 31 项 `supabase/tests/rls.test.sql`。验收 ✅ 2026-07-07:`db reset` 一键通过,`test db` 31/31。要点:软删走 delete_practice_log() RPC(PG 会用 SELECT 策略校验 UPDATE 新行);join_code 独立表 + RPC 防遍历。
-- [ ] **P0.8** 质量门(S,可选)— `flutter analyze` + `flutter test` 的本地脚本或 CI。验收:一条命令出结果。
+- [x] **P0.8** 质量门(S)— `scripts/check.ps1`:一条命令跑 `flutter analyze` + `flutter test` + pgTAP(栈未运行则跳过)。验收 ✅ 2026-07-07。
 
 **P0 DoD**:上述验收全部通过;App(骨架)连自托管实例完成"匿名浏览公开数据"。
 
@@ -68,7 +68,7 @@
 
 **目标**:注册 → 建群/入群 → 报数 → 统计的完整闭环,加上架必需的合规项;结束时发内测包。
 
-- [ ] **P1.1** Auth 界面与流程(M)— 注册 / 登录 / 找回密码 / Google / Apple;**首启引导:选语言 → 字号 → 地区**(PRD §11)。
+- [ ] **P1.1** 🔄 Auth 界面与流程(M)— 已完成(2026-07-07):邮箱注册/登录/找回密码(发信)、首启引导(语言→字号→地区,即时生效+持久化)、偏好登录后同步 profiles、匿名浏览不强制登录、登出;冒烟测试跑通注册→建档→同步→登出。**待办**:Google/Apple 登录(⛔ 依赖 E3/E4)、重置密码的深链回跳(随 E2 域名配置)、真机/模拟器走查。
 - [ ] **P1.2** Profile 与设置(S)— display_name、简繁切换(默认繁)、字号、地区、时区;偏好云端 + 本地双存。
 - [ ] **P1.3** 建群与入群(M)— 建群(建群者即群主)、群 ID 分享、`join_group` RPC 申请 + 申请说明、群主审核列表(通过/拒绝)、成员列表。
 - [ ] **P1.4** 群生命周期(M)— 退群 / 移除 / 群主转让 / 解散(二次确认,软删)/ join_code 重置 / **群公告**(置顶 + 更新生成通知记录)。(PRD §3.2)
