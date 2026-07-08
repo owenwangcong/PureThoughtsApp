@@ -71,6 +71,11 @@ flutter test             # 全部测试
 flutter test test/xxx_test.dart   # 单个测试文件
 flutter run              # 运行(需连接设备/模拟器)
 flutter gen-l10n         # 生成简繁本地化(配置后)
+
+# 正式签名 APK(签名密钥在 app/android/keys/,key.properties 不入库,须自行备份)
+flutter build apk --release `
+  --dart-define=SUPABASE_URL=https://<生产域名> `
+  --dart-define=SUPABASE_ANON_KEY=<生产anon key>
 ```
 
 ## 工作约定
