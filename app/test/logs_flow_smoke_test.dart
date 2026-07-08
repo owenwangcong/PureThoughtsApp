@@ -88,6 +88,26 @@ void main() {
         .from('practice_logs')
         .update({'quantity': 3, 'note': '補記昨日'}).eq('id', log['id'] as String);
 
+    // 批量报数(一次多种功课,P1.6 增强):单请求写多行,触发器逐行生效
+    final xinjing = types.firstWhere((t) => t['name_hans'] == '心经')['id'] as String;
+    final jingzuo = types.firstWhere((t) => t['name_hans'] == '静坐')['id'] as String;
+    await member.from('practice_logs').insert([
+      {
+        'group_id': gid,
+        'reporter_id': memberId,
+        'practice_type_id': xinjing,
+        'quantity': 1,
+        'local_date': localDate,
+      },
+      {
+        'group_id': gid,
+        'reporter_id': memberId,
+        'practice_type_id': jingzuo,
+        'quantity': 30,
+        'local_date': localDate,
+      },
+    ]);
+
     // 自由名字代报 → 名单自动记忆
     await member.from('practice_logs').insert({
       'group_id': gid,
@@ -121,13 +141,13 @@ void main() {
         .eq('type', 'proxy_log');
     expect(notifs.length, 1);
 
-    // 群统计:3 条记录进统计
+    // 群统计:5 条记录进统计(自报 1 + 批量 2 + 自由名字 1 + 代报 1)
     final stats = await member
         .from('daily_group_stats')
         .select('entries')
         .eq('group_id', gid);
     expect(
-        stats.fold<int>(0, (s, r) => s + (r['entries'] as int)), 3);
+        stats.fold<int>(0, (s, r) => s + (r['entries'] as int)), 5);
 
     // owner(被代报人)经 RPC 删除自己名下记录 → 统计扣减
     final proxyLog = await owner
@@ -142,19 +162,22 @@ void main() {
         .select('entries')
         .eq('group_id', gid);
     expect(
-        stats2.fold<int>(0, (s, r) => s + (r['entries'] as int)), 2);
+        stats2.fold<int>(0, (s, r) => s + (r['entries'] as int)), 4);
 
-    // 累计视图(P1.8):个人只见自己的(金刚经 3,不含自由名字/已删),群见全部
+    // 累计视图(P1.8):个人只见自己的(金刚经/心经/静坐,不含自由名字/已删),群见全部
     final myTotals = await member
         .from('user_practice_totals')
         .select('practice_type_id, total, entries');
-    expect(myTotals.length, 1);
-    expect(double.parse('${myTotals.single['total']}'), 3);
+    expect(myTotals.length, 3);
+    expect(
+        double.parse(
+            '${myTotals.firstWhere((r) => r['practice_type_id'] == jingangjing)['total']}'),
+        3);
     final groupTotals = await member
         .from('group_practice_totals')
         .select('total, entries')
         .eq('group_id', gid);
-    expect(groupTotals.fold<int>(0, (s, r) => s + (r['entries'] as int)), 2);
+    expect(groupTotals.fold<int>(0, (s, r) => s + (r['entries'] as int)), 4);
 
     // 清理:解散测试群
     await owner.rpc('dissolve_group', params: {'p_group_id': gid});
