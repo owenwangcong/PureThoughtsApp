@@ -59,6 +59,8 @@ npx supabase test db   # 运行 pgTAP 测试(supabase/tests/*.sql,改 schema 后
 npx supabase migration new <name>   # 新建一个 migration 文件
 ```
 
+本地测试账号(seed 自动创建,密码均 `test1234`):`admin@test.local`(App 管理员)、`owner@test.local`(測試共修群群主)、`member@test.local`(已入群成员)、`user@test.local`(未入群)。测试群 join code 固定 `TESTGRP2`。
+
 ### Flutter(工程创建后适用)
 
 ```sh
