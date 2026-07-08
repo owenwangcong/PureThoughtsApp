@@ -36,13 +36,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **数据模型**:见 PRD §12.2;统计走 `daily_user_stats` / `daily_group_stats` 视图,客户端不拉全量记录。
 - **客户端关键库**:Riverpod、go_router、supabase_flutter、just_audio + audio_service(后台播放)、youtube_player_iframe、webview_flutter、table_calendar、sentry_flutter;iOS 推送为原生 APNs 注册(不经 FCM),firebase_messaging 仅用于海外 Android。
 
-## 当前状态与目录约定
+## 目录约定
 
-- **尚无代码**:Flutter 工程未创建(待 `flutter create`),Supabase schema 未编写。
-- 约定目录:
-  - `docs/` — 需求与设计文档
-  - `app/` — Flutter 工程(创建后)
-  - `supabase/migrations/` — 数据库 migration SQL;`supabase/functions/` — Edge Functions
+- `docs/` — 需求与设计文档(PRD / PLAN)
+- `app/` — Flutter 工程(package `pure_thoughts`,org `com.purethoughts`,iOS + Android)
+  - `lib/core/` 环境与设置 · `lib/features/<模块>/` 按功能分目录 · `lib/l10n/` ARB(zh_Hant 模板)
+  - 环境经 `--dart-define`(SUPABASE_URL / SUPABASE_ANON_KEY / SENTRY_DSN),默认本地栈;Android 模拟器用 `http://10.0.2.2:54321`
+- `supabase/migrations/` — 数据库 migration SQL;`supabase/tests/` — pgTAP;`supabase/functions/` — Edge Functions(待建)
 
 ## 常用命令
 

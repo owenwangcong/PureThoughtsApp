@@ -1,0 +1,12 @@
+{
+  "@@locale": "zh_Hans",
+  "appTitle": "善护念",
+  "practiceListTitle": "功课清单",
+  "loadFailed": "加载失败,请重试",
+  "retry": "重试",
+  "emptyList": "暂无资料",
+  "unitVolume": "部",
+  "unitRecitation": "遍",
+  "unitCount": "次",
+  "unitMinute": "分钟"
+}

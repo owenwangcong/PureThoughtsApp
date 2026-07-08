@@ -10,7 +10,7 @@
 
 | Phase | 内容 | 状态 | 进度 | 完成日期 |
 |---|---|---|:---:|---|
-| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 2/9 | — |
+| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 3/9 | — |
 | **P1** | MVP:核心闭环(群 + 报数 + 统计)+ 上架合规 | ⬜ 未开始 | 0/10 | — |
 | **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | ⬜ 未开始 | 0/7 | — |
 | **P3** | 视频 + 在线经本 | ⬜ 未开始 | 0/3 | — |
@@ -56,7 +56,7 @@
 - [ ] **P0.3** Auth 配置(M)— SMTP(E5)验证邮件 / 重置密码;Google OAuth(E4);Apple Sign-In(E3)。验收:三种方式均能完成注册登录。
 - [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。
 - [ ] **P0.5** 监控告警(S)— Uptime 监控 + 磁盘/CPU 告警。验收:模拟宕机能收到告警。
-- [ ] **P0.6** Flutter 工程骨架(M)— `flutter create app/`;接 Riverpod、go_router、supabase_flutter、intl(zh_Hant 默认 + zh_Hans)、全局字号缩放主题、sentry_flutter。验收:App 启动并匿名读到公开表数据。
+- [x] **P0.6** Flutter 工程骨架(M)— `app/`(org com.purethoughts,iOS+Android):Riverpod 3 + go_router + supabase_flutter 2.15 + gen-l10n(zh_Hant 默认/zh_Hans/zh 回退)+ 全局字号缩放(0.8–2.0 与系统叠乘)+ sentry(DSN 为空不启用)+ dart-define 环境配置(默认本地栈)。验收 ✅ 2026-07-07:冒烟测试匿名读到 5 条全局功课清单、报数表被拒;`analyze` 0 issue;单测 4/4;debug APK 构建通过。注:真机/模拟器跑通放在 P1.1 随 Auth 界面一起验证;Android 模拟器连本地栈用 `10.0.2.2:54321`。
 - [x] **P0.7** 数据库 schema v1(L)— 16 表 + 枚举 + RLS + 6 个 RPC(join_group / delete_practice_log / 转让 / 重置码 / 取码 / vow_progress)+ 3 视图 + 触发器(自动 profile / 建群 / unit 快照 / proxy_names 记忆 / 代报通知 / 更新守卫),`supabase/migrations/20260707000001_init_schema.sql`;pgTAP 测试 31 项 `supabase/tests/rls.test.sql`。验收 ✅ 2026-07-07:`db reset` 一键通过,`test db` 31/31。要点:软删走 delete_practice_log() RPC(PG 会用 SELECT 策略校验 UPDATE 新行);join_code 独立表 + RPC 防遍历。
 - [ ] **P0.8** 质量门(S,可选)— `flutter analyze` + `flutter test` 的本地脚本或 CI。验收:一条命令出结果。
 
