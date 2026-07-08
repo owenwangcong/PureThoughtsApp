@@ -144,6 +144,18 @@ void main() {
     expect(
         stats2.fold<int>(0, (s, r) => s + (r['entries'] as int)), 2);
 
+    // 累计视图(P1.8):个人只见自己的(金刚经 3,不含自由名字/已删),群见全部
+    final myTotals = await member
+        .from('user_practice_totals')
+        .select('practice_type_id, total, entries');
+    expect(myTotals.length, 1);
+    expect(double.parse('${myTotals.single['total']}'), 3);
+    final groupTotals = await member
+        .from('group_practice_totals')
+        .select('total, entries')
+        .eq('group_id', gid);
+    expect(groupTotals.fold<int>(0, (s, r) => s + (r['entries'] as int)), 2);
+
     // 清理:解散测试群
     await owner.rpc('dissolve_group', params: {'p_group_id': gid});
   });

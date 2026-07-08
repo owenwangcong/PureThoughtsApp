@@ -183,6 +183,13 @@ class GroupDetailScreen extends ConsumerWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/groups/$groupId/logs'),
                 ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.insights),
+                  title: Text(l10n.groupStats),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/groups/$groupId/stats'),
+                ),
                 const Divider(height: 16),
                 if (g['description'] != null) ...[
                   Text(g['description'] as String),

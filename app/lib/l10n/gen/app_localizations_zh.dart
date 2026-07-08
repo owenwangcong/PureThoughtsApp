@@ -283,6 +283,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get categoryOther => '其他';
+
+  @override
+  String get quickReport => '快捷報數(點選即報,數量可改)';
+
+  @override
+  String get myStats => '個人統計';
+
+  @override
+  String get groupStats => '群統計';
+
+  @override
+  String get todayTitle => '今日';
+
+  @override
+  String get totalTitle => '累計';
+
+  @override
+  String get streakLabel => '連續用功天數';
+
+  @override
+  String get trend14 => '近 14 天趨勢(筆數)';
+
+  @override
+  String get historyTitle => '歷史查看';
+
+  @override
+  String get pickDate => '選擇日期';
+
+  @override
+  String get noDataToday => '今日尚未報數';
+
+  @override
+  String get reportedToday => '今日已報人數';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -564,6 +597,39 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get categoryOther => '其他';
+
+  @override
+  String get quickReport => '快捷报数(点选即报,数量可改)';
+
+  @override
+  String get myStats => '个人统计';
+
+  @override
+  String get groupStats => '群统计';
+
+  @override
+  String get todayTitle => '今日';
+
+  @override
+  String get totalTitle => '累计';
+
+  @override
+  String get streakLabel => '连续用功天数';
+
+  @override
+  String get trend14 => '近 14 天趋势(笔数)';
+
+  @override
+  String get historyTitle => '历史查看';
+
+  @override
+  String get pickDate => '选择日期';
+
+  @override
+  String get noDataToday => '今日尚未报数';
+
+  @override
+  String get reportedToday => '今日已报人数';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -845,4 +911,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get categoryOther => '其他';
+
+  @override
+  String get quickReport => '快捷報數(點選即報,數量可改)';
+
+  @override
+  String get myStats => '個人統計';
+
+  @override
+  String get groupStats => '群統計';
+
+  @override
+  String get todayTitle => '今日';
+
+  @override
+  String get totalTitle => '累計';
+
+  @override
+  String get streakLabel => '連續用功天數';
+
+  @override
+  String get trend14 => '近 14 天趨勢(筆數)';
+
+  @override
+  String get historyTitle => '歷史查看';
+
+  @override
+  String get pickDate => '選擇日期';
+
+  @override
+  String get noDataToday => '今日尚未報數';
+
+  @override
+  String get reportedToday => '今日已報人數';
 }
