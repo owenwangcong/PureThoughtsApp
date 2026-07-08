@@ -1,0 +1,12 @@
+{
+  "@@locale": "zh",
+  "appTitle": "善護念",
+  "practiceListTitle": "功課清單",
+  "loadFailed": "載入失敗,請重試",
+  "retry": "重試",
+  "emptyList": "暫無資料",
+  "unitVolume": "部",
+  "unitRecitation": "遍",
+  "unitCount": "次",
+  "unitMinute": "分鐘"
+}
