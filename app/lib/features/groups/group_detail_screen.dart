@@ -10,6 +10,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../moderation/moderation_providers.dart';
 import '../moderation/report_dialog.dart';
+import 'add_practice_type_dialog.dart';
 import 'groups_providers.dart';
 
 /// 群详情:公告、群主区(群 ID 分享/重置、入群审核、成员管理)、成员列表、
@@ -324,70 +325,8 @@ class _PracticeTypesSection extends ConsumerWidget {
   final bool isOwner;
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final name = TextEditingController();
-    var category = 'other';
-    var unit = 'recitation';
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(l10n.addPracticeType),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: name,
-                autofocus: true,
-                decoration: InputDecoration(labelText: l10n.practiceTypeName),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: category,
-                decoration: InputDecoration(labelText: l10n.categoryTitle),
-                items: [
-                  for (final c in practiceCategories)
-                    DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
-                ],
-                onChanged: (v) => setState(() => category = v!),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: unit,
-                decoration: InputDecoration(labelText: l10n.unitTitle),
-                items: [
-                  for (final u in practiceUnits)
-                    DropdownMenuItem(value: u, child: Text(unitLabel(l10n, u))),
-                ],
-                onChanged: (v) => setState(() => unit = v!),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
-            FilledButton(
-                onPressed: () => Navigator.pop(context, true), child: Text(l10n.submit)),
-          ],
-        ),
-      ),
-    );
-    if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      await Supabase.instance.client.from('practice_types').insert({
-        'group_id': groupId,
-        'name_hant': name.text.trim(),
-        'name_hans': name.text.trim(),
-        'category': category,
-        'unit': unit,
-        'is_custom': true,
-      });
-      ref.invalidate(groupPracticeTypesProvider(groupId));
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
-    }
+    final newId = await showAddPracticeTypeDialog(context, groupId: groupId);
+    if (newId != null) ref.invalidate(groupPracticeTypesProvider(groupId));
   }
 
   Future<void> _toggle(

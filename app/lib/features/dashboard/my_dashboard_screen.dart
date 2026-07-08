@@ -31,15 +31,11 @@ class _MyDashboardScreenState extends ConsumerState<MyDashboardScreen> {
     final daily = ref.watch(myDailyStatsProvider);
     final totals = ref.watch(myTotalsProvider);
 
-    final typeIds = <String>{
-      ...?daily.value?.map((r) => r['practice_type_id'] as String),
-      ...?totals.value?.map((r) => r['practice_type_id'] as String),
-    }.toList();
-    final names = ref.watch(practiceTypeNamesProvider(typeIds));
+    final names = ref.watch(allPracticeTypesMapProvider);
 
     String nameOf(String id) {
       final t = names.value?[id];
-      if (t == null) return '';
+      if (t == null) return '…';
       return (locale.scriptCode == 'Hans' ? t['name_hans'] : t['name_hant']) as String;
     }
 
