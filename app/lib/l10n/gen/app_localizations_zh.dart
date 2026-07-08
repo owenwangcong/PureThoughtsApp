@@ -199,6 +199,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get confirmResetCode => '舊群 ID 將立即失效,確定重置?';
+
+  @override
+  String get groupPracticeTypes => '本群功課項';
+
+  @override
+  String get addPracticeType => '新增功課項';
+
+  @override
+  String get practiceTypeName => '名稱';
+
+  @override
+  String get unitTitle => '單位';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -396,6 +408,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get confirmResetCode => '旧群 ID 将立即失效,确定重置?';
+
+  @override
+  String get groupPracticeTypes => '本群功课项';
+
+  @override
+  String get addPracticeType => '新增功课项';
+
+  @override
+  String get practiceTypeName => '名称';
+
+  @override
+  String get unitTitle => '单位';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -593,4 +617,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get confirmResetCode => '舊群 ID 將立即失效,確定重置?';
+
+  @override
+  String get groupPracticeTypes => '本群功課項';
+
+  @override
+  String get addPracticeType => '新增功課項';
+
+  @override
+  String get practiceTypeName => '名稱';
+
+  @override
+  String get unitTitle => '單位';
 }

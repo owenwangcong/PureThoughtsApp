@@ -87,6 +87,29 @@ void main() {
         await joiner.from('group_member_display').select('display_name').eq('group_id', gid);
     expect(memberNames.length, 2);
 
+    // ---- 功课项(P1.5):成员可加自定义项;群主可停用 ----
+    final custom = await joiner
+        .from('practice_types')
+        .insert({
+          'group_id': gid,
+          'name_hant': '楞嚴咒',
+          'name_hans': '楞严咒',
+          'unit': 'recitation',
+          'is_custom': true,
+        })
+        .select('id, active')
+        .single();
+    expect(custom['active'], true);
+    await owner
+        .from('practice_types')
+        .update({'active': false}).eq('id', custom['id'] as String);
+    final disabled = await joiner
+        .from('practice_types')
+        .select('active')
+        .eq('id', custom['id'] as String)
+        .single();
+    expect(disabled['active'], false, reason: '群主可停用自定义功课项');
+
     // ---- 生命周期(P1.4):转让 → 新群主重置码 → 原群主退群 → 解散 ----
     await owner.rpc('transfer_group_ownership',
         params: {'p_group_id': gid, 'p_new_owner': joiner.auth.currentUser!.id});

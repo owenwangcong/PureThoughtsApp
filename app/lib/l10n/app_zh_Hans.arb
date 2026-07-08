@@ -63,5 +63,9 @@
   "confirmRemove": "确定移除该成员?其历史报数将保留。",
   "confirmTransfer": "确定将群主转让给此成员?转让后您将成为普通成员。",
   "confirmDissolve": "解散后群组对所有成员不可见,且无法恢复。确定解散?",
-  "confirmResetCode": "旧群 ID 将立即失效,确定重置?"
+  "confirmResetCode": "旧群 ID 将立即失效,确定重置?",
+  "groupPracticeTypes": "本群功课项",
+  "addPracticeType": "新增功课项",
+  "practiceTypeName": "名称",
+  "unitTitle": "单位"
 }
