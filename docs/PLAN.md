@@ -36,6 +36,7 @@
 | E4 | Google Cloud / Firebase 项目 | Google OAuth、FCM | P0.3, P2.1 | ⬜ |
 | E5 | 发信服务账号(Resend / SES) | 注册验证邮件、邮件兜底 | P0.3, P2.2 | ⬜ |
 | E6 | 大陆真实网络的测试协助(自己或成员) | 机房实测、可达性验收 | P0.1, P2.7, P3.3 | ⬜ |
+| E13 | Codemagic 控制台配置:上传 upload keystore(引用名 purethoughts_upload)+ production 环境变量组(SUPABASE_URL/ANON_KEY 待 E1) | CI 构建与发布(codemagic.yaml,2026-07-08 定案:不在本机做 release 构建) | P1.10 分发 | ⬜ |
 | E7 | 回向文文案(内容方提供) | 发愿达成页 | P2.5 | ⬜ |
 | E8 | 隐私政策 / 社区规范文案(可由 Claude 起草,内容方确认) | 上架合规 | P1.9 | ⬜ |
 | E9 | 经本网站 URL 清单 | 经本 WebView | P3.2 | ⬜ |

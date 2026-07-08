@@ -1,0 +1,76 @@
+# Codemagic CI/CD(构建与发布统一走 Codemagic,不在本机构建)
+#
+# 使用前在 Codemagic 控制台完成:
+# 1. Android 签名:上传 app/android/keys/upload-keystore.jks,
+#    引用名设为 purethoughts_upload(密码见本机 app/android/key.properties)。
+# 2. 环境变量组 production:
+#    SUPABASE_URL      = https://<自托管生产域名>   (E1 到位后填)
+#    SUPABASE_ANON_KEY = <生产 anon key>
+#    SENTRY_DSN        = <可选>
+# 3. iOS 签名待 E3(Apple Developer 账号)后,启用 ios-workflow。
+
+workflows:
+  android-release:
+    name: Android Release (APK + AAB)
+    instance_type: linux_x2
+    working_directory: app
+    environment:
+      flutter: 3.32.8
+      groups:
+        - production
+      android_signing:
+        - purethoughts_upload
+    scripts:
+      - name: 生成 key.properties(接入 Codemagic 托管签名)
+        script: |
+          cat > android/key.properties <<EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=$CM_KEYSTORE_PATH
+          EOF
+      - name: 依赖与静态检查
+        script: |
+          flutter pub get
+          flutter analyze
+      - name: 测试(依赖本地栈的 e2e 会自动跳过)
+        script: flutter test
+      - name: 构建 APK(官网直接分发,大陆 Android)
+        script: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+      - name: 构建 AAB(Google Play)
+        script: |
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+
+  # iOS 工作流:待 E3(Apple Developer 账号 + 证书/描述文件)后启用
+  # ios-release:
+  #   name: iOS Release (TestFlight)
+  #   instance_type: mac_mini_m2
+  #   working_directory: app
+  #   environment:
+  #     flutter: 3.32.8
+  #     groups:
+  #       - production
+  #     ios_signing:
+  #       distribution_type: app_store
+  #       bundle_identifier: com.purethoughts.pureThoughts
+  #   scripts:
+  #     - flutter pub get && flutter analyze && flutter test
+  #     - flutter build ipa --release \
+  #         --dart-define=SUPABASE_URL=$SUPABASE_URL \
+  #         --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+  #   artifacts:
+  #     - build/ios/ipa/*.ipa
+  #   publishing:
+  #     app_store_connect:
+  #       auth: integration
+  #       submit_to_testflight: true
