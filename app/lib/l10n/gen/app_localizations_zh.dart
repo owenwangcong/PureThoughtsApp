@@ -419,6 +419,60 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vowCongrats => '隨喜讚歎!發願圓滿';
 
   @override
+  String get toolsTitle => '工具';
+
+  @override
+  String get timerTitle => '打坐計時';
+
+  @override
+  String get counterTitle => '念珠計數';
+
+  @override
+  String get startTimer => '開始';
+
+  @override
+  String get stopTimer => '結束';
+
+  @override
+  String get timeUp => '時間到';
+
+  @override
+  String get intervalBell => '中途鈴(正念提醒)';
+
+  @override
+  String get prepBell => '預備鈴';
+
+  @override
+  String get offLabel => '關閉';
+
+  @override
+  String get keepAwake => '螢幕常亮';
+
+  @override
+  String get keepForeground => '計時期間請保持 App 開啟,螢幕會自動常亮';
+
+  @override
+  String get tapToCount => '點擊螢幕任意處計數';
+
+  @override
+  String get roundsLabel => '串數';
+
+  @override
+  String get beadsTarget => '一串';
+
+  @override
+  String get resetCount => '清零';
+
+  @override
+  String get confirmReset => '確定清零?';
+
+  @override
+  String get soundToggle => '鈴聲';
+
+  @override
+  String get toReport => '轉為報數';
+
+  @override
   String get dedicationTitle => '迴向';
 
   @override
@@ -841,6 +895,60 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get vowCongrats => '随喜赞叹!发愿圆满';
 
   @override
+  String get toolsTitle => '工具';
+
+  @override
+  String get timerTitle => '打坐计时';
+
+  @override
+  String get counterTitle => '念珠计数';
+
+  @override
+  String get startTimer => '开始';
+
+  @override
+  String get stopTimer => '结束';
+
+  @override
+  String get timeUp => '时间到';
+
+  @override
+  String get intervalBell => '中途铃(正念提醒)';
+
+  @override
+  String get prepBell => '预备铃';
+
+  @override
+  String get offLabel => '关闭';
+
+  @override
+  String get keepAwake => '屏幕常亮';
+
+  @override
+  String get keepForeground => '计时期间请保持 App 打开,屏幕会自动常亮';
+
+  @override
+  String get tapToCount => '点击屏幕任意处计数';
+
+  @override
+  String get roundsLabel => '串数';
+
+  @override
+  String get beadsTarget => '一串';
+
+  @override
+  String get resetCount => '清零';
+
+  @override
+  String get confirmReset => '确定清零?';
+
+  @override
+  String get soundToggle => '铃声';
+
+  @override
+  String get toReport => '转为报数';
+
+  @override
   String get dedicationTitle => '回向';
 
   @override
@@ -1261,6 +1369,60 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get toolsTitle => '工具';
+
+  @override
+  String get timerTitle => '打坐計時';
+
+  @override
+  String get counterTitle => '念珠計數';
+
+  @override
+  String get startTimer => '開始';
+
+  @override
+  String get stopTimer => '結束';
+
+  @override
+  String get timeUp => '時間到';
+
+  @override
+  String get intervalBell => '中途鈴(正念提醒)';
+
+  @override
+  String get prepBell => '預備鈴';
+
+  @override
+  String get offLabel => '關閉';
+
+  @override
+  String get keepAwake => '螢幕常亮';
+
+  @override
+  String get keepForeground => '計時期間請保持 App 開啟,螢幕會自動常亮';
+
+  @override
+  String get tapToCount => '點擊螢幕任意處計數';
+
+  @override
+  String get roundsLabel => '串數';
+
+  @override
+  String get beadsTarget => '一串';
+
+  @override
+  String get resetCount => '清零';
+
+  @override
+  String get confirmReset => '確定清零?';
+
+  @override
+  String get soundToggle => '鈴聲';
+
+  @override
+  String get toReport => '轉為報數';
 
   @override
   String get dedicationTitle => '迴向';

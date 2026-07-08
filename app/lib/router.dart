@@ -15,6 +15,9 @@ import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
 import 'features/notifications/notifications_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/tools/counter_screen.dart';
+import 'features/tools/timer_screen.dart';
+import 'features/tools/tools_screen.dart';
 import 'features/vows/vows_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -58,6 +61,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/notifications',
           builder: (context, state) => const NotificationsScreen()),
       GoRoute(path: '/vows', builder: (context, state) => const VowsScreen()),
+      GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
+      GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
+      GoRoute(path: '/tools/counter', builder: (context, state) => const CounterScreen()),
       GoRoute(
           path: '/admin/reports',
           builder: (context, state) => const AdminReportsScreen()),

@@ -914,6 +914,114 @@ abstract class AppLocalizations {
   /// **'隨喜讚歎!發願圓滿'**
   String get vowCongrats;
 
+  /// No description provided for @toolsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'工具'**
+  String get toolsTitle;
+
+  /// No description provided for @timerTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'打坐計時'**
+  String get timerTitle;
+
+  /// No description provided for @counterTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'念珠計數'**
+  String get counterTitle;
+
+  /// No description provided for @startTimer.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'開始'**
+  String get startTimer;
+
+  /// No description provided for @stopTimer.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'結束'**
+  String get stopTimer;
+
+  /// No description provided for @timeUp.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'時間到'**
+  String get timeUp;
+
+  /// No description provided for @intervalBell.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'中途鈴(正念提醒)'**
+  String get intervalBell;
+
+  /// No description provided for @prepBell.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'預備鈴'**
+  String get prepBell;
+
+  /// No description provided for @offLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'關閉'**
+  String get offLabel;
+
+  /// No description provided for @keepAwake.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'螢幕常亮'**
+  String get keepAwake;
+
+  /// No description provided for @keepForeground.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'計時期間請保持 App 開啟,螢幕會自動常亮'**
+  String get keepForeground;
+
+  /// No description provided for @tapToCount.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'點擊螢幕任意處計數'**
+  String get tapToCount;
+
+  /// No description provided for @roundsLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'串數'**
+  String get roundsLabel;
+
+  /// No description provided for @beadsTarget.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'一串'**
+  String get beadsTarget;
+
+  /// No description provided for @resetCount.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'清零'**
+  String get resetCount;
+
+  /// No description provided for @confirmReset.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定清零?'**
+  String get confirmReset;
+
+  /// No description provided for @soundToggle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'鈴聲'**
+  String get soundToggle;
+
+  /// No description provided for @toReport.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'轉為報數'**
+  String get toReport;
+
   /// No description provided for @dedicationTitle.
   ///
   /// In zh_Hant, this message translates to:
