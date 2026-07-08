@@ -67,5 +67,22 @@
   "groupPracticeTypes": "本群功課項",
   "addPracticeType": "新增功課項",
   "practiceTypeName": "名稱",
-  "unitTitle": "單位"
+  "unitTitle": "單位",
+  "reportLog": "報數",
+  "logsTitle": "報數記錄",
+  "selectPracticeType": "選擇功課",
+  "subjectTitle": "為誰報數",
+  "subjectSelf": "自己",
+  "subjectMember": "群成員",
+  "subjectName": "其他名字",
+  "quantityTitle": "數量",
+  "noteLabel": "備註(選填;補報可註明實際日期)",
+  "submitLog": "提交報數",
+  "logSubmitted": "已報數,隨喜讚歎!",
+  "quantityInvalid": "請輸入正確的數量",
+  "edit": "編輯",
+  "delete": "刪除",
+  "confirmDeleteLog": "確定刪除這條報數?統計將即時扣減。",
+  "proxyBy": "代報",
+  "fellowPractitioner": "同修"
 }

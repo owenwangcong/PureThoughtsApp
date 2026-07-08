@@ -67,5 +67,22 @@
   "groupPracticeTypes": "本群功课项",
   "addPracticeType": "新增功课项",
   "practiceTypeName": "名称",
-  "unitTitle": "单位"
+  "unitTitle": "单位",
+  "reportLog": "报数",
+  "logsTitle": "报数记录",
+  "selectPracticeType": "选择功课",
+  "subjectTitle": "为谁报数",
+  "subjectSelf": "自己",
+  "subjectMember": "群成员",
+  "subjectName": "其他名字",
+  "quantityTitle": "数量",
+  "noteLabel": "备注(选填;补报可注明实际日期)",
+  "submitLog": "提交报数",
+  "logSubmitted": "已报数,随喜赞叹!",
+  "quantityInvalid": "请输入正确的数量",
+  "edit": "编辑",
+  "delete": "删除",
+  "confirmDeleteLog": "确定删除这条报数?统计将即时扣减。",
+  "proxyBy": "代报",
+  "fellowPractitioner": "同修"
 }

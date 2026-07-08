@@ -211,6 +211,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get unitTitle => '單位';
+
+  @override
+  String get reportLog => '報數';
+
+  @override
+  String get logsTitle => '報數記錄';
+
+  @override
+  String get selectPracticeType => '選擇功課';
+
+  @override
+  String get subjectTitle => '為誰報數';
+
+  @override
+  String get subjectSelf => '自己';
+
+  @override
+  String get subjectMember => '群成員';
+
+  @override
+  String get subjectName => '其他名字';
+
+  @override
+  String get quantityTitle => '數量';
+
+  @override
+  String get noteLabel => '備註(選填;補報可註明實際日期)';
+
+  @override
+  String get submitLog => '提交報數';
+
+  @override
+  String get logSubmitted => '已報數,隨喜讚歎!';
+
+  @override
+  String get quantityInvalid => '請輸入正確的數量';
+
+  @override
+  String get edit => '編輯';
+
+  @override
+  String get delete => '刪除';
+
+  @override
+  String get confirmDeleteLog => '確定刪除這條報數?統計將即時扣減。';
+
+  @override
+  String get proxyBy => '代報';
+
+  @override
+  String get fellowPractitioner => '同修';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -420,6 +471,57 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get unitTitle => '单位';
+
+  @override
+  String get reportLog => '报数';
+
+  @override
+  String get logsTitle => '报数记录';
+
+  @override
+  String get selectPracticeType => '选择功课';
+
+  @override
+  String get subjectTitle => '为谁报数';
+
+  @override
+  String get subjectSelf => '自己';
+
+  @override
+  String get subjectMember => '群成员';
+
+  @override
+  String get subjectName => '其他名字';
+
+  @override
+  String get quantityTitle => '数量';
+
+  @override
+  String get noteLabel => '备注(选填;补报可注明实际日期)';
+
+  @override
+  String get submitLog => '提交报数';
+
+  @override
+  String get logSubmitted => '已报数,随喜赞叹!';
+
+  @override
+  String get quantityInvalid => '请输入正确的数量';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get confirmDeleteLog => '确定删除这条报数?统计将即时扣减。';
+
+  @override
+  String get proxyBy => '代报';
+
+  @override
+  String get fellowPractitioner => '同修';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -629,4 +731,55 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get unitTitle => '單位';
+
+  @override
+  String get reportLog => '報數';
+
+  @override
+  String get logsTitle => '報數記錄';
+
+  @override
+  String get selectPracticeType => '選擇功課';
+
+  @override
+  String get subjectTitle => '為誰報數';
+
+  @override
+  String get subjectSelf => '自己';
+
+  @override
+  String get subjectMember => '群成員';
+
+  @override
+  String get subjectName => '其他名字';
+
+  @override
+  String get quantityTitle => '數量';
+
+  @override
+  String get noteLabel => '備註(選填;補報可註明實際日期)';
+
+  @override
+  String get submitLog => '提交報數';
+
+  @override
+  String get logSubmitted => '已報數,隨喜讚歎!';
+
+  @override
+  String get quantityInvalid => '請輸入正確的數量';
+
+  @override
+  String get edit => '編輯';
+
+  @override
+  String get delete => '刪除';
+
+  @override
+  String get confirmDeleteLog => '確定刪除這條報數?統計將即時扣減。';
+
+  @override
+  String get proxyBy => '代報';
+
+  @override
+  String get fellowPractitioner => '同修';
 }

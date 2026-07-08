@@ -7,6 +7,8 @@ import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/groups/group_detail_screen.dart';
 import 'features/groups/groups_screen.dart';
+import 'features/logs/group_logs_screen.dart';
+import 'features/logs/report_log_screen.dart';
 import 'features/settings/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -28,6 +30,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/groups/:gid',
         builder: (context, state) =>
             GroupDetailScreen(groupId: state.pathParameters['gid']!),
+      ),
+      GoRoute(
+        path: '/groups/:gid/report',
+        builder: (context, state) =>
+            ReportLogScreen(groupId: state.pathParameters['gid']!),
+      ),
+      GoRoute(
+        path: '/groups/:gid/logs',
+        builder: (context, state) =>
+            GroupLogsScreen(groupId: state.pathParameters['gid']!),
       ),
     ],
   );

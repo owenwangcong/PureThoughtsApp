@@ -505,6 +505,108 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'單位'**
   String get unitTitle;
+
+  /// No description provided for @reportLog.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'報數'**
+  String get reportLog;
+
+  /// No description provided for @logsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'報數記錄'**
+  String get logsTitle;
+
+  /// No description provided for @selectPracticeType.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇功課'**
+  String get selectPracticeType;
+
+  /// No description provided for @subjectTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'為誰報數'**
+  String get subjectTitle;
+
+  /// No description provided for @subjectSelf.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'自己'**
+  String get subjectSelf;
+
+  /// No description provided for @subjectMember.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群成員'**
+  String get subjectMember;
+
+  /// No description provided for @subjectName.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'其他名字'**
+  String get subjectName;
+
+  /// No description provided for @quantityTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'數量'**
+  String get quantityTitle;
+
+  /// No description provided for @noteLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'備註(選填;補報可註明實際日期)'**
+  String get noteLabel;
+
+  /// No description provided for @submitLog.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提交報數'**
+  String get submitLog;
+
+  /// No description provided for @logSubmitted.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已報數,隨喜讚歎!'**
+  String get logSubmitted;
+
+  /// No description provided for @quantityInvalid.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'請輸入正確的數量'**
+  String get quantityInvalid;
+
+  /// No description provided for @edit.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'編輯'**
+  String get edit;
+
+  /// No description provided for @delete.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'刪除'**
+  String get delete;
+
+  /// No description provided for @confirmDeleteLog.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定刪除這條報數?統計將即時扣減。'**
+  String get confirmDeleteLog;
+
+  /// No description provided for @proxyBy.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'代報'**
+  String get proxyBy;
+
+  /// No description provided for @fellowPractitioner.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'同修'**
+  String get fellowPractitioner;
 }
 
 class _AppLocalizationsDelegate

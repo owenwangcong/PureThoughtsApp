@@ -160,6 +160,11 @@ class GroupDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/groups/$groupId/report'),
+        icon: const Icon(Icons.edit_note),
+        label: Text(l10n.reportLog),
+      ),
       body: group.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(l10n.loadFailed)),
@@ -171,6 +176,14 @@ class GroupDetailScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.receipt_long),
+                  title: Text(l10n.logsTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/groups/$groupId/logs'),
+                ),
+                const Divider(height: 16),
                 if (g['description'] != null) ...[
                   Text(g['description'] as String),
                   const SizedBox(height: 8),
