@@ -829,6 +829,24 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'選擇群組'**
   String get chooseGroup;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'通知'**
+  String get notificationsTitle;
+
+  /// No description provided for @notifProxyLog.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'有同修為您代報'**
+  String get notifProxyLog;
+
+  /// No description provided for @notifAnnouncement.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群公告更新'**
+  String get notifAnnouncement;
 }
 
 class _AppLocalizationsDelegate

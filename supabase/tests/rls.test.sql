@@ -8,7 +8,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(43);
+select plan(45);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -95,6 +95,24 @@ select is(
   (select count(*)::int from public.group_members
    where group_id = '00000000-0000-0000-0000-0000000000d1' and status = 'approved'),
   2, '群主可审核通过入群申请');
+
+-- 公告更新 → 群成员收到 App 内通知(P2.3);非成员不可见
+update public.groups set announcement = '本週六共修改為線上'
+ where id = '00000000-0000-0000-0000-0000000000d1';
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000b');
+select is(
+  (select count(*)::int from public.notifications
+   where scope = 'group' and type = 'announcement'
+     and target_id = '00000000-0000-0000-0000-0000000000d1'),
+  1, '公告更新生成群范围通知,成员可见');
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000c');
+select is(
+  (select count(*)::int from public.notifications where type = 'announcement'),
+  0, '非成员看不到群公告通知');
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000a');
 
 -- ---------------------------------------------------------------- 报数与可见性
 select tests_logout();

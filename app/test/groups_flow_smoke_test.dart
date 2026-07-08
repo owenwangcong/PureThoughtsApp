@@ -87,6 +87,31 @@ void main() {
         await joiner.from('group_member_display').select('display_name').eq('group_id', gid);
     expect(memberNames.length, 2);
 
+    // ---- 通知中心(P2.3):公告更新 → 成员收到群通知 → 标记已读 ----
+    await owner
+        .from('groups')
+        .update({'announcement': '週六共修 19:30'}).eq('id', gid);
+    final notifs = await joiner
+        .from('notifications')
+        .select('id, type, payload, notification_reads(read_at)')
+        .eq('type', 'announcement')
+        .eq('target_id', gid);
+    expect(notifs.length, 1);
+    expect((notifs.single['notification_reads'] as List), isEmpty,
+        reason: '初始未读');
+    await joiner.from('notification_reads').upsert([
+      {
+        'notification_id': notifs.single['id'],
+        'user_id': joiner.auth.currentUser!.id,
+      }
+    ], onConflict: 'notification_id,user_id', ignoreDuplicates: true);
+    final read = await joiner
+        .from('notifications')
+        .select('id, notification_reads(read_at)')
+        .eq('id', notifs.single['id'] as String)
+        .single();
+    expect((read['notification_reads'] as List), isNotEmpty, reason: '已读生效');
+
     // ---- 功课项(P1.5):成员可加自定义项;群主可停用 ----
     final custom = await joiner
         .from('practice_types')

@@ -13,6 +13,7 @@ import 'features/legal/privacy_screen.dart';
 import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
+import 'features/notifications/notifications_screen.dart';
 import 'features/settings/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -52,6 +53,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/dashboard', builder: (context, state) => const MyDashboardScreen()),
       GoRoute(path: '/privacy', builder: (context, state) => const PrivacyScreen()),
+      GoRoute(
+          path: '/notifications',
+          builder: (context, state) => const NotificationsScreen()),
       GoRoute(
           path: '/admin/reports',
           builder: (context, state) => const AdminReportsScreen()),

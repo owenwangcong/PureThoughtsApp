@@ -121,5 +121,8 @@
   "repeatLast": "重复上次",
   "forOthers": "替他人报数",
   "frequentGroup": "常用",
-  "chooseGroup": "选择群组"
+  "chooseGroup": "选择群组",
+  "notificationsTitle": "通知",
+  "notifProxyLog": "有同修为您代报",
+  "notifAnnouncement": "群公告更新"
 }
