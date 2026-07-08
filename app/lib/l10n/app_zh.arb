@@ -117,5 +117,9 @@
   "deleteOwnerBlocked": "您仍是群組群主,請先轉讓或解散群組,再刪除帳號。",
   "adminReports": "檢舉處理",
   "markResolved": "標記已處理",
-  "banUser": "封禁該用戶"
+  "banUser": "封禁該用戶",
+  "repeatLast": "重複上次",
+  "forOthers": "替他人報數",
+  "frequentGroup": "常用",
+  "chooseGroup": "選擇群組"
 }

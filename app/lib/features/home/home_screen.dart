@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/prefs.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../dashboard/quick_report_section.dart';
+import '../groups/groups_providers.dart';
 
 /// 全局功课项(主清单),匿名即可读(RLS:group_id is null 公开)
 class PracticeType {
@@ -78,6 +80,18 @@ class HomeScreen extends ConsumerWidget {
           // 登录:快捷报数 + 统计与群入口(Dashboard 首屏)
           : ListView(
               children: [
+                // 報數直达:单群直进,多群选择并记住上次(PRD v0.5.3)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.edit_note, size: 28),
+                    label: Text(l10n.reportLog,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary)),
+                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(64)),
+                    onPressed: () => _startReport(context, ref),
+                  ),
+                ),
                 const QuickReportSection(),
                 const Divider(height: 1),
                 ListTile(
@@ -97,6 +111,53 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
     );
+  }
+
+  /// 報數直达:0 群 → 去入群;1 群 → 直进表单;多群 → 底部选择器(上次的排最前)
+  Future<void> _startReport(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final groups = (ref.read(myGroupsProvider).value ?? const [])
+        .where((m) => m['status'] == 'approved')
+        .map((m) => m['groups'] as Map<String, dynamic>)
+        .toList();
+    if (groups.isEmpty) {
+      context.push('/groups');
+      return;
+    }
+    final prefs = ref.read(sharedPrefsProvider);
+    if (groups.length == 1) {
+      final gid = groups.single['id'] as String;
+      prefs.setString(PrefKeys.lastReportGroup, gid);
+      context.push('/groups/$gid/report');
+      return;
+    }
+    final last = prefs.getString(PrefKeys.lastReportGroup);
+    groups.sort((a, b) => (b['id'] == last ? 1 : 0) - (a['id'] == last ? 1 : 0));
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.chooseGroup,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            for (final g in groups)
+              ListTile(
+                leading: const Icon(Icons.groups),
+                title: Text(g['name'] as String),
+                trailing: g['id'] == last ? const Icon(Icons.history) : null,
+                onTap: () => Navigator.pop(context, g['id'] as String),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !context.mounted) return;
+    prefs.setString(PrefKeys.lastReportGroup, picked);
+    context.push('/groups/$picked/report');
   }
 
   Widget _buildPracticeList(

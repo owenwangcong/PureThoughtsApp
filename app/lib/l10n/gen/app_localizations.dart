@@ -805,6 +805,30 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'封禁該用戶'**
   String get banUser;
+
+  /// No description provided for @repeatLast.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'重複上次'**
+  String get repeatLast;
+
+  /// No description provided for @forOthers.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'替他人報數'**
+  String get forOthers;
+
+  /// No description provided for @frequentGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'常用'**
+  String get frequentGroup;
+
+  /// No description provided for @chooseGroup.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇群組'**
+  String get chooseGroup;
 }
 
 class _AppLocalizationsDelegate

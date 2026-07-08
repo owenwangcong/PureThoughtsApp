@@ -10,7 +10,7 @@ final myRecentSelfLogsProvider =
   if (user == null) return const [];
   return Supabase.instance.client
       .from('practice_logs')
-      .select('group_id, practice_type_id, quantity, created_at')
+      .select('group_id, practice_type_id, quantity, local_date, created_at')
       .eq('reporter_id', user.id)
       .isFilter('subject_user_id', null)
       .isFilter('subject_name', null)

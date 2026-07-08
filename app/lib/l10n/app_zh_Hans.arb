@@ -117,5 +117,9 @@
   "deleteOwnerBlocked": "您仍是群组群主,请先转让或解散群组,再删除账号。",
   "adminReports": "举报处理",
   "markResolved": "标记已处理",
-  "banUser": "封禁该用户"
+  "banUser": "封禁该用户",
+  "repeatLast": "重复上次",
+  "forOthers": "替他人报数",
+  "frequentGroup": "常用",
+  "chooseGroup": "选择群组"
 }

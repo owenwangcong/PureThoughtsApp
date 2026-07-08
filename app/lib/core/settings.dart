@@ -10,6 +10,7 @@ abstract final class PrefKeys {
   static const fontScale = 'font_scale';
   static const region = 'region'; // 'cn' | 'other'
   static const onboardingDone = 'onboarding_done';
+  static const lastReportGroup = 'last_report_group'; // 多群时記住上次报数的群
 }
 
 /// UI 语言,默认繁体(PRD §11)

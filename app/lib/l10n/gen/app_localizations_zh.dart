@@ -361,6 +361,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get banUser => '封禁該用戶';
+
+  @override
+  String get repeatLast => '重複上次';
+
+  @override
+  String get forOthers => '替他人報數';
+
+  @override
+  String get frequentGroup => '常用';
+
+  @override
+  String get chooseGroup => '選擇群組';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -720,6 +732,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get banUser => '封禁该用户';
+
+  @override
+  String get repeatLast => '重复上次';
+
+  @override
+  String get forOthers => '替他人报数';
+
+  @override
+  String get frequentGroup => '常用';
+
+  @override
+  String get chooseGroup => '选择群组';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1079,4 +1103,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get banUser => '封禁該用戶';
+
+  @override
+  String get repeatLast => '重複上次';
+
+  @override
+  String get forOthers => '替他人報數';
+
+  @override
+  String get frequentGroup => '常用';
+
+  @override
+  String get chooseGroup => '選擇群組';
 }
