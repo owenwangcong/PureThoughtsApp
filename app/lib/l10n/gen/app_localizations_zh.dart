@@ -262,6 +262,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fellowPractitioner => '同修';
+
+  @override
+  String get categoryTitle => '分類';
+
+  @override
+  String get categorySutra => '經';
+
+  @override
+  String get categoryMantra => '咒';
+
+  @override
+  String get categoryRepentance => '懺';
+
+  @override
+  String get categoryBuddhaName => '念佛';
+
+  @override
+  String get categoryMeditation => '靜坐';
+
+  @override
+  String get categoryOther => '其他';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -522,6 +543,27 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get fellowPractitioner => '同修';
+
+  @override
+  String get categoryTitle => '分类';
+
+  @override
+  String get categorySutra => '经';
+
+  @override
+  String get categoryMantra => '咒';
+
+  @override
+  String get categoryRepentance => '忏';
+
+  @override
+  String get categoryBuddhaName => '念佛';
+
+  @override
+  String get categoryMeditation => '静坐';
+
+  @override
+  String get categoryOther => '其他';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -782,4 +824,25 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get fellowPractitioner => '同修';
+
+  @override
+  String get categoryTitle => '分類';
+
+  @override
+  String get categorySutra => '經';
+
+  @override
+  String get categoryMantra => '咒';
+
+  @override
+  String get categoryRepentance => '懺';
+
+  @override
+  String get categoryBuddhaName => '念佛';
+
+  @override
+  String get categoryMeditation => '靜坐';
+
+  @override
+  String get categoryOther => '其他';
 }

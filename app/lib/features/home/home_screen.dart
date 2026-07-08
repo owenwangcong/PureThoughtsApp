@@ -14,18 +14,21 @@ class PracticeType {
     required this.id,
     required this.nameHant,
     required this.nameHans,
+    required this.category,
     required this.unit,
   });
 
   final String id;
   final String nameHant;
   final String nameHans;
+  final String category;
   final String unit;
 
   factory PracticeType.fromJson(Map<String, dynamic> json) => PracticeType(
         id: json['id'] as String,
         nameHant: json['name_hant'] as String,
         nameHans: json['name_hans'] as String,
+        category: json['category'] as String,
         unit: json['unit'] as String,
       );
 
@@ -35,7 +38,7 @@ class PracticeType {
 final globalPracticeTypesProvider = FutureProvider<List<PracticeType>>((ref) async {
   final rows = await Supabase.instance.client
       .from('practice_types')
-      .select('id, name_hant, name_hans, unit')
+      .select('id, name_hant, name_hans, category, unit')
       .isFilter('group_id', null)
       .order('sort_order', ascending: true);
   return rows.map(PracticeType.fromJson).toList();
@@ -108,19 +111,32 @@ class HomeScreen extends ConsumerWidget {
         ),
         data: (items) => items.isEmpty
             ? Center(child: Text(l10n.emptyList))
-            : ListView.separated(
-                itemCount: items.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return ListTile(
-                    title: Text(item.nameFor(locale)),
-                    trailing: Text(
-                      unitLabel(l10n, item.unit),
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  );
-                },
+            // 按分类分组:經/咒/懺/念佛/靜坐(PRD v0.5.2)
+            : ListView(
+                children: [
+                  for (final cat in practiceCategories)
+                    if (items.any((t) => t.category == cat)) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                        child: Text(
+                          categoryLabel(l10n, cat),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                        ),
+                      ),
+                      for (final item in items.where((t) => t.category == cat))
+                        ListTile(
+                          dense: true,
+                          title: Text(item.nameFor(locale)),
+                          trailing: Text(
+                            unitLabel(l10n, item.unit),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                    ],
+                ],
               ),
     );
   }

@@ -288,6 +288,7 @@ class _PracticeTypesSection extends ConsumerWidget {
   Future<void> _add(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
     final name = TextEditingController();
+    var category = 'other';
     var unit = 'recitation';
     final ok = await showDialog<bool>(
       context: context,
@@ -301,6 +302,16 @@ class _PracticeTypesSection extends ConsumerWidget {
                 controller: name,
                 autofocus: true,
                 decoration: InputDecoration(labelText: l10n.practiceTypeName),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: category,
+                decoration: InputDecoration(labelText: l10n.categoryTitle),
+                items: [
+                  for (final c in practiceCategories)
+                    DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
+                ],
+                onChanged: (v) => setState(() => category = v!),
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -331,6 +342,7 @@ class _PracticeTypesSection extends ConsumerWidget {
         'group_id': groupId,
         'name_hant': name.text.trim(),
         'name_hans': name.text.trim(),
+        'category': category,
         'unit': unit,
         'is_custom': true,
       });

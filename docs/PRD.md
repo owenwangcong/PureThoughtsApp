@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.1(v0.5 定稿 + 代报对象增强) · 来源:`initial.md` + 五轮需求澄清
+> 版本:v0.5.2(功课项模型修正:必须具体到经/咒/忏名,經咒懺是分类) · 来源:`initial.md` + 六轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -73,9 +73,10 @@
 ## 4. Epic 1 · 功课报数(核心)
 
 ### 4.1 功课清单
-- **主清单**由 App 管理员维护(全局);**用户可在群内加自定义功课项**(**群成员均可添加**;群主可停用或合并重复项,防清单杂乱)。
-- 每个功课项含:名称(简/繁双语)、**计数单位**。
-- **计数单位**:`部`(经)、`遍`(咒 / 忏)、`次`、`分钟`(打坐等)。
+- **功课项必须具体**(v0.5.2 修正):經/咒/懺是**分类**而非功课项,不能笼统报"诵经 2 部"——报数对象是具体条目,如金剛經 1 部、地藏經 3 部、大悲咒 2 遍、地藏懺 1 遍。
+- 每个功课项含:名称(简/繁双语)、**分类**(`經 / 咒 / 懺 / 念佛 / 靜坐 / 其他`)、**计数单位**;清单与报数选择器按分类分组展示,统计可按分类拆分。
+- **主清单**由 App 管理员维护(全局);**用户可在群内加自定义功课项**(**群成员均可添加**,需选分类与单位;群主可停用或合并重复项,防清单杂乱)。
+- **计数单位**:`部`(经)、`遍`(咒 / 忏)、`次`、`分钟`(打坐等);单位挂在具体条目上,同类条目可用不同单位。
 
 ### 4.2 报数
 - 提交当日 / 当次功课数量。
@@ -247,7 +248,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `profiles` | id(↔auth), display_name, locale, font_scale, **timezone**, **region(cn/other)**, is_app_admin, **banned_at**, created_at |
 | `groups` | id, name, join_code(群ID,**可重置**), owner_id, description, **announcement**, **deleted_at** |
 | `group_members` | group_id, user_id, status(pending/approved/rejected/removed/**left**), role(owner/member), apply_message, approved_at |
-| `practice_types` | id, group_id(null=全局主清单), name_hant, name_hans, unit, is_custom, active, sort_order |
+| `practice_types` | id, group_id(null=全局主清单), name_hant, name_hans, **category(sutra/mantra/repentance/buddha_name/meditation/other)**, unit, is_custom, active, sort_order |
 | `practice_logs` | id, group_id, reporter_id, subject_user_id(nullable), subject_name(nullable), practice_type_id, quantity, unit, note, created_at, **local_date(按报数人时区的自然日,统计口径)**, **updated_at**, **deleted_at(软删)** |
 | **`proxy_names`** | id, group_id, name, created_by, use_count, last_used_at —— 代报自由名字的群共享名单;唯一约束 (group_id, name);报数时自动 upsert |
 | `vows` | id, user_id, group_id(**nullable=全部群**), practice_type_id, target_qty, start_date, end_date, **status(active/completed/expired/abandoned)** |

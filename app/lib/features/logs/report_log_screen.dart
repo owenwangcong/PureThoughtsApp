@@ -99,22 +99,43 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
           // ---- 功课项 ----
           Text(l10n.selectPracticeType, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
+          // 按分类分组(經/咒/懺/念佛/靜坐/其他),功课项具体到经名(PRD v0.5.2)
           types.when(
             loading: () => const LinearProgressIndicator(),
             error: (_, _) => Text(l10n.loadFailed),
-            data: (list) => Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            data: (list) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final t in list)
-                  ChoiceChip(
-                    label: Text(
-                      (locale.scriptCode == 'Hans' ? t['name_hans'] : t['name_hant'])
-                          as String,
+                for (final cat in practiceCategories)
+                  if (list.any((t) => t['category'] == cat)) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 4),
+                      child: Text(
+                        categoryLabel(l10n, cat),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                      ),
                     ),
-                    selected: _typeId == t['id'],
-                    onSelected: (_) => setState(() => _typeId = t['id'] as String),
-                  ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final t in list.where((t) => t['category'] == cat))
+                          ChoiceChip(
+                            label: Text(
+                              (locale.scriptCode == 'Hans'
+                                  ? t['name_hans']
+                                  : t['name_hant']) as String,
+                            ),
+                            selected: _typeId == t['id'],
+                            onSelected: (_) =>
+                                setState(() => _typeId = t['id'] as String),
+                          ),
+                      ],
+                    ),
+                  ],
               ],
             ),
           ),
