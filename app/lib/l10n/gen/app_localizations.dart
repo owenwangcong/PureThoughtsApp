@@ -607,6 +607,48 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'同修'**
   String get fellowPractitioner;
+
+  /// No description provided for @categoryTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'分類'**
+  String get categoryTitle;
+
+  /// No description provided for @categorySutra.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'經'**
+  String get categorySutra;
+
+  /// No description provided for @categoryMantra.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'咒'**
+  String get categoryMantra;
+
+  /// No description provided for @categoryRepentance.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'懺'**
+  String get categoryRepentance;
+
+  /// No description provided for @categoryBuddhaName.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'念佛'**
+  String get categoryBuddhaName;
+
+  /// No description provided for @categoryMeditation.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'靜坐'**
+  String get categoryMeditation;
+
+  /// No description provided for @categoryOther.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'其他'**
+  String get categoryOther;
 }
 
 class _AppLocalizationsDelegate

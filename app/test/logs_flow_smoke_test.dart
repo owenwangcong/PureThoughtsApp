@@ -62,8 +62,8 @@ void main() {
         .eq('active', true)
         .or('group_id.is.null,group_id.eq.$gid');
     expect(types.length, greaterThanOrEqualTo(5));
-    final songjing = types.firstWhere((t) => t['name_hans'] == '诵经')['id'] as String;
-    final chizhou = types.firstWhere((t) => t['name_hans'] == '持咒')['id'] as String;
+    final jingangjing = types.firstWhere((t) => t['name_hans'] == '金刚经')['id'] as String;
+    final dabeizhou = types.firstWhere((t) => t['name_hans'] == '大悲咒')['id'] as String;
 
     // 自报(显式 local_date)
     final today = DateTime.now();
@@ -74,7 +74,7 @@ void main() {
         .insert({
           'group_id': gid,
           'reporter_id': memberId,
-          'practice_type_id': songjing,
+          'practice_type_id': jingangjing,
           'quantity': 2,
           'local_date': localDate,
         })
@@ -93,7 +93,7 @@ void main() {
       'group_id': gid,
       'reporter_id': memberId,
       'subject_name': '劉奶奶',
-      'practice_type_id': chizhou,
+      'practice_type_id': dabeizhou,
       'quantity': 108,
       'local_date': localDate,
     });
@@ -109,7 +109,7 @@ void main() {
       'group_id': gid,
       'reporter_id': memberId,
       'subject_user_id': owner.auth.currentUser!.id,
-      'practice_type_id': chizhou,
+      'practice_type_id': dabeizhou,
       'quantity': 21,
       'local_date': localDate,
     });

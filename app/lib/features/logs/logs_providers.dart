@@ -6,7 +6,7 @@ final reportablePracticeTypesProvider =
     FutureProvider.family<List<Map<String, dynamic>>, String>((ref, groupId) async {
   return Supabase.instance.client
       .from('practice_types')
-      .select('id, name_hant, name_hans, unit, group_id, sort_order')
+      .select('id, name_hant, name_hans, category, unit, group_id, sort_order')
       .eq('active', true)
       .or('group_id.is.null,group_id.eq.$groupId')
       .order('sort_order', ascending: true);

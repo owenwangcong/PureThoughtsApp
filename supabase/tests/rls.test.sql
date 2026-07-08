@@ -105,7 +105,7 @@ select lives_ok($$
   values ('00000000-0000-0000-0000-0000000000e1',
           '00000000-0000-0000-0000-0000000000d1',
           '00000000-0000-0000-0000-00000000000b',
-          (select id from public.practice_types where name_hans = '诵经'),
+          (select id from public.practice_types where name_hans = '金刚经'),
           3)
 $$, '成员可自报功课');
 
@@ -124,7 +124,7 @@ select lives_ok($$
   values ('00000000-0000-0000-0000-0000000000d1',
           '00000000-0000-0000-0000-00000000000b',
           '王阿姨',
-          (select id from public.practice_types where name_hans = '持咒'),
+          (select id from public.practice_types where name_hans = '大悲咒'),
           108)
 $$, '可用自由名字代报');
 
@@ -164,14 +164,14 @@ select throws_ok($$
   insert into public.practice_logs (group_id, reporter_id, practice_type_id, quantity)
   values ('00000000-0000-0000-0000-0000000000d1',
           '00000000-0000-0000-0000-00000000000c',
-          (select id from public.practice_types where name_hans = '诵经'), 1)
+          (select id from public.practice_types where name_hans = '金刚经'), 1)
 $$, '42501', null, '非成员不能报数');
 
 -- 匿名(未登录)
 select tests_logout();
 select tests_anon();
 select lives_ok($$ select count(*) from public.scriptures $$, '匿名可访问公开内容表');
-select is((select count(*)::int from public.practice_types where group_id is null), 5, '匿名可读全局功课清单');
+select is((select count(*)::int from public.practice_types where group_id is null), 17, '匿名可读全局功课清单');
 select throws_ok($$ select count(*) from public.practice_logs $$,
   '42501', null, '匿名无权访问报数表(未授 GRANT,硬拒绝)');
 select throws_ok($$ select count(*) from public.notifications $$,

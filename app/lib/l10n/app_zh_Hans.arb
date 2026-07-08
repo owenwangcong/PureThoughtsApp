@@ -84,5 +84,12 @@
   "delete": "删除",
   "confirmDeleteLog": "确定删除这条报数?统计将即时扣减。",
   "proxyBy": "代报",
-  "fellowPractitioner": "同修"
+  "fellowPractitioner": "同修",
+  "categoryTitle": "分类",
+  "categorySutra": "经",
+  "categoryMantra": "咒",
+  "categoryRepentance": "忏",
+  "categoryBuddhaName": "念佛",
+  "categoryMeditation": "静坐",
+  "categoryOther": "其他"
 }
