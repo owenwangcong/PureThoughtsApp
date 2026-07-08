@@ -15,6 +15,7 @@ import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
 import 'features/notifications/notifications_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/vows/vows_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final onboarded = ref.watch(onboardingDoneProvider);
@@ -56,6 +57,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/notifications',
           builder: (context, state) => const NotificationsScreen()),
+      GoRoute(path: '/vows', builder: (context, state) => const VowsScreen()),
       GoRoute(
           path: '/admin/reports',
           builder: (context, state) => const AdminReportsScreen()),
