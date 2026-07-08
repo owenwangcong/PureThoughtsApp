@@ -7,6 +7,7 @@ import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
+import '../dashboard/quick_report_section.dart';
 
 /// 全局功课项(主清单),匿名即可读(RLS:group_id is null 公开)
 class PracticeType {
@@ -71,19 +72,30 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          if (user != null)
-            ListTile(
-              leading: const Icon(Icons.groups),
-              title: Text(l10n.groupsTitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/groups'),
+      body: user == null
+          // 匿名:浏览全局功课清单(公开内容)
+          ? _buildPracticeList(context, ref, l10n, locale, types)
+          // 登录:快捷报数 + 统计与群入口(Dashboard 首屏)
+          : ListView(
+              children: [
+                const QuickReportSection(),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.insights),
+                  title: Text(l10n.myStats),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/dashboard'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.groups),
+                  title: Text(l10n.groupsTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/groups'),
+                ),
+                const Divider(height: 1),
+              ],
             ),
-          if (user != null) const Divider(height: 1),
-          Expanded(child: _buildPracticeList(context, ref, l10n, locale, types)),
-        ],
-      ),
     );
   }
 

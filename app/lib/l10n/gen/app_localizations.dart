@@ -649,6 +649,72 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'其他'**
   String get categoryOther;
+
+  /// No description provided for @quickReport.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'快捷報數(點選即報,數量可改)'**
+  String get quickReport;
+
+  /// No description provided for @myStats.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'個人統計'**
+  String get myStats;
+
+  /// No description provided for @groupStats.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'群統計'**
+  String get groupStats;
+
+  /// No description provided for @todayTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日'**
+  String get todayTitle;
+
+  /// No description provided for @totalTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'累計'**
+  String get totalTitle;
+
+  /// No description provided for @streakLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'連續用功天數'**
+  String get streakLabel;
+
+  /// No description provided for @trend14.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'近 14 天趨勢(筆數)'**
+  String get trend14;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'歷史查看'**
+  String get historyTitle;
+
+  /// No description provided for @pickDate.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇日期'**
+  String get pickDate;
+
+  /// No description provided for @noDataToday.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日尚未報數'**
+  String get noDataToday;
+
+  /// No description provided for @reportedToday.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日已報人數'**
+  String get reportedToday;
 }
 
 class _AppLocalizationsDelegate

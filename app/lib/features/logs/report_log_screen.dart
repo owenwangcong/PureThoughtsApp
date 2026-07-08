@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../dashboard/dashboard_providers.dart';
 import '../groups/groups_providers.dart';
 import 'logs_providers.dart';
 
@@ -42,6 +43,21 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
     super.dispose();
   }
 
+  /// 选中功课项;数量为空时自动填上次报过的数量(快捷报数的记忆默认值,P1.7)
+  void _selectType(String typeId) {
+    setState(() => _typeId = typeId);
+    if (_quantity.text.trim().isNotEmpty) return;
+    final recent = ref.read(myRecentSelfLogsProvider).value;
+    final last = recent
+        ?.where((r) =>
+            r['group_id'] == widget.groupId && r['practice_type_id'] == typeId)
+        .firstOrNull;
+    if (last != null) {
+      final d = double.tryParse('${last['quantity']}') ?? 0;
+      _quantity.text = d == d.roundToDouble() ? '${d.round()}' : '$d';
+    }
+  }
+
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -69,6 +85,9 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
       });
       ref.invalidate(groupLogsProvider(widget.groupId));
       ref.invalidate(proxyNamesProvider(widget.groupId));
+      ref.invalidate(myRecentSelfLogsProvider);
+      ref.invalidate(myDailyStatsProvider);
+      ref.invalidate(myTotalsProvider);
       messenger.showSnackBar(SnackBar(content: Text(l10n.logSubmitted)));
       if (mounted) context.pop();
     } catch (e) {
@@ -85,6 +104,7 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
     final types = ref.watch(reportablePracticeTypesProvider(widget.groupId));
     final members = ref.watch(groupMembersProvider(widget.groupId));
     final proxyNames = ref.watch(proxyNamesProvider(widget.groupId));
+    ref.watch(myRecentSelfLogsProvider); // 预载,供记忆默认值使用
     final myId = Supabase.instance.client.auth.currentUser?.id;
 
     final selectedType = types.value
@@ -130,8 +150,7 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
                                   : t['name_hant']) as String,
                             ),
                             selected: _typeId == t['id'],
-                            onSelected: (_) =>
-                                setState(() => _typeId = t['id'] as String),
+                            onSelected: (_) => _selectType(t['id'] as String),
                           ),
                       ],
                     ),

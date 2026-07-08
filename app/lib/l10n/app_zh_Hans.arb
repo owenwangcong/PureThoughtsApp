@@ -91,5 +91,16 @@
   "categoryRepentance": "忏",
   "categoryBuddhaName": "念佛",
   "categoryMeditation": "静坐",
-  "categoryOther": "其他"
+  "categoryOther": "其他",
+  "quickReport": "快捷报数(点选即报,数量可改)",
+  "myStats": "个人统计",
+  "groupStats": "群统计",
+  "todayTitle": "今日",
+  "totalTitle": "累计",
+  "streakLabel": "连续用功天数",
+  "trend14": "近 14 天趋势(笔数)",
+  "historyTitle": "历史查看",
+  "pickDate": "选择日期",
+  "noDataToday": "今日尚未报数",
+  "reportedToday": "今日已报人数"
 }
