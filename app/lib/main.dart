@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/env.dart';
+import 'core/prefs.dart';
 import 'core/settings.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'router.dart';
@@ -11,8 +13,12 @@ import 'router.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.supabaseAnonKey);
+  final prefs = await SharedPreferences.getInstance();
 
-  const app = ProviderScope(child: PureThoughtsApp());
+  final app = ProviderScope(
+    overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+    child: const PureThoughtsApp(),
+  );
   if (Env.sentryDsn.isNotEmpty) {
     await SentryFlutter.init(
       (options) => options.dsn = Env.sentryDsn,

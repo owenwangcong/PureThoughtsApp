@@ -151,6 +151,132 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'分鐘'**
   String get unitMinute;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'登入'**
+  String get authSignIn;
+
+  /// No description provided for @authSignUp.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'註冊'**
+  String get authSignUp;
+
+  /// No description provided for @authSignOut.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'登出'**
+  String get authSignOut;
+
+  /// No description provided for @authEmail.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'電子郵箱'**
+  String get authEmail;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'請輸入有效的電子郵箱'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authPassword.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'密碼'**
+  String get authPassword;
+
+  /// No description provided for @authPasswordMin.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'密碼至少 6 位'**
+  String get authPasswordMin;
+
+  /// No description provided for @authForgot.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'忘記密碼?'**
+  String get authForgot;
+
+  /// No description provided for @authResetSent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'重設密碼郵件已發送,請查收'**
+  String get authResetSent;
+
+  /// No description provided for @authToSignUp.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'沒有帳號?註冊'**
+  String get authToSignUp;
+
+  /// No description provided for @authToSignIn.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已有帳號?登入'**
+  String get authToSignIn;
+
+  /// No description provided for @authFailed.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'操作失敗:'**
+  String get authFailed;
+
+  /// No description provided for @next.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'下一步'**
+  String get next;
+
+  /// No description provided for @done.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'完成'**
+  String get done;
+
+  /// No description provided for @onboardingLanguage.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇語言'**
+  String get onboardingLanguage;
+
+  /// No description provided for @onboardingFont.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇字號'**
+  String get onboardingFont;
+
+  /// No description provided for @onboardingFontPreview.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'諸惡莫作,眾善奉行'**
+  String get onboardingFontPreview;
+
+  /// No description provided for @onboardingRegion.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'所在地區'**
+  String get onboardingRegion;
+
+  /// No description provided for @onboardingRegionHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用於選擇通知送達方式(大陸地區以應用內通知與郵件為主)'**
+  String get onboardingRegionHint;
+
+  /// No description provided for @regionCn.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'中國大陸'**
+  String get regionCn;
+
+  /// No description provided for @regionOther.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'其他地區'**
+  String get regionOther;
 }
 
 class _AppLocalizationsDelegate

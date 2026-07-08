@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/settings.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../auth/auth_providers.dart';
 
 /// 全局功课项(主清单),匿名即可读(RLS:group_id is null 公开)
 class PracticeType {
@@ -55,9 +57,25 @@ class HomeScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeProvider);
     final types = ref.watch(globalPracticeTypesProvider);
+    final user = ref.watch(currentUserProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.practiceListTitle)),
+      appBar: AppBar(
+        title: Text(l10n.practiceListTitle),
+        actions: [
+          if (user == null)
+            TextButton(
+              onPressed: () => context.push('/auth'),
+              child: Text(l10n.authSignIn),
+            )
+          else
+            IconButton(
+              tooltip: l10n.authSignOut,
+              icon: const Icon(Icons.logout),
+              onPressed: () => Supabase.instance.client.auth.signOut(),
+            ),
+        ],
+      ),
       body: types.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
