@@ -67,13 +67,12 @@ class HomeScreen extends ConsumerWidget {
             TextButton(
               onPressed: () => context.push('/auth'),
               child: Text(l10n.authSignIn),
-            )
-          else
-            IconButton(
-              tooltip: l10n.authSignOut,
-              icon: const Icon(Icons.logout),
-              onPressed: () => Supabase.instance.client.auth.signOut(),
             ),
+          IconButton(
+            tooltip: l10n.settingsTitle,
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push('/settings'),
+          ),
         ],
       ),
       body: types.when(

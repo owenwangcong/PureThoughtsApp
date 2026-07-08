@@ -72,6 +72,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authFailed => '操作失敗:';
 
   @override
+  String get settingsTitle => '設定';
+
+  @override
+  String get displayName => '顯示名稱';
+
+  @override
+  String get save => '儲存';
+
+  @override
+  String get saved => '已儲存';
+
+  @override
   String get next => '下一步';
 
   @override
@@ -167,6 +179,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get authFailed => '操作失败:';
 
   @override
+  String get settingsTitle => '设置';
+
+  @override
+  String get displayName => '显示名称';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get saved => '已保存';
+
+  @override
   String get next => '下一步';
 
   @override
@@ -260,6 +284,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get authFailed => '操作失敗:';
+
+  @override
+  String get settingsTitle => '設定';
+
+  @override
+  String get displayName => '顯示名稱';
+
+  @override
+  String get save => '儲存';
+
+  @override
+  String get saved => '已儲存';
 
   @override
   String get next => '下一步';

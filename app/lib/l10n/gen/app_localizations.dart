@@ -224,6 +224,30 @@ abstract class AppLocalizations {
   /// **'操作失敗:'**
   String get authFailed;
 
+  /// No description provided for @settingsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'設定'**
+  String get settingsTitle;
+
+  /// No description provided for @displayName.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'顯示名稱'**
+  String get displayName;
+
+  /// No description provided for @save.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'儲存'**
+  String get save;
+
+  /// No description provided for @saved.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已儲存'**
+  String get saved;
+
   /// No description provided for @next.
   ///
   /// In zh_Hant, this message translates to:

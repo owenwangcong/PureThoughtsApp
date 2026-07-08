@@ -10,3 +10,10 @@ final currentUserProvider = Provider<User?>((ref) {
   ref.watch(authStateChangesProvider);
   return Supabase.instance.client.auth.currentUser;
 });
+
+/// 当前用户的 profiles 行;未登录为 null
+final myProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return null;
+  return Supabase.instance.client.from('profiles').select().eq('id', user.id).maybeSingle();
+});
