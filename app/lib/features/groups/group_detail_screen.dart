@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/settings.dart';
+import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import 'groups_providers.dart';
@@ -197,6 +199,8 @@ class GroupDetailScreen extends ConsumerWidget {
                       onReview: (uid, ok) => _review(context, ref, uid, ok)),
                   const Divider(height: 32),
                 ],
+                _PracticeTypesSection(groupId: groupId, isOwner: isOwner),
+                const Divider(height: 32),
                 Text(l10n.members, style: Theme.of(context).textTheme.titleMedium),
                 members.when(
                   loading: () => const LinearProgressIndicator(),
@@ -257,6 +261,149 @@ class GroupDetailScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// 本群功课项:成员可添加自定义项(PRD §4.1,已定案成员均可加);群主可停用/启用。
+/// 合并重复项推迟(需迁移历史报数的 RPC,列入后续)。
+class _PracticeTypesSection extends ConsumerWidget {
+  const _PracticeTypesSection({required this.groupId, required this.isOwner});
+  final String groupId;
+  final bool isOwner;
+
+  Future<void> _add(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final name = TextEditingController();
+    var unit = 'recitation';
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(l10n.addPracticeType),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                autofocus: true,
+                decoration: InputDecoration(labelText: l10n.practiceTypeName),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: unit,
+                decoration: InputDecoration(labelText: l10n.unitTitle),
+                items: [
+                  for (final u in practiceUnits)
+                    DropdownMenuItem(value: u, child: Text(unitLabel(l10n, u))),
+                ],
+                onChanged: (v) => setState(() => unit = v!),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(context, true), child: Text(l10n.submit)),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await Supabase.instance.client.from('practice_types').insert({
+        'group_id': groupId,
+        'name_hant': name.text.trim(),
+        'name_hans': name.text.trim(),
+        'unit': unit,
+        'is_custom': true,
+      });
+      ref.invalidate(groupPracticeTypesProvider(groupId));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+    }
+  }
+
+  Future<void> _toggle(
+      BuildContext context, WidgetRef ref, String typeId, bool active) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await Supabase.instance.client
+          .from('practice_types')
+          .update({'active': active}).eq('id', typeId);
+      ref.invalidate(groupPracticeTypesProvider(groupId));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final locale = ref.watch(localeProvider);
+    final types = ref.watch(groupPracticeTypesProvider(groupId));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(l10n.groupPracticeTypes,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            IconButton(
+              tooltip: l10n.addPracticeType,
+              icon: const Icon(Icons.add_circle_outline),
+              onPressed: () => _add(context, ref),
+            ),
+          ],
+        ),
+        types.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (_, _) => Text(l10n.loadFailed),
+          data: (list) {
+            final visible = isOwner ? list : list.where((t) => t['active'] == true).toList();
+            if (visible.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(l10n.emptyList,
+                    style: Theme.of(context).textTheme.bodySmall),
+              );
+            }
+            return Column(
+              children: [
+                for (final t in visible)
+                  ListTile(
+                    dense: true,
+                    title: Text(
+                      (locale.scriptCode == 'Hans'
+                          ? t['name_hans']
+                          : t['name_hant']) as String,
+                      style: t['active'] == false
+                          ? TextStyle(
+                              color: Theme.of(context).disabledColor,
+                              decoration: TextDecoration.lineThrough)
+                          : null,
+                    ),
+                    subtitle: Text(unitLabel(l10n, t['unit'] as String)),
+                    trailing: isOwner
+                        ? Switch(
+                            value: t['active'] as bool,
+                            onChanged: (v) =>
+                                _toggle(context, ref, t['id'] as String, v),
+                          )
+                        : null,
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

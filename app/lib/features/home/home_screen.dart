@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/settings.dart';
+import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 
@@ -43,14 +44,6 @@ final globalPracticeTypesProvider = FutureProvider<List<PracticeType>>((ref) asy
 /// 骨架期首页:展示全局功课清单,验证「App 启动并匿名读到公开表数据」(PLAN P0.6 验收)
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
-
-  String _unitLabel(AppLocalizations l10n, String unit) => switch (unit) {
-        'volume' => l10n.unitVolume,
-        'recitation' => l10n.unitRecitation,
-        'count' => l10n.unitCount,
-        'minute' => l10n.unitMinute,
-        _ => unit,
-      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -123,7 +116,7 @@ class HomeScreen extends ConsumerWidget {
                   return ListTile(
                     title: Text(item.nameFor(locale)),
                     trailing: Text(
-                      _unitLabel(l10n, item.unit),
+                      unitLabel(l10n, item.unit),
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   );

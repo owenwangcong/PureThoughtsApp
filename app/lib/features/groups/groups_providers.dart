@@ -45,6 +45,16 @@ final pendingApplicationsProvider =
       .eq('status', 'pending');
 });
 
+/// 本群自定义功课项(含停用的;UI 按角色过滤)
+final groupPracticeTypesProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, groupId) async {
+  return Supabase.instance.client
+      .from('practice_types')
+      .select('id, name_hant, name_hans, unit, active, sort_order')
+      .eq('group_id', groupId)
+      .order('sort_order', ascending: true);
+});
+
 /// join code(RPC,仅群主/管理员;无权限返回 null)
 final joinCodeProvider = FutureProvider.family<String?, String>((ref, groupId) async {
   try {

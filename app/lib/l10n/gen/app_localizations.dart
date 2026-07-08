@@ -481,6 +481,30 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'舊群 ID 將立即失效,確定重置?'**
   String get confirmResetCode;
+
+  /// No description provided for @groupPracticeTypes.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'本群功課項'**
+  String get groupPracticeTypes;
+
+  /// No description provided for @addPracticeType.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'新增功課項'**
+  String get addPracticeType;
+
+  /// No description provided for @practiceTypeName.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'名稱'**
+  String get practiceTypeName;
+
+  /// No description provided for @unitTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'單位'**
+  String get unitTitle;
 }
 
 class _AppLocalizationsDelegate
