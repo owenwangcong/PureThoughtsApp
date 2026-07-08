@@ -10,7 +10,7 @@
 
 | Phase | 内容 | 状态 | 进度 | 完成日期 |
 |---|---|---|:---:|---|
-| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 1/9 | — |
+| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 2/9 | — |
 | **P1** | MVP:核心闭环(群 + 报数 + 统计)+ 上架合规 | ⬜ 未开始 | 0/10 | — |
 | **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | ⬜ 未开始 | 0/7 | — |
 | **P3** | 视频 + 在线经本 | ⬜ 未开始 | 0/3 | — |
@@ -57,7 +57,7 @@
 - [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。
 - [ ] **P0.5** 监控告警(S)— Uptime 监控 + 磁盘/CPU 告警。验收:模拟宕机能收到告警。
 - [ ] **P0.6** Flutter 工程骨架(M)— `flutter create app/`;接 Riverpod、go_router、supabase_flutter、intl(zh_Hant 默认 + zh_Hans)、全局字号缩放主题、sentry_flutter。验收:App 启动并匿名读到公开表数据。
-- [ ] **P0.7** 数据库 schema v1(L)— PRD §12.2 全部表 + §12.3 RLS + `join_group` RPC + `daily_user_stats`/`daily_group_stats` 视图 + 索引,写成 `supabase/migrations/` SQL(本地栈 `npx supabase db reset` 验证);附 RLS 验证 SQL 脚本(非成员读不到 practice_logs、join_code 不可直读等)。验收:空库一键执行成功,RLS 脚本全过。**不依赖外部条件,可立即开工。**
+- [x] **P0.7** 数据库 schema v1(L)— 16 表 + 枚举 + RLS + 6 个 RPC(join_group / delete_practice_log / 转让 / 重置码 / 取码 / vow_progress)+ 3 视图 + 触发器(自动 profile / 建群 / unit 快照 / proxy_names 记忆 / 代报通知 / 更新守卫),`supabase/migrations/20260707000001_init_schema.sql`;pgTAP 测试 31 项 `supabase/tests/rls.test.sql`。验收 ✅ 2026-07-07:`db reset` 一键通过,`test db` 31/31。要点:软删走 delete_practice_log() RPC(PG 会用 SELECT 策略校验 UPDATE 新行);join_code 独立表 + RPC 防遍历。
 - [ ] **P0.8** 质量门(S,可选)— `flutter analyze` + `flutter test` 的本地脚本或 CI。验收:一条命令出结果。
 
 **P0 DoD**:上述验收全部通过;App(骨架)连自托管实例完成"匿名浏览公开数据"。

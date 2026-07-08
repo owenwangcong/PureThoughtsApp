@@ -54,7 +54,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npx supabase start     # 启动本地全栈(需 Docker Desktop 运行)
 npx supabase stop      # 停止(数据保留;--no-backup 清数据)
 npx supabase status    # 查看本地 API URL / anon key / Studio 地址
-npx supabase db reset  # 重建本地库并按顺序执行 supabase/migrations/*.sql
+npx supabase db reset  # 重建本地库并按顺序执行 supabase/migrations/*.sql + seed.sql
+npx supabase test db   # 运行 pgTAP 测试(supabase/tests/*.sql,改 schema 后必须全绿)
 npx supabase migration new <name>   # 新建一个 migration 文件
 ```
 
