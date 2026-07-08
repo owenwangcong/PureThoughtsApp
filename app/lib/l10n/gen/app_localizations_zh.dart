@@ -382,6 +382,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notifAnnouncement => '群公告更新';
+
+  @override
+  String get vowsTitle => '我的發願';
+
+  @override
+  String get createVow => '發願';
+
+  @override
+  String get vowTarget => '目標數量';
+
+  @override
+  String get vowPeriod => '期限';
+
+  @override
+  String get vowScope => '範圍';
+
+  @override
+  String get scopeAllGroups => '全部群組';
+
+  @override
+  String get daysUnit => '天';
+
+  @override
+  String daysLeft(int days) {
+    return '剩餘 $days 天';
+  }
+
+  @override
+  String get vowCompleted => '已圓滿';
+
+  @override
+  String get vowExpired => '已到期';
+
+  @override
+  String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get dedicationTitle => '迴向';
+
+  @override
+  String get dedicationText =>
+      '願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -762,6 +804,48 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get notifAnnouncement => '群公告更新';
+
+  @override
+  String get vowsTitle => '我的发愿';
+
+  @override
+  String get createVow => '发愿';
+
+  @override
+  String get vowTarget => '目标数量';
+
+  @override
+  String get vowPeriod => '期限';
+
+  @override
+  String get vowScope => '范围';
+
+  @override
+  String get scopeAllGroups => '全部群组';
+
+  @override
+  String get daysUnit => '天';
+
+  @override
+  String daysLeft(int days) {
+    return '剩余 $days 天';
+  }
+
+  @override
+  String get vowCompleted => '已圆满';
+
+  @override
+  String get vowExpired => '已到期';
+
+  @override
+  String get vowCongrats => '随喜赞叹!发愿圆满';
+
+  @override
+  String get dedicationTitle => '回向';
+
+  @override
+  String get dedicationText =>
+      '愿以此功德,庄严佛净土。\n上报四重恩,下济三途苦。\n若有见闻者,悉发菩提心。\n尽此一报身,同生极乐国。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1142,4 +1226,46 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get notifAnnouncement => '群公告更新';
+
+  @override
+  String get vowsTitle => '我的發願';
+
+  @override
+  String get createVow => '發願';
+
+  @override
+  String get vowTarget => '目標數量';
+
+  @override
+  String get vowPeriod => '期限';
+
+  @override
+  String get vowScope => '範圍';
+
+  @override
+  String get scopeAllGroups => '全部群組';
+
+  @override
+  String get daysUnit => '天';
+
+  @override
+  String daysLeft(int days) {
+    return '剩餘 $days 天';
+  }
+
+  @override
+  String get vowCompleted => '已圓滿';
+
+  @override
+  String get vowExpired => '已到期';
+
+  @override
+  String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get dedicationTitle => '迴向';
+
+  @override
+  String get dedicationText =>
+      '願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。';
 }

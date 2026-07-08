@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../vows/vows_providers.dart';
 import 'dashboard_providers.dart';
 
 String _fmtNum(Object? n) {
@@ -81,6 +83,9 @@ class _MyDashboardScreenState extends ConsumerState<MyDashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // ---- 發願進度(PRD §4.4:Dashboard 展示目标进度条) ----
+                _ActiveVowsSection(nameOf: nameOf),
 
                 // ---- 今日 ----
                 Text(l10n.todayTitle, style: Theme.of(context).textTheme.titleMedium),
@@ -177,6 +182,46 @@ class _MyDashboardScreenState extends ConsumerState<MyDashboardScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+/// 进行中发愿的紧凑进度区(点击进入發願页)
+class _ActiveVowsSection extends ConsumerWidget {
+  const _ActiveVowsSection({required this.nameOf});
+  final String Function(String) nameOf;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final vows = (ref.watch(myVowsProvider).value ?? const [])
+        .where((v) => v['status'] == 'active')
+        .take(3)
+        .toList();
+    if (vows.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.vowsTitle, style: Theme.of(context).textTheme.titleMedium),
+        for (final vow in vows)
+          Consumer(builder: (context, ref, _) {
+            final p = ref.watch(vowProgressProvider(vow['id'] as String)).value ?? 0;
+            final target = double.tryParse('${vow['target_qty']}') ?? 1;
+            return ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Text(nameOf(vow['practice_type_id'] as String)),
+              subtitle: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                    value: (p / target).clamp(0.0, 1.0), minHeight: 8),
+              ),
+              trailing: Text('${_fmtNum(p)}/${_fmtNum(target)}'),
+              onTap: () => context.push('/vows'),
+            );
+          }),
+        const Divider(height: 32),
+      ],
     );
   }
 }

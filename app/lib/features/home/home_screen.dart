@@ -105,6 +105,13 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.volunteer_activism_outlined),
+                  title: Text(l10n.vowsTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/vows'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.groups),
                   title: Text(l10n.groupsTitle),
                   trailing: const Icon(Icons.chevron_right),

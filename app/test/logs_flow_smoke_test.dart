@@ -179,6 +179,25 @@ void main() {
         .eq('group_id', gid);
     expect(groupTotals.fold<int>(0, (s, r) => s + (r['entries'] as int)), 4);
 
+    // 发愿进度(P2.5):member 对金刚经发愿 5 部,进度 = 自报 3(不含自由名字/被删)
+    final vow = await member
+        .from('vows')
+        .insert({
+          'user_id': memberId,
+          'practice_type_id': jingangjing,
+          'target_qty': 5,
+          'start_date': localDate,
+          'end_date': '2030-01-01',
+        })
+        .select('id')
+        .single();
+    final progress =
+        await member.rpc('vow_progress', params: {'p_vow_id': vow['id']});
+    expect(double.parse('$progress'), 3);
+    // 别人看不到我的发愿(RLS)
+    final othersVows = await owner.from('vows').select('id');
+    expect(othersVows, isEmpty);
+
     // 清理:解散测试群
     await owner.rpc('dissolve_group', params: {'p_group_id': gid});
   });

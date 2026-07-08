@@ -124,5 +124,18 @@
   "chooseGroup": "选择群组",
   "notificationsTitle": "通知",
   "notifProxyLog": "有同修为您代报",
-  "notifAnnouncement": "群公告更新"
+  "notifAnnouncement": "群公告更新",
+  "vowsTitle": "我的发愿",
+  "createVow": "发愿",
+  "vowTarget": "目标数量",
+  "vowPeriod": "期限",
+  "vowScope": "范围",
+  "scopeAllGroups": "全部群组",
+  "daysUnit": "天",
+  "daysLeft": "剩余 {days} 天",
+  "vowCompleted": "已圆满",
+  "vowExpired": "已到期",
+  "vowCongrats": "随喜赞叹!发愿圆满",
+  "dedicationTitle": "回向",
+  "dedicationText": "愿以此功德,庄严佛净土。\n上报四重恩,下济三途苦。\n若有见闻者,悉发菩提心。\n尽此一报身,同生极乐国。"
 }

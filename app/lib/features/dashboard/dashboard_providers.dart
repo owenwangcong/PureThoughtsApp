@@ -63,7 +63,7 @@ final allPracticeTypesMapProvider =
     FutureProvider<Map<String, Map<String, dynamic>>>((ref) async {
   final rows = await Supabase.instance.client
       .from('practice_types')
-      .select('id, name_hant, name_hans, unit');
+      .select('id, name_hant, name_hans, category, unit, sort_order, active');
   return {for (final r in rows) r['id'] as String: r};
 });
 

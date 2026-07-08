@@ -847,6 +847,84 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'群公告更新'**
   String get notifAnnouncement;
+
+  /// No description provided for @vowsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'我的發願'**
+  String get vowsTitle;
+
+  /// No description provided for @createVow.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'發願'**
+  String get createVow;
+
+  /// No description provided for @vowTarget.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'目標數量'**
+  String get vowTarget;
+
+  /// No description provided for @vowPeriod.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'期限'**
+  String get vowPeriod;
+
+  /// No description provided for @vowScope.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'範圍'**
+  String get vowScope;
+
+  /// No description provided for @scopeAllGroups.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'全部群組'**
+  String get scopeAllGroups;
+
+  /// No description provided for @daysUnit.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'天'**
+  String get daysUnit;
+
+  /// No description provided for @daysLeft.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'剩餘 {days} 天'**
+  String daysLeft(int days);
+
+  /// No description provided for @vowCompleted.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已圓滿'**
+  String get vowCompleted;
+
+  /// No description provided for @vowExpired.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已到期'**
+  String get vowExpired;
+
+  /// No description provided for @vowCongrats.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'隨喜讚歎!發願圓滿'**
+  String get vowCongrats;
+
+  /// No description provided for @dedicationTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'迴向'**
+  String get dedicationTitle;
+
+  /// No description provided for @dedicationText.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。'**
+  String get dedicationText;
 }
 
 class _AppLocalizationsDelegate
