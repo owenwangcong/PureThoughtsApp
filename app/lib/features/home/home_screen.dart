@@ -10,6 +10,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../dashboard/quick_report_section.dart';
 import '../groups/groups_providers.dart';
+import '../notifications/notifications_providers.dart';
 
 /// 全局功课项(主清单),匿名即可读(RLS:group_id is null 公开)
 class PracticeType {
@@ -60,13 +61,15 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.practiceListTitle),
+        title: Text(user == null ? l10n.practiceListTitle : l10n.appTitle),
         actions: [
           if (user == null)
             TextButton(
               onPressed: () => context.push('/auth'),
               child: Text(l10n.authSignIn),
-            ),
+            )
+          else
+            _NotificationBell(onTap: () => context.push('/notifications')),
           IconButton(
             tooltip: l10n.settingsTitle,
             icon: const Icon(Icons.settings),
@@ -211,6 +214,26 @@ class HomeScreen extends ConsumerWidget {
                     ],
                 ],
               ),
+    );
+  }
+}
+
+/// 通知铃铛(带未读红点),App 内通知中心入口(大陆 Android 唯一通道)
+class _NotificationBell extends ConsumerWidget {
+  const _NotificationBell({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadCountProvider);
+    return IconButton(
+      tooltip: AppLocalizations.of(context).notificationsTitle,
+      onPressed: onTap,
+      icon: Badge(
+        isLabelVisible: unread > 0,
+        label: Text('$unread'),
+        child: const Icon(Icons.notifications_outlined),
+      ),
     );
   }
 }

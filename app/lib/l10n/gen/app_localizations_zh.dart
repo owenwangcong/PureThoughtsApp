@@ -373,6 +373,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chooseGroup => '選擇群組';
+
+  @override
+  String get notificationsTitle => '通知';
+
+  @override
+  String get notifProxyLog => '有同修為您代報';
+
+  @override
+  String get notifAnnouncement => '群公告更新';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -744,6 +753,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get chooseGroup => '选择群组';
+
+  @override
+  String get notificationsTitle => '通知';
+
+  @override
+  String get notifProxyLog => '有同修为您代报';
+
+  @override
+  String get notifAnnouncement => '群公告更新';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1115,4 +1133,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get chooseGroup => '選擇群組';
+
+  @override
+  String get notificationsTitle => '通知';
+
+  @override
+  String get notifProxyLog => '有同修為您代報';
+
+  @override
+  String get notifAnnouncement => '群公告更新';
 }
