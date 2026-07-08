@@ -90,9 +90,7 @@ class QuickReportSection extends ConsumerWidget {
         }
         if (items.isEmpty) return const SizedBox.shrink();
 
-        final typeIds =
-            items.map((r) => r['practice_type_id'] as String).toSet().toList();
-        final names = ref.watch(practiceTypeNamesProvider(typeIds));
+        final names = ref.watch(allPracticeTypesMapProvider);
         final groupNames = <String, String>{
           for (final m in myGroups.value ?? const [])
             (m['groups'] as Map)['id'] as String: (m['groups'] as Map)['name'] as String,

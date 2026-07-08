@@ -8,6 +8,7 @@ import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../dashboard/dashboard_providers.dart';
+import '../groups/add_practice_type_dialog.dart';
 import '../groups/groups_providers.dart';
 import 'logs_providers.dart';
 
@@ -180,6 +181,23 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
                       ],
                     ),
                   ],
+                // 就地自定义任意功课(名称/分类/单位自定;PRD §4.1 成员均可加)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ActionChip(
+                    avatar: const Icon(Icons.add, size: 18),
+                    label: Text(l10n.addPracticeType),
+                    onPressed: () async {
+                      final newId = await showAddPracticeTypeDialog(context,
+                          groupId: widget.groupId);
+                      if (newId == null) return;
+                      ref.invalidate(reportablePracticeTypesProvider(widget.groupId));
+                      ref.invalidate(groupPracticeTypesProvider(widget.groupId));
+                      ref.invalidate(allPracticeTypesMapProvider);
+                      _toggleType(newId); // 建完即选中,直接填数量
+                    },
+                  ),
+                ),
               ],
             ),
           ),

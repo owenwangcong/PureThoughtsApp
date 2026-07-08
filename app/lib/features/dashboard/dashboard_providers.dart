@@ -56,15 +56,14 @@ final myLogsOnDateProvider = FutureProvider.family<List<Map<String, dynamic>>, S
       .order('created_at', ascending: false);
 });
 
-/// 功课项名称映射(按 id 批量取,跨群;RLS 保证只取得到有权限的)
-final practiceTypeNamesProvider =
-    FutureProvider.family<Map<String, Map<String, dynamic>>, List<String>>(
-        (ref, ids) async {
-  if (ids.isEmpty) return const {};
+/// 我可见的全部功课项映射(全局 + 我所在群的自定义;RLS 收行)。
+/// 注意:不要用 List 做 family 参数——List 无值相等性,会导致 provider
+/// 每次重建都重新实例化、名称永远处于 loading(个人统计只显数字的 Bug 根因)。
+final allPracticeTypesMapProvider =
+    FutureProvider<Map<String, Map<String, dynamic>>>((ref) async {
   final rows = await Supabase.instance.client
       .from('practice_types')
-      .select('id, name_hant, name_hans, unit')
-      .inFilter('id', ids);
+      .select('id, name_hant, name_hans, unit');
   return {for (final r in rows) r['id'] as String: r};
 });
 
