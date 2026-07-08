@@ -914,6 +914,66 @@ abstract class AppLocalizations {
   /// **'隨喜讚歎!發願圓滿'**
   String get vowCongrats;
 
+  /// No description provided for @calendarTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動日曆'**
+  String get calendarTitle;
+
+  /// No description provided for @createEvent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'新增活動'**
+  String get createEvent;
+
+  /// No description provided for @eventTitleLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動名稱'**
+  String get eventTitleLabel;
+
+  /// No description provided for @weeklyRepeat.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'每週重複'**
+  String get weeklyRepeat;
+
+  /// No description provided for @eventCancelled.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'本次取消'**
+  String get eventCancelled;
+
+  /// No description provided for @cancelOccurrence.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'取消本次活動'**
+  String get cancelOccurrence;
+
+  /// No description provided for @eventTypePractice.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共修'**
+  String get eventTypePractice;
+
+  /// No description provided for @eventTypeMeditation.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'打坐'**
+  String get eventTypeMeditation;
+
+  /// No description provided for @eventTypeTalk.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'講法'**
+  String get eventTypeTalk;
+
+  /// No description provided for @eventTypeAssembly.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'法會'**
+  String get eventTypeAssembly;
+
   /// No description provided for @toolsTitle.
   ///
   /// In zh_Hant, this message translates to:

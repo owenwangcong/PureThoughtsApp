@@ -81,6 +81,13 @@ insert into public.group_members (group_id, user_id, status, apply_message, appr
   ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000003',
    'approved', '弟子請求加入', now());
 
+-- 示例活动:周六共修(每周)+ 周三打坐(每周)
+insert into public.events (title, type, start_at, duration_minutes, recurrence_rule, youtube_url, content, created_by) values
+  ('週六共修', 'group_practice', '2026-07-11 11:30:00+00', 120, 'FREQ=WEEKLY',
+   'https://youtube.com/@example', '共同誦經迴向', '00000000-0000-4000-8000-000000000001'),
+  ('週三打坐', 'meditation', '2026-07-08 12:00:00+00', 60, 'FREQ=WEEKLY',
+   null, '線上靜坐共修', '00000000-0000-4000-8000-000000000001');
+
 -- 示例报数(local_date/unit 由触发器补全;含自由名字代报 → proxy_names 自动生成)
 insert into public.practice_logs (group_id, reporter_id, practice_type_id, quantity) values
   ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000003',
