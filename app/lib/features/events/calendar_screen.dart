@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/channels.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -149,16 +149,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 FilledButton.icon(
                   icon: const Icon(Icons.play_circle_outline),
                   label: const Text('YouTube'),
-                  onPressed: () => launchUrl(Uri.parse(o.event['youtube_url'] as String),
-                      mode: LaunchMode.externalApplication),
+                  // App 内观看:watch 链接进内嵌播放器,其余进应用内浏览器
+                  onPressed: () {
+                    final url = o.event['youtube_url'] as String;
+                    final id = RegExp(r'(?:v=|youtu\.be/|/live/)([\w-]{11})')
+                        .firstMatch(url)
+                        ?.group(1);
+                    context.push(id != null
+                        ? '/watch/$id'
+                        : Uri(path: '/webview', queryParameters: {
+                            'url': url,
+                            'title': 'YouTube',
+                          }).toString());
+                  },
                 ),
               if (o.event['webex_url'] != null) ...[
                 const SizedBox(height: 8),
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.videocam_outlined),
                   label: const Text('Webex'),
-                  onPressed: () => launchUrl(Uri.parse(o.event['webex_url'] as String),
-                      mode: LaunchMode.externalApplication),
+                  onPressed: () => context.push(Uri(
+                    path: '/webview',
+                    queryParameters: {
+                      'url': o.event['webex_url'] as String,
+                      'title': 'Webex',
+                    },
+                  ).toString()),
                 ),
               ],
               if (isAdmin && !o.cancelled) ...[

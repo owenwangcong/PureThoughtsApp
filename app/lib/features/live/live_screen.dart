@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/channels.dart';
 import '../../core/settings.dart';
@@ -87,11 +86,16 @@ class LiveScreen extends ConsumerWidget {
                                 ?.copyWith(color: scheme.onSurfaceVariant)),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
-                          icon: const Icon(Icons.open_in_new),
+                          icon: const Icon(Icons.language),
                           label: Text(l10n.openChannel),
-                          onPressed: () => launchUrl(
-                              Uri.parse(Channels.youtubeChannelUrl),
-                              mode: LaunchMode.externalApplication),
+                          // 应用内浏览器打开频道页,不离开 App
+                          onPressed: () => context.push(Uri(
+                            path: '/webview',
+                            queryParameters: {
+                              'url': Channels.youtubeChannelUrl,
+                              'title': 'YouTube',
+                            },
+                          ).toString()),
                         ),
                       ],
                     ],
@@ -128,8 +132,14 @@ class LiveScreen extends ConsumerWidget {
                     FilledButton.tonalIcon(
                       icon: const Icon(Icons.login),
                       label: Text(l10n.joinWebex),
-                      onPressed: () => launchUrl(Uri.parse(Channels.webexJoinUrl),
-                          mode: LaunchMode.externalApplication),
+                      // 应用内 WebView 加入(Webex 网页版);右上角可切外部打开
+                      onPressed: () => context.push(Uri(
+                        path: '/webview',
+                        queryParameters: {
+                          'url': Channels.webexJoinUrl,
+                          'title': 'Webex',
+                        },
+                      ).toString()),
                     ),
                   ],
                 ),
@@ -158,8 +168,10 @@ class LiveScreen extends ConsumerWidget {
                               if (id != null) {
                                 context.push('/watch/$id');
                               } else {
-                                launchUrl(Uri.parse(v['url'] as String),
-                                    mode: LaunchMode.externalApplication);
+                                context.push(Uri(
+                                  path: '/webview',
+                                  queryParameters: {'url': v['url'] as String},
+                                ).toString());
                               }
                             },
                           ),

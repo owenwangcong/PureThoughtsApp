@@ -47,6 +47,7 @@ dependencies:
   table_calendar: ^3.2.0
   url_launcher: ^6.3.2
   youtube_player_iframe: ^5.2.2
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:

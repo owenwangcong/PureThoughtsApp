@@ -34,10 +34,11 @@ Deno.serve(async (req) => {
       },
     });
     const html = await res.text();
-    isLive = html.includes('"isLive":true');
+    // 权威信号是 liveBroadcastDetails.isLiveNow:
+    // 频道有"预告中"直播时页面也会出现 "isLive":true(实测误报),isUpcoming 场景必须排除
+    isLive = html.includes('"isLiveNow":true');
     videoId =
-      html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/)?.[1] ??
-      html.match(/"videoId":"([\w-]{11})"/)?.[1] ?? null;
+      html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/)?.[1] ?? null;
     title = html.match(/<title>(.*?)<\/title>/)?.[1]
       ?.replace(" - YouTube", "").trim() ?? null;
   } catch (_) {

@@ -13,6 +13,7 @@ import 'features/groups/groups_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/live/live_screen.dart';
 import 'features/live/video_player_screen.dart';
+import 'features/live/web_view_screen.dart';
 import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
@@ -71,6 +72,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/watch/:vid',
         builder: (context, state) =>
             VideoPlayerScreen(videoId: state.pathParameters['vid']!),
+      ),
+      GoRoute(
+        path: '/webview',
+        builder: (context, state) => WebViewScreen(
+          url: state.uri.queryParameters['url']!,
+          title: state.uri.queryParameters['title'],
+        ),
       ),
       GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
       GoRoute(path: '/tools/counter', builder: (context, state) => const CounterScreen()),
