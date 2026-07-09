@@ -158,29 +158,48 @@ class HomeScreen extends ConsumerWidget {
                 // ---- 修行:个人纪录与工具 ----
                 SectionHeader(l10n.sectionSelf),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: GridView.count(
-                    crossAxisCount: 4,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 0.82,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
                     children: [
-                      _FeatureItem(
-                          icon: Icons.insights,
-                          label: l10n.myStats,
-                          route: '/dashboard'),
-                      _FeatureItem(
-                          icon: Icons.volunteer_activism_outlined,
-                          label: l10n.vowsTitle,
-                          route: '/vows'),
-                      _FeatureItem(
-                          icon: Icons.self_improvement,
-                          label: l10n.timerTitle,
-                          route: '/tools/timer'),
-                      _FeatureItem(
-                          icon: Icons.radio_button_checked,
-                          label: l10n.counterTitle,
-                          route: '/tools/counter'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.insights,
+                              label: l10n.myStats,
+                              onTap: () => context.push('/dashboard'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.volunteer_activism_outlined,
+                              label: l10n.vowsTitle,
+                              onTap: () => context.push('/vows'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.self_improvement,
+                              label: l10n.timerTitle,
+                              onTap: () => context.push('/tools/timer'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.radio_button_checked,
+                              label: l10n.counterTitle,
+                              onTap: () => context.push('/tools/counter'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -356,50 +375,6 @@ class _BigTile extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// 功能宫格项:大图标 + 文字(触控区 ≥48pt,适老)
-class _FeatureItem extends StatelessWidget {
-  const _FeatureItem({
-    required this.icon,
-    required this.label,
-    required this.route,
-  });
-
-  final IconData icon;
-  final String label;
-  final String route;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () => context.push(route),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: scheme.primaryContainer,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(icon, size: 28, color: scheme.onPrimaryContainer),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
       ),
     );
   }
