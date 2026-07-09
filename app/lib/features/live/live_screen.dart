@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/channels.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'live_providers.dart';
+import 'webex.dart';
 
 /// 直播(PRD §6):YouTube 开播检测 + App 内观看;Webex 固定房间一键加入;
 /// 往期回看(media_items)。匿名可用。
@@ -132,14 +134,16 @@ class LiveScreen extends ConsumerWidget {
                     FilledButton.tonalIcon(
                       icon: const Icon(Icons.login),
                       label: Text(l10n.joinWebex),
-                      // 应用内 WebView 加入(Webex 网页版);右上角可切外部打开
-                      onPressed: () => context.push(Uri(
-                        path: '/webview',
-                        queryParameters: {
-                          'url': Channels.webexJoinUrl,
-                          'title': 'Webex',
-                        },
-                      ).toString()),
+                      // 应用内加入(权限预请求 + 访客名预填)
+                      onPressed: () =>
+                          openWebexInApp(context, ref, url: Channels.webexJoinUrl),
+                    ),
+                    // 永远保留 Webex App 选项(用户定案)
+                    TextButton.icon(
+                      icon: const Icon(Icons.exit_to_app),
+                      label: Text(l10n.webexOpenApp),
+                      onPressed: () => launchUrl(Uri.parse(Channels.webexJoinUrl),
+                          mode: LaunchMode.externalApplication),
                     ),
                   ],
                 ),

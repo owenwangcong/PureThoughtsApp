@@ -1034,6 +1034,12 @@ abstract class AppLocalizations {
   /// **'加入 Webex 共修'**
   String get joinWebex;
 
+  /// No description provided for @webexOpenApp.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用 Webex App 開啟'**
+  String get webexOpenApp;
+
   /// No description provided for @webexHint.
   ///
   /// In zh_Hant, this message translates to:

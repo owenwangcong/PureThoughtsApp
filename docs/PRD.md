@@ -159,7 +159,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 - **固定频道**(v0.5.6 定案):YouTube `youtube.com/@善護念`;Webex `purethoughts.my.webex.com/join/Shanhunian`;日历活动的直播链接默认预填这两个频道。
 - **开播自动检测**(v0.5.6):`live-probe` Edge Function 探测 YouTube 频道 `/live` 端点(无需 API key)→ 开播时写 `live_streams` 表并生成全员通知(App 内通知中心即时可见;P2.1 推送接通后同链路升级系统推送);打开直播页时客户端触发探测,生产部署后 pg_cron 每 5 分钟服务端探测。**Webex 无公开状态 API**,不做自动检测:固定房间一键加入 + 日历活动预告为准。
 - **直播入口**:YouTube / Webex。
-- **播放方式**:**YouTube 内嵌播放**;**Webex 尝试内嵌,大概率降级为跳转**(Webex 会议无法可靠嵌入 webview)。
+- **播放方式**:**YouTube 内嵌播放**;**Webex 应用内 WebView 加入**(v0.5.7 定案:媒体权限桥接支持网页版通话;App 显示名尽力预填访客名,失效则手动填、WebView 会记住;**所有 Webex 入口永远保留「用 Webex App 開啟」选项**——网页版兼容性风险的兜底)。
 - **往期回看**:YouTube 存储的录制视频。
 - **讲法问答检索**:参考现有 Line 群做法,对接**已有通用 API(JSON)**,经 Edge Function 代理(隐藏上游地址、统一鉴权)—— *接口示例待用户提供后再设计*。
 - ⚠️ 大陆可达性风险见 §14。

@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/channels.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
+import '../live/webex.dart';
 import 'event_icons.dart';
 import 'events_providers.dart';
 import 'occurrence_utils.dart';
@@ -213,16 +215,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               if (o.event['webex_url'] != null) ...[
                 const SizedBox(height: 8),
-                FilledButton.tonalIcon(
-                  icon: const Icon(Icons.videocam_outlined),
-                  label: const Text('Webex'),
-                  onPressed: () => context.push(Uri(
-                    path: '/webview',
-                    queryParameters: {
-                      'url': o.event['webex_url'] as String,
-                      'title': 'Webex',
-                    },
-                  ).toString()),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        icon: const Icon(Icons.videocam_outlined),
+                        label: const Text('Webex'),
+                        onPressed: () => openWebexInApp(context, ref,
+                            url: o.event['webex_url'] as String),
+                      ),
+                    ),
+                    // 永远保留 Webex App 选项(用户定案)
+                    IconButton(
+                      tooltip: l10n.webexOpenApp,
+                      icon: const Icon(Icons.exit_to_app),
+                      onPressed: () => launchUrl(
+                          Uri.parse(o.event['webex_url'] as String),
+                          mode: LaunchMode.externalApplication),
+                    ),
+                  ],
                 ),
               ],
               if (isAdmin) ...[

@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Supabase API 访问必需(debug/profile 模板自带,release 需显式声明) -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Webex 网页版会议音视频(App 内 WebView 通话,PRD §6) -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <application
         android:label="善护念"
         android:name="${applicationName}"

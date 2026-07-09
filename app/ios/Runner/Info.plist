@@ -12,6 +12,11 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<!-- Webex 网页版会议(App 内 WebView 通话,PRD §6) -->
+	<key>NSCameraUsageDescription</key>
+	<string>用於在 Webex 會議中開啟視訊</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>用於在 Webex 會議中發言</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

@@ -156,6 +156,7 @@
   "enterLive": "进入直播",
   "openChannel": "打开频道",
   "joinWebex": "加入 Webex 共修",
+  "webexOpenApp": "用 Webex App 打开",
   "webexHint": "固定共修房间,开始时间见活动日历",
   "replaysTitle": "往期回看",
   "notifLiveStarted": "直播开始了",
