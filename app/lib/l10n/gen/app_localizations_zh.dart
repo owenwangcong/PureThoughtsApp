@@ -285,7 +285,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get categoryOther => '其他';
 
   @override
-  String get quickReport => '快捷報數(點選即報,數量可改)';
+  String get quickReport => '快捷報數(可多選,一次提交)';
 
   @override
   String get myStats => '個人統計';
@@ -812,7 +812,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get categoryOther => '其他';
 
   @override
-  String get quickReport => '快捷报数(点选即报,数量可改)';
+  String get quickReport => '快捷报数(可多选,一次提交)';
 
   @override
   String get myStats => '个人统计';
@@ -1339,7 +1339,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get categoryOther => '其他';
 
   @override
-  String get quickReport => '快捷報數(點選即報,數量可改)';
+  String get quickReport => '快捷報數(可多選,一次提交)';
 
   @override
   String get myStats => '個人統計';

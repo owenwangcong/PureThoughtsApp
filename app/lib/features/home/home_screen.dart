@@ -63,30 +63,30 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(user == null ? l10n.practiceListTitle : l10n.appTitle),
-        actions: [
-          if (user == null)
-            TextButton(
-              onPressed: () => context.push('/auth'),
-              child: Text(l10n.authSignIn),
-            )
-          else
-            _NotificationBell(onTap: () => context.push('/notifications')),
-          IconButton(
-            tooltip: l10n.calendarTitle,
-            icon: const Icon(Icons.calendar_month),
-            onPressed: () => context.push('/calendar'),
-          ),
-          IconButton(
-            tooltip: l10n.toolsTitle,
-            icon: const Icon(Icons.self_improvement),
-            onPressed: () => context.push('/tools'),
-          ),
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
+        // 登录态导航走首页功能宫格,顶栏只留通知铃(PRD v0.5.5)
+        actions: user == null
+            ? [
+                TextButton(
+                  onPressed: () => context.push('/auth'),
+                  child: Text(l10n.authSignIn),
+                ),
+                IconButton(
+                  tooltip: l10n.calendarTitle,
+                  icon: const Icon(Icons.calendar_month),
+                  onPressed: () => context.push('/calendar'),
+                ),
+                IconButton(
+                  tooltip: l10n.toolsTitle,
+                  icon: const Icon(Icons.self_improvement),
+                  onPressed: () => context.push('/tools'),
+                ),
+                IconButton(
+                  tooltip: l10n.settingsTitle,
+                  icon: const Icon(Icons.settings),
+                  onPressed: () => context.push('/settings'),
+                ),
+              ]
+            : [_NotificationBell(onTap: () => context.push('/notifications'))],
       ),
       body: user == null
           // 匿名:浏览全局功课清单(公开内容)
@@ -107,28 +107,53 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const QuickReportSection(),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.insights),
-                  title: Text(l10n.myStats),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/dashboard'),
+                const SizedBox(height: 8),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                // 功能宫格:主要功能大图标直达(PRD v0.5.5,适老导航)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 16, 8, 24),
+                  child: GridView.count(
+                    crossAxisCount: 4,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.82,
+                    children: [
+                      _FeatureItem(
+                          icon: Icons.groups,
+                          label: l10n.groupsTitle,
+                          route: '/groups'),
+                      _FeatureItem(
+                          icon: Icons.insights,
+                          label: l10n.myStats,
+                          route: '/dashboard'),
+                      _FeatureItem(
+                          icon: Icons.volunteer_activism_outlined,
+                          label: l10n.vowsTitle,
+                          route: '/vows'),
+                      _FeatureItem(
+                          icon: Icons.calendar_month,
+                          label: l10n.calendarTitle,
+                          route: '/calendar'),
+                      _FeatureItem(
+                          icon: Icons.self_improvement,
+                          label: l10n.timerTitle,
+                          route: '/tools/timer'),
+                      _FeatureItem(
+                          icon: Icons.radio_button_checked,
+                          label: l10n.counterTitle,
+                          route: '/tools/counter'),
+                      _FeatureItem(
+                          icon: Icons.notifications_outlined,
+                          label: l10n.notificationsTitle,
+                          route: '/notifications'),
+                      _FeatureItem(
+                          icon: Icons.settings_outlined,
+                          label: l10n.settingsTitle,
+                          route: '/settings'),
+                    ],
+                  ),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.volunteer_activism_outlined),
-                  title: Text(l10n.vowsTitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/vows'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.groups),
-                  title: Text(l10n.groupsTitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/groups'),
-                ),
-                const Divider(height: 1),
               ],
             ),
     );
@@ -221,6 +246,50 @@ class HomeScreen extends ConsumerWidget {
                     ],
                 ],
               ),
+    );
+  }
+}
+
+/// 功能宫格项:大图标 + 文字(触控区 ≥48pt,适老)
+class _FeatureItem extends StatelessWidget {
+  const _FeatureItem({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
+
+  final IconData icon;
+  final String label;
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => context.push(route),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(icon, size: 28, color: scheme.onPrimaryContainer),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
