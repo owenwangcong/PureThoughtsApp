@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/channels.dart';
 import '../../core/prefs.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
@@ -78,7 +79,14 @@ class HomeScreen extends ConsumerWidget {
                 IconButton(
                   tooltip: l10n.scripturesTitle,
                   icon: const Icon(Icons.menu_book_outlined),
-                  onPressed: () => context.push('/scriptures'),
+                  onPressed: () => context.push(Uri(
+                    path: '/webview',
+                    queryParameters: {
+                      'url': Channels.scripturesUrl,
+                      'title': l10n.scripturesTitle,
+                      'zoom': '1',
+                    },
+                  ).toString()),
                 ),
                 IconButton(
                   tooltip: l10n.calendarTitle,
@@ -160,7 +168,15 @@ class HomeScreen extends ConsumerWidget {
                             child: _BigTile(
                               icon: Icons.menu_book_outlined,
                               label: l10n.scripturesTitle,
-                              onTap: () => context.push('/scriptures'),
+                              // 直达经本网站,不经列表层(2026-07-09 用户定案)
+                              onTap: () => context.push(Uri(
+                                path: '/webview',
+                                queryParameters: {
+                                  'url': Channels.scripturesUrl,
+                                  'title': l10n.scripturesTitle,
+                                  'zoom': '1',
+                                },
+                              ).toString()),
                             ),
                           ),
                         ],

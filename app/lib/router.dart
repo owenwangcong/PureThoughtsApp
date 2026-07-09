@@ -18,7 +18,6 @@ import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
 import 'features/notifications/notifications_screen.dart';
-import 'features/scriptures/scriptures_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/tools/counter_screen.dart';
 import 'features/tools/timer_screen.dart';
@@ -82,9 +81,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           applyFontScale: state.uri.queryParameters['zoom'] == '1',
         ),
       ),
-      GoRoute(
-          path: '/scriptures',
-          builder: (context, state) => const ScripturesScreen()),
       GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
       GoRoute(path: '/tools/counter', builder: (context, state) => const CounterScreen()),
       GoRoute(

@@ -3,4 +3,5 @@ abstract final class Channels {
   static const youtubeChannelUrl = 'https://www.youtube.com/@善護念';
   static const youtubeLiveUrl = 'https://www.youtube.com/@善護念/live';
   static const webexJoinUrl = 'https://purethoughts.my.webex.com/join/Shanhunian';
+  static const scripturesUrl = 'https://qldazangjing.com/'; // 乾隆大藏經(E9)
 }
