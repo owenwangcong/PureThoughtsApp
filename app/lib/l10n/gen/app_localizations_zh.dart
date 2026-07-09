@@ -458,6 +458,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vowsEmptyHint => '發一個願,讓精進有方向。';
 
   @override
+  String get liveTitle => '直播';
+
+  @override
+  String get liveNow => '直播中';
+
+  @override
+  String get notLive => '目前未直播';
+
+  @override
+  String get enterLive => '進入直播';
+
+  @override
+  String get openChannel => '打開頻道';
+
+  @override
+  String get joinWebex => '加入 Webex 共修';
+
+  @override
+  String get webexHint => '固定共修房間,開始時間見活動日曆';
+
+  @override
+  String get replaysTitle => '往期回看';
+
+  @override
+  String get notifLiveStarted => '直播開始了';
+
+  @override
   String get calendarTitle => '活動日曆';
 
   @override
@@ -1003,6 +1030,33 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get vowsEmptyHint => '发一个愿,让精进有方向。';
 
   @override
+  String get liveTitle => '直播';
+
+  @override
+  String get liveNow => '直播中';
+
+  @override
+  String get notLive => '当前未直播';
+
+  @override
+  String get enterLive => '进入直播';
+
+  @override
+  String get openChannel => '打开频道';
+
+  @override
+  String get joinWebex => '加入 Webex 共修';
+
+  @override
+  String get webexHint => '固定共修房间,开始时间见活动日历';
+
+  @override
+  String get replaysTitle => '往期回看';
+
+  @override
+  String get notifLiveStarted => '直播开始了';
+
+  @override
   String get calendarTitle => '活动日历';
 
   @override
@@ -1546,6 +1600,33 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowsEmptyHint => '發一個願,讓精進有方向。';
+
+  @override
+  String get liveTitle => '直播';
+
+  @override
+  String get liveNow => '直播中';
+
+  @override
+  String get notLive => '目前未直播';
+
+  @override
+  String get enterLive => '進入直播';
+
+  @override
+  String get openChannel => '打開頻道';
+
+  @override
+  String get joinWebex => '加入 Webex 共修';
+
+  @override
+  String get webexHint => '固定共修房間,開始時間見活動日曆';
+
+  @override
+  String get replaysTitle => '往期回看';
+
+  @override
+  String get notifLiveStarted => '直播開始了';
 
   @override
   String get calendarTitle => '活動日曆';

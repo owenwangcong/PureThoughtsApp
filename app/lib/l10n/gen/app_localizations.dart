@@ -992,6 +992,60 @@ abstract class AppLocalizations {
   /// **'發一個願,讓精進有方向。'**
   String get vowsEmptyHint;
 
+  /// No description provided for @liveTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'直播'**
+  String get liveTitle;
+
+  /// No description provided for @liveNow.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'直播中'**
+  String get liveNow;
+
+  /// No description provided for @notLive.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'目前未直播'**
+  String get notLive;
+
+  /// No description provided for @enterLive.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'進入直播'**
+  String get enterLive;
+
+  /// No description provided for @openChannel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'打開頻道'**
+  String get openChannel;
+
+  /// No description provided for @joinWebex.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'加入 Webex 共修'**
+  String get joinWebex;
+
+  /// No description provided for @webexHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'固定共修房間,開始時間見活動日曆'**
+  String get webexHint;
+
+  /// No description provided for @replaysTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'往期回看'**
+  String get replaysTitle;
+
+  /// No description provided for @notifLiveStarted.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'直播開始了'**
+  String get notifLiveStarted;
+
   /// No description provided for @calendarTitle.
   ///
   /// In zh_Hant, this message translates to:

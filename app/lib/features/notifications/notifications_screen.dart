@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
@@ -58,6 +59,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           return (l10n.notifProxyLog, '$groupName · $typeName $qty $unit');
         case 'announcement':
           return (l10n.notifAnnouncement, '$groupName · ${payload['text'] ?? ''}');
+        case 'live_started':
+          return (l10n.notifLiveStarted, (payload['title'] as String?) ?? 'YouTube');
         default:
           return (
             (n['title'] as String?)?.isNotEmpty == true ? n['title'] as String : n['type'] as String,
@@ -92,10 +95,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     switch (n['type']) {
                       'proxy_log' => Icons.volunteer_activism_outlined,
                       'announcement' => Icons.campaign_outlined,
+                      'live_started' => Icons.live_tv,
                       _ => Icons.notifications_outlined,
                     },
                     color: unread ? Theme.of(context).colorScheme.primary : null,
                   ),
+                  onTap: n['type'] == 'live_started'
+                      ? () => context.push('/live')
+                      : null,
                   title: Text(
                     title,
                     style: unread ? const TextStyle(fontWeight: FontWeight.bold) : null,

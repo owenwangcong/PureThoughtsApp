@@ -8,7 +8,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(45);
+select plan(47);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -194,6 +194,11 @@ select throws_ok($$ select count(*) from public.practice_logs $$,
   '42501', null, '匿名无权访问报数表(未授 GRANT,硬拒绝)');
 select throws_ok($$ select count(*) from public.notifications $$,
   '42501', null, '匿名无权访问通知表(未授 GRANT,硬拒绝)');
+select lives_ok($$ select count(*) from public.live_streams $$,
+  '匿名可读直播状态(公开内容,P3.1)');
+select throws_ok($$
+  insert into public.live_streams (platform, url) values ('youtube', 'x')
+$$, '42501', null, '匿名不能写直播状态(仅服务端)');
 
 -- ---------------------------------------------------------------- 修改/删除权限
 -- B(报数人)可改自己的数量/备注;直接置 deleted_at 被拒(须走 RPC)
