@@ -479,6 +479,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get joinWebex => '加入 Webex 共修';
 
   @override
+  String get webexOpenApp => '用 Webex App 開啟';
+
+  @override
   String get webexHint => '固定共修房間,開始時間見活動日曆';
 
   @override
@@ -1090,6 +1093,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get joinWebex => '加入 Webex 共修';
 
   @override
+  String get webexOpenApp => '用 Webex App 打开';
+
+  @override
   String get webexHint => '固定共修房间,开始时间见活动日历';
 
   @override
@@ -1699,6 +1705,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get joinWebex => '加入 Webex 共修';
+
+  @override
+  String get webexOpenApp => '用 Webex App 開啟';
 
   @override
   String get webexHint => '固定共修房間,開始時間見活動日曆';

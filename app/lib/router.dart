@@ -83,6 +83,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           url: state.uri.queryParameters['url']!,
           title: state.uri.queryParameters['title'],
           applyFontScale: state.uri.queryParameters['zoom'] == '1',
+          prefillName: state.uri.queryParameters['name'],
         ),
       ),
       GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
