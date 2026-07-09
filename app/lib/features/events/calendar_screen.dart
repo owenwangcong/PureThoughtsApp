@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/channels.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import 'events_providers.dart';
@@ -187,8 +188,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final l10n = AppLocalizations.of(context);
     final title = TextEditingController();
     final content = TextEditingController();
-    final youtube = TextEditingController();
-    final webex = TextEditingController();
+    // 默认预填固定频道(PRD v0.5.6 §6),不需要时清空即可
+    final youtube = TextEditingController(text: Channels.youtubeLiveUrl);
+    final webex = TextEditingController(text: Channels.webexJoinUrl);
     var type = 'group_practice';
     var weekly = true;
     var duration = 90;

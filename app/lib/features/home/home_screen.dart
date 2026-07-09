@@ -71,6 +71,11 @@ class HomeScreen extends ConsumerWidget {
                   child: Text(l10n.authSignIn),
                 ),
                 IconButton(
+                  tooltip: l10n.liveTitle,
+                  icon: const Icon(Icons.live_tv),
+                  onPressed: () => context.push('/live'),
+                ),
+                IconButton(
                   tooltip: l10n.calendarTitle,
                   icon: const Icon(Icons.calendar_month),
                   onPressed: () => context.push('/calendar'),
@@ -136,6 +141,14 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
+                      Expanded(
+                        child: _BigTile(
+                          icon: Icons.live_tv,
+                          label: l10n.liveTitle,
+                          onTap: () => context.push('/live'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: _BigTile(
                           icon: Icons.groups,

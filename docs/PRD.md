@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.5(首页功能宫格 + 快捷报数多选) · 来源:`initial.md` + 九轮需求澄清
+> 版本:v0.5.6(直播频道定案与自动开播检测) · 来源:`initial.md` + 十轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -154,6 +154,8 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 
 ## 6. Epic 3 · 在线视频与往期录制
 
+- **固定频道**(v0.5.6 定案):YouTube `youtube.com/@善護念`;Webex `purethoughts.my.webex.com/join/Shanhunian`;日历活动的直播链接默认预填这两个频道。
+- **开播自动检测**(v0.5.6):`live-probe` Edge Function 探测 YouTube 频道 `/live` 端点(无需 API key)→ 开播时写 `live_streams` 表并生成全员通知(App 内通知中心即时可见;P2.1 推送接通后同链路升级系统推送);打开直播页时客户端触发探测,生产部署后 pg_cron 每 5 分钟服务端探测。**Webex 无公开状态 API**,不做自动检测:固定房间一键加入 + 日历活动预告为准。
 - **直播入口**:YouTube / Webex。
 - **播放方式**:**YouTube 内嵌播放**;**Webex 尝试内嵌,大概率降级为跳转**(Webex 会议无法可靠嵌入 webview)。
 - **往期回看**:YouTube 存储的录制视频。

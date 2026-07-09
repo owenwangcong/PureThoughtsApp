@@ -11,6 +11,8 @@ import 'features/dashboard/my_dashboard_screen.dart';
 import 'features/groups/group_detail_screen.dart';
 import 'features/groups/groups_screen.dart';
 import 'features/legal/privacy_screen.dart';
+import 'features/live/live_screen.dart';
+import 'features/live/video_player_screen.dart';
 import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
@@ -64,6 +66,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/vows', builder: (context, state) => const VowsScreen()),
       GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
       GoRoute(path: '/calendar', builder: (context, state) => const CalendarScreen()),
+      GoRoute(path: '/live', builder: (context, state) => const LiveScreen()),
+      GoRoute(
+        path: '/watch/:vid',
+        builder: (context, state) =>
+            VideoPlayerScreen(videoId: state.pathParameters['vid']!),
+      ),
       GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
       GoRoute(path: '/tools/counter', builder: (context, state) => const CounterScreen()),
       GoRoute(
