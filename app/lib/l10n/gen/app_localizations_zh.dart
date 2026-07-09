@@ -246,6 +246,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get logSubmitted => '已報數,隨喜讚歎!';
 
   @override
+  String get offlineQueued => '網絡不通,已離線暫存,連網後自動補傳';
+
+  @override
+  String get offlineFlushed => '已補傳離線報數';
+
+  @override
   String get quantityInvalid => '請輸入正確的數量';
 
   @override
@@ -860,6 +866,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get logSubmitted => '已报数,随喜赞叹!';
 
   @override
+  String get offlineQueued => '网络不通,已离线暂存,联网后自动补传';
+
+  @override
+  String get offlineFlushed => '已补传离线报数';
+
+  @override
   String get quantityInvalid => '请输入正确的数量';
 
   @override
@@ -1472,6 +1484,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get logSubmitted => '已報數,隨喜讚歎!';
+
+  @override
+  String get offlineQueued => '網絡不通,已離線暫存,連網後自動補傳';
+
+  @override
+  String get offlineFlushed => '已補傳離線報數';
 
   @override
   String get quantityInvalid => '請輸入正確的數量';

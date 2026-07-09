@@ -79,6 +79,8 @@
   "noteLabel": "备注(选填;补报可注明实际日期)",
   "submitLog": "提交报数",
   "logSubmitted": "已报数,随喜赞叹!",
+  "offlineQueued": "网络不通,已离线暂存,联网后自动补传",
+  "offlineFlushed": "已补传离线报数",
   "quantityInvalid": "请输入正确的数量",
   "edit": "编辑",
   "delete": "删除",

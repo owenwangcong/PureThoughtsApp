@@ -8,6 +8,7 @@ import '../../core/settings.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../groups/groups_providers.dart';
+import '../logs/offline_queue.dart';
 
 /// 工具 → 报数桥(PRD §9):计时/计数结果一键转为报数。
 /// 弹窗选群(默认上次报数的群)与功课(默认给定分类的全局项),确认即写入。
@@ -101,13 +102,19 @@ Future<void> toolResultToLog(
   if (ok != true) return;
 
   try {
-    await Supabase.instance.client.from('practice_logs').insert({
-      'group_id': groupId,
-      'reporter_id': user.id,
-      'practice_type_id': typeId,
-      'quantity': quantity,
-      'local_date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-    });
+    final result = await submitPracticeLogs(ref, [
+      {
+        'group_id': groupId,
+        'reporter_id': user.id,
+        'practice_type_id': typeId,
+        'quantity': quantity,
+        'local_date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      }
+    ]);
+    if (result == SubmitResult.queued) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.offlineQueued)));
+      return;
+    }
     ref.invalidate(myRecentSelfLogsProvider);
     ref.invalidate(myDailyStatsProvider);
     ref.invalidate(myTotalsProvider);

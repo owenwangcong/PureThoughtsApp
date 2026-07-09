@@ -79,6 +79,8 @@
   "noteLabel": "備註(選填;補報可註明實際日期)",
   "submitLog": "提交報數",
   "logSubmitted": "已報數,隨喜讚歎!",
+  "offlineQueued": "網絡不通,已離線暫存,連網後自動補傳",
+  "offlineFlushed": "已補傳離線報數",
   "quantityInvalid": "請輸入正確的數量",
   "edit": "編輯",
   "delete": "刪除",

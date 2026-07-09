@@ -572,6 +572,18 @@ abstract class AppLocalizations {
   /// **'已報數,隨喜讚歎!'**
   String get logSubmitted;
 
+  /// No description provided for @offlineQueued.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'網絡不通,已離線暫存,連網後自動補傳'**
+  String get offlineQueued;
+
+  /// No description provided for @offlineFlushed.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已補傳離線報數'**
+  String get offlineFlushed;
+
   /// No description provided for @quantityInvalid.
   ///
   /// In zh_Hant, this message translates to:
