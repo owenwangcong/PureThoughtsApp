@@ -6,13 +6,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../core/channels.dart';
+import '../../core/settings.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
+import 'event_icons.dart';
 import 'events_providers.dart';
 import 'occurrence_utils.dart';
 
-/// 活動日曆(PRD §5):循环活动展开 + 单次修改;时间按用户本地时区显示;
-/// 匿名可浏览;管理员可建活动/取消单次。
+/// 活動日曆(PRD v0.5.7 §5):月视图 + 当日列表 + **未來活動列表**;
+/// 动态事件类型(不同图标);管理员增删改活动/取消单次/管理类型;
+/// 任何变更由 DB 触发器自动生成全员通知;时间按本地时区显示;匿名可浏览。
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
@@ -24,11 +28,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   var _focused = DateTime.now();
   DateTime? _selected;
 
+  Map<String, Map<String, dynamic>> get _typeById => {
+        for (final t in ref.read(eventTypesProvider).value ?? const [])
+          t['id'] as String: t,
+      };
+
+  String _typeName(Map<String, dynamic>? t, Locale locale) => t == null
+      ? ''
+      : (locale.scriptCode == 'Hans' ? t['name_hans'] : t['name_hant']) as String;
+
+  void _invalidateAll() {
+    ref.invalidate(eventsProvider);
+    ref.invalidate(eventOverridesProvider);
+    ref.invalidate(eventTypesProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final events = ref.watch(eventsProvider);
     final overrides = ref.watch(eventOverridesProvider);
+    ref.watch(eventTypesProvider);
     final profile = ref.watch(myProfileProvider);
     final isAdmin = profile.value?['is_app_admin'] == true;
 
@@ -47,20 +67,37 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final selected = _selected ?? DateTime.now();
     final dayList = byDay[dateKeyOf(selected)] ?? const [];
 
+    // 未來活動:自今日起 90 天内的前 10 场(不含已取消)
+    final now = DateTime.now();
+    final upcoming = expandOccurrences(
+      events: events.value ?? const [],
+      overrides: overrides.value ?? const [],
+      rangeStart: now,
+      rangeEnd: now.add(const Duration(days: 90)),
+    ).where((o) => !o.cancelled && o.startAt.isAfter(now)).take(10).toList();
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calendarTitle)),
+      appBar: AppBar(
+        title: Text(l10n.calendarTitle),
+        actions: [
+          if (isAdmin)
+            IconButton(
+              tooltip: l10n.manageEventTypes,
+              icon: const Icon(Icons.category_outlined),
+              onPressed: () => context.push('/calendar/types'),
+            ),
+        ],
+      ),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
-              onPressed: _editEvent,
+              onPressed: () => _editEvent(),
               child: const Icon(Icons.add),
             )
           : null,
       body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(eventsProvider);
-          ref.invalidate(eventOverridesProvider);
-        },
+        onRefresh: () async => _invalidateAll(),
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 96),
           children: [
             TableCalendar<Occurrence>(
               locale: Localizations.localeOf(context).toString(),
@@ -71,6 +108,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               eventLoader: (day) => byDay[dateKeyOf(day)] ?? const [],
               startingDayOfWeek: StartingDayOfWeek.monday,
               availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+              calendarStyle: const CalendarStyle(markersMaxCount: 4),
               onDaySelected: (sel, foc) => setState(() {
                 _selected = sel;
                 _focused = foc;
@@ -80,30 +118,39 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             const Divider(),
             if (dayList.isEmpty)
               Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(16),
                 child: Center(child: Text(l10n.emptyList)),
               )
             else
               for (final o in dayList) _occurrenceTile(context, o, isAdmin),
+
+            // ---- 未來活動 ----
+            if (upcoming.isNotEmpty) ...[
+              SectionHeader(l10n.upcomingTitle),
+              for (final o in upcoming)
+                _occurrenceTile(context, o, isAdmin, showDate: true),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _occurrenceTile(BuildContext context, Occurrence o, bool isAdmin) {
+  Widget _occurrenceTile(BuildContext context, Occurrence o, bool isAdmin,
+      {bool showDate = false}) {
     final l10n = AppLocalizations.of(context);
-    final time = DateFormat('HH:mm').format(o.startAt);
+    final locale = ref.watch(localeProvider);
+    final t = _typeById[o.event['event_type_id']];
+    final time = showDate
+        ? DateFormat('MM-dd (E) HH:mm', Localizations.localeOf(context).toString())
+            .format(o.startAt)
+        : DateFormat('HH:mm').format(o.startAt);
     return ListTile(
       leading: Icon(
-        switch (o.event['type']) {
-          'group_practice' => Icons.groups,
-          'meditation' => Icons.self_improvement,
-          'dharma_talk' => Icons.record_voice_over,
-          'dharma_assembly' => Icons.temple_buddhist,
-          _ => Icons.event,
-        },
-        color: o.cancelled ? Theme.of(context).disabledColor : null,
+        eventIcon(t?['icon'] as String?),
+        color: o.cancelled
+            ? Theme.of(context).disabledColor
+            : Theme.of(context).colorScheme.primary,
       ),
       title: Text(
         o.event['title'] as String,
@@ -113,7 +160,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 color: Theme.of(context).disabledColor)
             : null,
       ),
-      subtitle: Text(o.cancelled ? l10n.eventCancelled : time),
+      subtitle: Text(
+        '${_typeName(t, locale)} · ${o.cancelled ? l10n.eventCancelled : time}',
+      ),
       onTap: () => _showDetail(context, o, isAdmin),
     );
   }
@@ -123,7 +172,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           child: Column(
@@ -149,7 +198,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 FilledButton.icon(
                   icon: const Icon(Icons.play_circle_outline),
                   label: const Text('YouTube'),
-                  // App 内观看:watch 链接进内嵌播放器,其余进应用内浏览器
                   onPressed: () {
                     final url = o.event['youtube_url'] as String;
                     final id = RegExp(r'(?:v=|youtu\.be/|/live/)([\w-]{11})')
@@ -177,19 +225,67 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   ).toString()),
                 ),
               ],
-              if (isAdmin && !o.cancelled) ...[
-                const SizedBox(height: 16),
-                OutlinedButton(
+              if (isAdmin) ...[
+                const Divider(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          _editEvent(existing: o.event);
+                        },
+                        child: Text(l10n.editEvent),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (!o.cancelled)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await Supabase.instance.client
+                                .from('event_overrides')
+                                .upsert({
+                              'event_id': o.event['id'],
+                              'occurrence_date': o.dateKey,
+                              'patch': {'cancelled': true},
+                            }, onConflict: 'event_id,occurrence_date');
+                            _invalidateAll();
+                            if (sheetContext.mounted) Navigator.pop(sheetContext);
+                          },
+                          child: Text(l10n.cancelOccurrence),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error),
                   onPressed: () async {
-                    await Supabase.instance.client.from('event_overrides').upsert({
-                      'event_id': o.event['id'],
-                      'occurrence_date': o.dateKey,
-                      'patch': {'cancelled': true},
-                    }, onConflict: 'event_id,occurrence_date');
-                    ref.invalidate(eventOverridesProvider);
-                    if (context.mounted) Navigator.pop(context);
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (dctx) => AlertDialog(
+                        content: Text(l10n.confirmDeleteEvent),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(dctx, false),
+                              child: Text(l10n.cancel)),
+                          FilledButton(
+                              onPressed: () => Navigator.pop(dctx, true),
+                              child: Text(l10n.submit)),
+                        ],
+                      ),
+                    );
+                    if (ok != true) return;
+                    await Supabase.instance.client
+                        .from('events')
+                        .delete()
+                        .eq('id', o.event['id'] as String);
+                    _invalidateAll();
+                    if (sheetContext.mounted) Navigator.pop(sheetContext);
                   },
-                  child: Text(l10n.cancelOccurrence),
+                  child: Text(l10n.deleteEvent),
                 ),
               ],
             ],
@@ -199,24 +295,41 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  /// 管理员创建活动(标题/类型/时间/时长/每周循环/连接/说明)
-  Future<void> _editEvent() async {
+  /// 管理员新增/编辑活动(existing 非空 = 编辑)
+  Future<void> _editEvent({Map<String, dynamic>? existing}) async {
     final l10n = AppLocalizations.of(context);
-    final title = TextEditingController();
-    final content = TextEditingController();
-    // 默认预填固定频道(PRD v0.5.6 §6),不需要时清空即可
-    final youtube = TextEditingController(text: Channels.youtubeLiveUrl);
-    final webex = TextEditingController(text: Channels.webexJoinUrl);
-    var type = 'group_practice';
-    var weekly = true;
-    var duration = 90;
-    var when = DateTime.now().add(const Duration(days: 1));
+    final locale = ref.read(localeProvider);
+    final types = (ref.read(eventTypesProvider).value ?? const [])
+        .where((t) =>
+            t['active'] == true || t['id'] == existing?['event_type_id'])
+        .toList();
+    if (types.isEmpty) return;
+
+    final title = TextEditingController(text: existing?['title'] as String? ?? '');
+    final content =
+        TextEditingController(text: existing?['content'] as String? ?? '');
+    final youtube = TextEditingController(
+        text: existing == null
+            ? Channels.youtubeLiveUrl
+            : (existing['youtube_url'] as String? ?? ''));
+    final webex = TextEditingController(
+        text: existing == null
+            ? Channels.webexJoinUrl
+            : (existing['webex_url'] as String? ?? ''));
+    var typeId = existing?['event_type_id'] as String? ?? types.first['id'] as String;
+    var weekly = existing == null
+        ? true
+        : (existing['recurrence_rule'] as String?)?.isNotEmpty == true;
+    var when = existing == null
+        ? DateTime.now().add(const Duration(days: 1))
+        : DateTime.parse(existing['start_at'] as String).toLocal();
+    final duration = existing?['duration_minutes'] as int? ?? 90;
 
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(l10n.createEvent),
+          title: Text(existing == null ? l10n.createEvent : l10n.editEvent),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -228,19 +341,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: type,
+                  value: typeId,
                   decoration: InputDecoration(labelText: l10n.categoryTitle),
                   items: [
-                    for (final t in const [
-                      'group_practice',
-                      'meditation',
-                      'dharma_talk',
-                      'dharma_assembly',
-                      'other'
-                    ])
-                      DropdownMenuItem(value: t, child: Text(_eventTypeLabel(l10n, t))),
+                    for (final t in types)
+                      DropdownMenuItem(
+                        value: t['id'] as String,
+                        child: Row(
+                          children: [
+                            Icon(eventIcon(t['icon'] as String?), size: 20),
+                            const SizedBox(width: 8),
+                            Text(_typeName(t, locale)),
+                          ],
+                        ),
+                      ),
                   ],
-                  onChanged: (v) => setState(() => type = v!),
+                  onChanged: (v) => setState(() => typeId = v!),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
@@ -250,7 +366,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     final d = await showDatePicker(
                       context: context,
                       initialDate: when,
-                      firstDate: DateTime.now(),
+                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                     );
                     if (d == null || !context.mounted) return;
@@ -298,29 +414,31 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     if (ok != true || title.text.trim().isEmpty || !mounted) return;
 
     final messenger = ScaffoldMessenger.of(context);
+    final payload = {
+      'title': title.text.trim(),
+      'event_type_id': typeId,
+      'start_at': when.toUtc().toIso8601String(),
+      'duration_minutes': duration,
+      'recurrence_rule': weekly ? 'FREQ=WEEKLY' : null,
+      'youtube_url': youtube.text.trim().isEmpty ? null : youtube.text.trim(),
+      'webex_url': webex.text.trim().isEmpty ? null : webex.text.trim(),
+      'content': content.text.trim().isEmpty ? null : content.text.trim(),
+    };
     try {
-      await Supabase.instance.client.from('events').insert({
-        'title': title.text.trim(),
-        'type': type,
-        'start_at': when.toUtc().toIso8601String(),
-        'duration_minutes': duration,
-        if (weekly) 'recurrence_rule': 'FREQ=WEEKLY',
-        if (youtube.text.trim().isNotEmpty) 'youtube_url': youtube.text.trim(),
-        if (webex.text.trim().isNotEmpty) 'webex_url': webex.text.trim(),
-        if (content.text.trim().isNotEmpty) 'content': content.text.trim(),
-        'created_by': Supabase.instance.client.auth.currentUser!.id,
-      });
-      ref.invalidate(eventsProvider);
+      if (existing == null) {
+        await Supabase.instance.client.from('events').insert({
+          ...payload,
+          'created_by': Supabase.instance.client.auth.currentUser!.id,
+        });
+      } else {
+        await Supabase.instance.client
+            .from('events')
+            .update(payload)
+            .eq('id', existing['id'] as String);
+      }
+      _invalidateAll();
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
     }
   }
 }
-
-String _eventTypeLabel(AppLocalizations l10n, String type) => switch (type) {
-      'group_practice' => l10n.eventTypePractice,
-      'meditation' => l10n.eventTypeMeditation,
-      'dharma_talk' => l10n.eventTypeTalk,
-      'dharma_assembly' => l10n.eventTypeAssembly,
-      _ => l10n.categoryOther,
-    };

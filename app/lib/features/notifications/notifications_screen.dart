@@ -61,6 +61,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           return (l10n.notifAnnouncement, '$groupName · ${payload['text'] ?? ''}');
         case 'live_started':
           return (l10n.notifLiveStarted, (payload['title'] as String?) ?? 'YouTube');
+        case 'event_changed':
+          final word = switch (payload['action']) {
+            'created' => l10n.actCreated,
+            'updated' => l10n.actUpdated,
+            'deleted' => l10n.actDeleted,
+            'occurrence_cancelled' => l10n.actOccCancelled,
+            _ => l10n.actOccChanged,
+          };
+          return (l10n.notifEventChanged, '$word · ${payload['title'] ?? ''}');
         default:
           return (
             (n['title'] as String?)?.isNotEmpty == true ? n['title'] as String : n['type'] as String,
@@ -96,13 +105,16 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       'proxy_log' => Icons.volunteer_activism_outlined,
                       'announcement' => Icons.campaign_outlined,
                       'live_started' => Icons.live_tv,
+                      'event_changed' => Icons.event_note,
                       _ => Icons.notifications_outlined,
                     },
                     color: unread ? Theme.of(context).colorScheme.primary : null,
                   ),
-                  onTap: n['type'] == 'live_started'
-                      ? () => context.push('/live')
-                      : null,
+                  onTap: switch (n['type']) {
+                    'live_started' => () => context.push('/live'),
+                    'event_changed' => () => context.push('/calendar'),
+                    _ => null,
+                  },
                   title: Text(
                     title,
                     style: unread ? const TextStyle(fontWeight: FontWeight.bold) : null,

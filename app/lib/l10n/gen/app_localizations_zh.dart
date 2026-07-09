@@ -506,16 +506,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cancelOccurrence => '取消本次活動';
 
   @override
-  String get eventTypePractice => '共修';
+  String get upcomingTitle => '未來活動';
 
   @override
-  String get eventTypeMeditation => '打坐';
+  String get manageEventTypes => '事件類型管理';
 
   @override
-  String get eventTypeTalk => '講法';
+  String get editEvent => '編輯活動';
 
   @override
-  String get eventTypeAssembly => '法會';
+  String get deleteEvent => '刪除活動';
+
+  @override
+  String get confirmDeleteEvent => '確定刪除此活動?所有重複場次將一併移除,並通知全體用戶。';
+
+  @override
+  String get typeNameHant => '名稱(繁體)';
+
+  @override
+  String get typeNameHans => '名稱(簡體)';
+
+  @override
+  String get iconLabel => '圖標';
+
+  @override
+  String get activeLabel => '啟用';
+
+  @override
+  String get deleteTypeBlocked => '該類型已被活動使用,無法刪除;可改為停用。';
+
+  @override
+  String get notifEventChanged => '活動異動';
+
+  @override
+  String get actCreated => '新增';
+
+  @override
+  String get actUpdated => '更新';
+
+  @override
+  String get actDeleted => '已取消';
+
+  @override
+  String get actOccCancelled => '單次取消';
+
+  @override
+  String get actOccChanged => '單次改期';
 
   @override
   String get toolsTitle => '工具';
@@ -1081,16 +1117,52 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get cancelOccurrence => '取消本次活动';
 
   @override
-  String get eventTypePractice => '共修';
+  String get upcomingTitle => '未来活动';
 
   @override
-  String get eventTypeMeditation => '打坐';
+  String get manageEventTypes => '事件类型管理';
 
   @override
-  String get eventTypeTalk => '讲法';
+  String get editEvent => '编辑活动';
 
   @override
-  String get eventTypeAssembly => '法会';
+  String get deleteEvent => '删除活动';
+
+  @override
+  String get confirmDeleteEvent => '确定删除此活动?所有重复场次将一并移除,并通知全体用户。';
+
+  @override
+  String get typeNameHant => '名称(繁体)';
+
+  @override
+  String get typeNameHans => '名称(简体)';
+
+  @override
+  String get iconLabel => '图标';
+
+  @override
+  String get activeLabel => '启用';
+
+  @override
+  String get deleteTypeBlocked => '该类型已被活动使用,无法删除;可改为停用。';
+
+  @override
+  String get notifEventChanged => '活动变动';
+
+  @override
+  String get actCreated => '新增';
+
+  @override
+  String get actUpdated => '更新';
+
+  @override
+  String get actDeleted => '已取消';
+
+  @override
+  String get actOccCancelled => '单次取消';
+
+  @override
+  String get actOccChanged => '单次改期';
 
   @override
   String get toolsTitle => '工具';
@@ -1656,16 +1728,52 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get cancelOccurrence => '取消本次活動';
 
   @override
-  String get eventTypePractice => '共修';
+  String get upcomingTitle => '未來活動';
 
   @override
-  String get eventTypeMeditation => '打坐';
+  String get manageEventTypes => '事件類型管理';
 
   @override
-  String get eventTypeTalk => '講法';
+  String get editEvent => '編輯活動';
 
   @override
-  String get eventTypeAssembly => '法會';
+  String get deleteEvent => '刪除活動';
+
+  @override
+  String get confirmDeleteEvent => '確定刪除此活動?所有重複場次將一併移除,並通知全體用戶。';
+
+  @override
+  String get typeNameHant => '名稱(繁體)';
+
+  @override
+  String get typeNameHans => '名稱(簡體)';
+
+  @override
+  String get iconLabel => '圖標';
+
+  @override
+  String get activeLabel => '啟用';
+
+  @override
+  String get deleteTypeBlocked => '該類型已被活動使用,無法刪除;可改為停用。';
+
+  @override
+  String get notifEventChanged => '活動異動';
+
+  @override
+  String get actCreated => '新增';
+
+  @override
+  String get actUpdated => '更新';
+
+  @override
+  String get actDeleted => '已取消';
+
+  @override
+  String get actOccCancelled => '單次取消';
+
+  @override
+  String get actOccChanged => '單次改期';
 
   @override
   String get toolsTitle => '工具';

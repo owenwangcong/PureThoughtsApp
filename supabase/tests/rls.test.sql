@@ -8,7 +8,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(47);
+select plan(49);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -255,6 +255,27 @@ select throws_ok($$
   update public.profiles set is_app_admin = true
   where id = '00000000-0000-0000-0000-00000000000b'
 $$, 'P0001', 'not allowed to change admin/ban fields', '用户不能自封管理员');
+
+-- ---------------------------------------------------------------- 活动变更通知(v0.5.7)
+select tests_logout();
+insert into public.events (title, event_type_id, start_at)
+values ('測試活動通知',
+        (select id from public.event_types where name_hans = '共修'),
+        now() + interval '1 day');
+update public.events set title = '測試活動通知(改)' where title = '測試活動通知';
+select tests_login('00000000-0000-0000-0000-00000000000c');
+select is(
+  (select count(*)::int from public.notifications
+   where type = 'event_changed' and payload->>'action' = 'created'
+     and payload->>'title' = '測試活動通知'),
+  1, '新增活动生成全员通知');
+select is(
+  (select count(*)::int from public.notifications
+   where type = 'event_changed' and payload->>'action' = 'updated'
+     and payload->>'title' = '測試活動通知(改)'),
+  1, '修改活动生成全员通知');
+select tests_logout();
+select tests_login('00000000-0000-0000-0000-00000000000a');
 
 -- ---------------------------------------------------------------- 群生命周期(P1.4)
 -- 群主 A 不能直接退群(须先转让)
