@@ -30,4 +30,6 @@ supabase/functions/    Edge Functions(待创建)
 
 ## 当前状态
 
-需求定稿(PRD v0.5.1),代码尚未开工。执行按 [`docs/PLAN.md`](docs/PLAN.md) 推进:当前处于 **P0 基础设施**(自托管 Supabase 部署 + DB schema + Flutter 骨架),进度见 PLAN §1 总览。
+**功能开发基本完成**(PRD v0.5.8):MVP 核心闭环(群/报数/统计/发愿/合规)、通知中心、活动日历(动态类型+变更通知)、工具(计时/计数)、直播(YouTube 开播检测+App 内播放)、Webex 应用内会议、在线经本、宣纸+古铜金双主题。本地开发栈 + 真机验证全绿(Flutter 33 项 + pgTAP 49 项测试)。
+
+**待外部依赖**(PLAN §2):生产服务器(E1)、Apple 开发者账号(E3)、Firebase(E4)、发信服务(E5)、Codemagic 配置(E13)——解锁生产部署、推送、TestFlight 与分发。进度详见 [`docs/PLAN.md`](docs/PLAN.md) §1。

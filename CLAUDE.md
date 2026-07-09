@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 事实来源(每次会话先读)
 
-- **需求**:`docs/PRD.md`(当前 v0.5.1)是唯一需求事实来源,已五轮澄清定稿。改需求先改 PRD,再动代码。
+- **需求**:`docs/PRD.md`(当前 v0.5.8)是唯一需求事实来源。改需求先改 PRD,再动代码。
 - **执行计划与进度**:`docs/PLAN.md` 是唯一执行事实来源。**每次会话开工先读其 §1 进度总览**,从当前 Phase 按编号领取任务;完成即勾选并更新总览计数;Phase 需通过 DoD 才能进入下一个;阻塞标 ⛔ 并登记 PLAN §7。**新任务必须先写入 PLAN(需求性变更还要先进 PRD)再实现。**
 - `initial.md` 是最初的原始需求,仅作历史参考,与 PRD 冲突时以 PRD 为准。
 
@@ -27,6 +27,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **UGC 举报/拉黑**(MVP,上架硬性要求)。
 - **计数器只用屏幕按钮**(不用音量键,避免 iOS 拒审);念诵音频从内容方 HTTPS endpoint 下载(不放 Supabase Storage)。
 - 语言:UI 维护 `zh_Hant` / `zh_Hans` 双语文案,**默认繁体**。
+- **功课项必须具体到经名**(v0.5.2):經/咒/懺是分类(practice_types.category),不能报"诵经 2 部"。
+- **视觉基调**(v0.5.4):宣纸暖白 + 古铜金 `#8A6D3B` 双主题(`app_theme.dart`),深色无纯黑;骨架屏/引导空态/错误重试统一组件(`core/widgets/async_states.dart`)。
+- **未登录界面与登录一致**(v0.5.8):账号类功能点击跳登录;直播/經本/日曆/工具/設定匿名可用。
+- **直播**(v0.5.6/7):YouTube 开播判定以 `isLiveNow` 为准(`live-probe` 函数);Webex 应用内加入 + **永远保留 Webex App 选项**;固定频道常量在 `core/channels.dart`(与 Edge Function 内保持一致)。
 
 ## 架构要点
 
