@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../groups/groups_providers.dart';
@@ -68,11 +69,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.notificationsTitle)),
       body: notifications.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.loadFailed)),
+        loading: () => const SkeletonList(),
+        error: (_, _) =>
+            ErrorRetry(onRetry: () => ref.invalidate(myNotificationsProvider)),
         data: (list) {
           WidgetsBinding.instance.addPostFrameCallback((_) => _markAllRead(list));
-          if (list.isEmpty) return Center(child: Text(l10n.emptyList));
+          if (list.isEmpty) {
+            return EmptyState(
+                icon: Icons.notifications_none_outlined, title: l10n.emptyList);
+          }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(myNotificationsProvider),
             child: ListView.separated(

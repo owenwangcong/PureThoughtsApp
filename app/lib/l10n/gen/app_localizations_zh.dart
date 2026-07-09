@@ -419,6 +419,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vowCongrats => '隨喜讚歎!發願圓滿';
 
   @override
+  String get themeTitle => '外觀';
+
+  @override
+  String get themeSystem => '跟隨系統';
+
+  @override
+  String get themeLight => '淺色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
+  String get groupsEmptyHint => '輸入群 ID 申請加入,或建立新群組,與同修一起精進。';
+
+  @override
+  String get logsEmptyHint => '本群還沒有報數,點右下角「報數」開始。';
+
+  @override
+  String get vowsEmptyHint => '發一個願,讓精進有方向。';
+
+  @override
   String get calendarTitle => '活動日曆';
 
   @override
@@ -925,6 +946,27 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get vowCongrats => '随喜赞叹!发愿圆满';
 
   @override
+  String get themeTitle => '外观';
+
+  @override
+  String get themeSystem => '跟随系统';
+
+  @override
+  String get themeLight => '浅色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
+  String get groupsEmptyHint => '输入群 ID 申请加入,或创建新群组,与同修一起精进。';
+
+  @override
+  String get logsEmptyHint => '本群还没有报数,点右下角「报数」开始。';
+
+  @override
+  String get vowsEmptyHint => '发一个愿,让精进有方向。';
+
+  @override
   String get calendarTitle => '活动日历';
 
   @override
@@ -1429,6 +1471,27 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get themeTitle => '外觀';
+
+  @override
+  String get themeSystem => '跟隨系統';
+
+  @override
+  String get themeLight => '淺色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
+  String get groupsEmptyHint => '輸入群 ID 申請加入,或建立新群組,與同修一起精進。';
+
+  @override
+  String get logsEmptyHint => '本群還沒有報數,點右下角「報數」開始。';
+
+  @override
+  String get vowsEmptyHint => '發一個願,讓精進有方向。';
 
   @override
   String get calendarTitle => '活動日曆';

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../vows/vows_providers.dart';
 import 'dashboard_providers.dart';
@@ -51,8 +52,9 @@ class _MyDashboardScreenState extends ConsumerState<MyDashboardScreen> {
           ref.invalidate(myTotalsProvider);
         },
         child: daily.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(child: Text(l10n.loadFailed)),
+          loading: () => const SkeletonList(rows: 5),
+          error: (_, _) =>
+              ErrorRetry(onRetry: () => ref.invalidate(myDailyStatsProvider)),
           data: (rows) {
             final streak =
                 calcStreak(rows.map((r) => r['local_date'] as String), DateTime.now());

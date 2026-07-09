@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../groups/groups_providers.dart';
@@ -109,8 +110,9 @@ class GroupLogsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.logsTitle)),
       body: logs.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.loadFailed)),
+        loading: () => const SkeletonList(),
+        error: (_, _) =>
+            ErrorRetry(onRetry: () => ref.invalidate(groupLogsProvider(groupId))),
         data: (raw) {
           // 已拉黑用户的报数不展示(PRD §10.2)
           final blocks = ref.watch(myBlocksProvider).value ?? const <String>{};
@@ -119,7 +121,13 @@ class GroupLogsScreen extends ConsumerWidget {
                   !blocks.contains(log['reporter_id']) &&
                   !blocks.contains(log['subject_user_id']))
               .toList();
-          if (list.isEmpty) return Center(child: Text(l10n.emptyList));
+          if (list.isEmpty) {
+            return EmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: l10n.emptyList,
+              hint: l10n.logsEmptyHint,
+            );
+          }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(groupLogsProvider(groupId)),
             child: ListView.separated(
