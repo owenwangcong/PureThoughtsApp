@@ -653,7 +653,7 @@ abstract class AppLocalizations {
   /// No description provided for @quickReport.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'快捷報數(點選即報,數量可改)'**
+  /// **'快捷報數(可多選,一次提交)'**
   String get quickReport;
 
   /// No description provided for @myStats.
