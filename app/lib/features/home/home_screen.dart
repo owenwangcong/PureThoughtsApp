@@ -76,6 +76,11 @@ class HomeScreen extends ConsumerWidget {
                   onPressed: () => context.push('/live'),
                 ),
                 IconButton(
+                  tooltip: l10n.scripturesTitle,
+                  icon: const Icon(Icons.menu_book_outlined),
+                  onPressed: () => context.push('/scriptures'),
+                ),
+                IconButton(
                   tooltip: l10n.calendarTitle,
                   icon: const Icon(Icons.calendar_month),
                   onPressed: () => context.push('/calendar'),
@@ -139,30 +144,46 @@ class HomeScreen extends ConsumerWidget {
                 SectionHeader(l10n.sectionSangha),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.live_tv,
-                          label: l10n.liveTitle,
-                          onTap: () => context.push('/live'),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.live_tv,
+                              label: l10n.liveTitle,
+                              onTap: () => context.push('/live'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.menu_book_outlined,
+                              label: l10n.scripturesTitle,
+                              onTap: () => context.push('/scriptures'),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.groups,
-                          label: l10n.groupsTitle,
-                          onTap: () => context.push('/groups'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.calendar_month,
-                          label: l10n.calendarTitle,
-                          onTap: () => context.push('/calendar'),
-                        ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.groups,
+                              label: l10n.groupsTitle,
+                              onTap: () => context.push('/groups'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _BigTile(
+                              icon: Icons.calendar_month,
+                              label: l10n.calendarTitle,
+                              onTap: () => context.push('/calendar'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

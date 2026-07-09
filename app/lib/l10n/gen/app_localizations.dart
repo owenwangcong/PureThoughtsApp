@@ -992,6 +992,12 @@ abstract class AppLocalizations {
   /// **'發一個願,讓精進有方向。'**
   String get vowsEmptyHint;
 
+  /// No description provided for @scripturesTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'在線經本'**
+  String get scripturesTitle;
+
   /// No description provided for @liveTitle.
   ///
   /// In zh_Hant, this message translates to:

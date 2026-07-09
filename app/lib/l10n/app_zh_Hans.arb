@@ -149,6 +149,7 @@
   "groupsEmptyHint": "输入群 ID 申请加入,或创建新群组,与同修一起精进。",
   "logsEmptyHint": "本群还没有报数,点右下角「报数」开始。",
   "vowsEmptyHint": "发一个愿,让精进有方向。",
+  "scripturesTitle": "在线经本",
   "liveTitle": "直播",
   "liveNow": "直播中",
   "notLive": "当前未直播",

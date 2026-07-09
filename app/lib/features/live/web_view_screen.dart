@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../core/settings.dart';
+
 /// 应用内浏览器(PRD §6/§7):YouTube 频道页、Webex 加入、经本等
 /// 尽量不离开 App;右上角保留外部打开兜底(Webex 深度功能可能需要)。
-class WebViewScreen extends StatefulWidget {
-  const WebViewScreen({super.key, required this.url, this.title});
+/// [applyFontScale] = true 时把 App 字号设置透传为网页缩放(经本阅读)。
+class WebViewScreen extends ConsumerStatefulWidget {
+  const WebViewScreen({
+    super.key,
+    required this.url,
+    this.title,
+    this.applyFontScale = false,
+  });
 
   final String url;
   final String? title;
+  final bool applyFontScale;
 
   @override
-  State<WebViewScreen> createState() => _WebViewScreenState();
+  ConsumerState<WebViewScreen> createState() => _WebViewScreenState();
 }
 
-class _WebViewScreenState extends State<WebViewScreen> {
+class _WebViewScreenState extends ConsumerState<WebViewScreen> {
   late final WebViewController _controller;
   var _progress = 0;
 
@@ -25,6 +35,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
         onProgress: (p) => setState(() => _progress = p),
+        onPageFinished: (_) {
+          if (!widget.applyFontScale) return;
+          final scale = ref.read(fontScaleProvider);
+          // 字号透传:整页缩放,适老阅读(PRD §7)
+          _controller.runJavaScript(
+              "document.body.style.zoom='${scale.toStringAsFixed(2)}'");
+        },
       ))
       ..loadRequest(Uri.parse(widget.url));
   }
