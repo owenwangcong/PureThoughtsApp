@@ -653,7 +653,7 @@ abstract class AppLocalizations {
   /// No description provided for @quickReport.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'快捷報數(可多選,一次提交)'**
+  /// **'快捷報數'**
   String get quickReport;
 
   /// No description provided for @myStats.
@@ -913,6 +913,42 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'隨喜讚歎!發願圓滿'**
   String get vowCongrats;
+
+  /// No description provided for @quickReportTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'快捷報數'**
+  String get quickReportTitle;
+
+  /// No description provided for @quickEmptyHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'還沒有常用組合,先報一次數,下次就能一鍵重複。'**
+  String get quickEmptyHint;
+
+  /// No description provided for @sectionDaily.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'日課'**
+  String get sectionDaily;
+
+  /// No description provided for @sectionSangha.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共修'**
+  String get sectionSangha;
+
+  /// No description provided for @sectionSelf.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'修行'**
+  String get sectionSelf;
+
+  /// No description provided for @sectionGeneral.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'通用'**
+  String get sectionGeneral;
 
   /// No description provided for @themeTitle.
   ///

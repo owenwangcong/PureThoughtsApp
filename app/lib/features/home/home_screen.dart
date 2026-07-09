@@ -86,43 +86,85 @@ class HomeScreen extends ConsumerWidget {
                   onPressed: () => context.push('/settings'),
                 ),
               ]
-            : [_NotificationBell(onTap: () => context.push('/notifications'))],
+            : [
+                // 通知/設定:顶栏小图标与宫格双入口(PRD v0.5.5)
+                _NotificationBell(onTap: () => context.push('/notifications')),
+                IconButton(
+                  tooltip: l10n.settingsTitle,
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () => context.push('/settings'),
+                ),
+              ],
       ),
       body: user == null
           // 匿名:浏览全局功课清单(公开内容)
           ? _buildPracticeList(context, ref, l10n, locale, types)
-          // 登录:快捷报数 + 统计与群入口(Dashboard 首屏)
+          // 登录:分组式功能布局(PRD v0.5.5:日課 / 共修 / 修行 / 通用)
           : ListView(
+              padding: const EdgeInsets.only(bottom: 32),
               children: [
-                // 報數直达:单群直进,多群选择并记住上次(PRD v0.5.3)
+                // ---- 日課:最高频动作,大色块强调 ----
+                SectionHeader(l10n.sectionDaily),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: FilledButton.icon(
-                    icon: const Icon(Icons.edit_note, size: 28),
-                    label: Text(l10n.reportLog,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary)),
-                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(64)),
-                    onPressed: () => _startReport(context, ref),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _BigTile(
+                          icon: Icons.edit_note,
+                          label: l10n.reportLog,
+                          emphasis: _TileEmphasis.primary,
+                          onTap: () => _startReport(context, ref),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _BigTile(
+                          icon: Icons.bolt,
+                          label: l10n.quickReportTitle,
+                          emphasis: _TileEmphasis.container,
+                          onTap: () => showQuickReportSheet(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const QuickReportSection(),
-                const SizedBox(height: 8),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                // 功能宫格:主要功能大图标直达(PRD v0.5.5,适老导航)
+
+                // ---- 共修 ----
+                SectionHeader(l10n.sectionSangha),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 16, 8, 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _BigTile(
+                          icon: Icons.groups,
+                          label: l10n.groupsTitle,
+                          onTap: () => context.push('/groups'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _BigTile(
+                          icon: Icons.calendar_month,
+                          label: l10n.calendarTitle,
+                          onTap: () => context.push('/calendar'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ---- 修行:个人纪录与工具 ----
+                SectionHeader(l10n.sectionSelf),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GridView.count(
                     crossAxisCount: 4,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 12,
                     childAspectRatio: 0.82,
                     children: [
-                      _FeatureItem(
-                          icon: Icons.groups,
-                          label: l10n.groupsTitle,
-                          route: '/groups'),
                       _FeatureItem(
                           icon: Icons.insights,
                           label: l10n.myStats,
@@ -132,10 +174,6 @@ class HomeScreen extends ConsumerWidget {
                           label: l10n.vowsTitle,
                           route: '/vows'),
                       _FeatureItem(
-                          icon: Icons.calendar_month,
-                          label: l10n.calendarTitle,
-                          route: '/calendar'),
-                      _FeatureItem(
                           icon: Icons.self_improvement,
                           label: l10n.timerTitle,
                           route: '/tools/timer'),
@@ -143,14 +181,31 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.radio_button_checked,
                           label: l10n.counterTitle,
                           route: '/tools/counter'),
-                      _FeatureItem(
+                    ],
+                  ),
+                ),
+
+                // ---- 通用 ----
+                SectionHeader(l10n.sectionGeneral),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _BigTile(
                           icon: Icons.notifications_outlined,
                           label: l10n.notificationsTitle,
-                          route: '/notifications'),
-                      _FeatureItem(
+                          onTap: () => context.push('/notifications'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _BigTile(
                           icon: Icons.settings_outlined,
                           label: l10n.settingsTitle,
-                          route: '/settings'),
+                          onTap: () => context.push('/settings'),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -246,6 +301,62 @@ class HomeScreen extends ConsumerWidget {
                     ],
                 ],
               ),
+    );
+  }
+}
+
+enum _TileEmphasis { surface, container, primary }
+
+/// 大功能块:图标 + 文字的半宽色块(分组布局主元素,大气简约)
+class _BigTile extends ConsumerWidget {
+  const _BigTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.emphasis = _TileEmphasis.surface,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final _TileEmphasis emphasis;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final (bg, fg) = switch (emphasis) {
+      _TileEmphasis.primary => (scheme.primary, scheme.onPrimary),
+      _TileEmphasis.container => (scheme.primaryContainer, scheme.onPrimaryContainer),
+      _TileEmphasis.surface => (scheme.surfaceContainerLow, scheme.onSurface),
+    };
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: SizedBox(
+          height: 84,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon,
+                  size: 30,
+                  color: emphasis == _TileEmphasis.surface ? scheme.primary : fg),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(color: fg),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

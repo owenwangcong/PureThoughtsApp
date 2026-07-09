@@ -285,7 +285,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get categoryOther => '其他';
 
   @override
-  String get quickReport => '快捷報數(可多選,一次提交)';
+  String get quickReport => '快捷報數';
 
   @override
   String get myStats => '個人統計';
@@ -417,6 +417,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get quickReportTitle => '快捷報數';
+
+  @override
+  String get quickEmptyHint => '還沒有常用組合,先報一次數,下次就能一鍵重複。';
+
+  @override
+  String get sectionDaily => '日課';
+
+  @override
+  String get sectionSangha => '共修';
+
+  @override
+  String get sectionSelf => '修行';
+
+  @override
+  String get sectionGeneral => '通用';
 
   @override
   String get themeTitle => '外觀';
@@ -812,7 +830,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get categoryOther => '其他';
 
   @override
-  String get quickReport => '快捷报数(可多选,一次提交)';
+  String get quickReport => '快捷报数';
 
   @override
   String get myStats => '个人统计';
@@ -944,6 +962,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get vowCongrats => '随喜赞叹!发愿圆满';
+
+  @override
+  String get quickReportTitle => '快捷报数';
+
+  @override
+  String get quickEmptyHint => '还没有常用组合,先报一次数,下次就能一键重复。';
+
+  @override
+  String get sectionDaily => '日课';
+
+  @override
+  String get sectionSangha => '共修';
+
+  @override
+  String get sectionSelf => '修行';
+
+  @override
+  String get sectionGeneral => '通用';
 
   @override
   String get themeTitle => '外观';
@@ -1339,7 +1375,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get categoryOther => '其他';
 
   @override
-  String get quickReport => '快捷報數(可多選,一次提交)';
+  String get quickReport => '快捷報數';
 
   @override
   String get myStats => '個人統計';
@@ -1471,6 +1507,24 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowCongrats => '隨喜讚歎!發願圓滿';
+
+  @override
+  String get quickReportTitle => '快捷報數';
+
+  @override
+  String get quickEmptyHint => '還沒有常用組合,先報一次數,下次就能一鍵重複。';
+
+  @override
+  String get sectionDaily => '日課';
+
+  @override
+  String get sectionSangha => '共修';
+
+  @override
+  String get sectionSelf => '修行';
+
+  @override
+  String get sectionGeneral => '通用';
 
   @override
   String get themeTitle => '外觀';
