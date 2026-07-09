@@ -1088,29 +1088,101 @@ abstract class AppLocalizations {
   /// **'取消本次活動'**
   String get cancelOccurrence;
 
-  /// No description provided for @eventTypePractice.
+  /// No description provided for @upcomingTitle.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'共修'**
-  String get eventTypePractice;
+  /// **'未來活動'**
+  String get upcomingTitle;
 
-  /// No description provided for @eventTypeMeditation.
+  /// No description provided for @manageEventTypes.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'打坐'**
-  String get eventTypeMeditation;
+  /// **'事件類型管理'**
+  String get manageEventTypes;
 
-  /// No description provided for @eventTypeTalk.
+  /// No description provided for @editEvent.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'講法'**
-  String get eventTypeTalk;
+  /// **'編輯活動'**
+  String get editEvent;
 
-  /// No description provided for @eventTypeAssembly.
+  /// No description provided for @deleteEvent.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'法會'**
-  String get eventTypeAssembly;
+  /// **'刪除活動'**
+  String get deleteEvent;
+
+  /// No description provided for @confirmDeleteEvent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定刪除此活動?所有重複場次將一併移除,並通知全體用戶。'**
+  String get confirmDeleteEvent;
+
+  /// No description provided for @typeNameHant.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'名稱(繁體)'**
+  String get typeNameHant;
+
+  /// No description provided for @typeNameHans.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'名稱(簡體)'**
+  String get typeNameHans;
+
+  /// No description provided for @iconLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'圖標'**
+  String get iconLabel;
+
+  /// No description provided for @activeLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'啟用'**
+  String get activeLabel;
+
+  /// No description provided for @deleteTypeBlocked.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'該類型已被活動使用,無法刪除;可改為停用。'**
+  String get deleteTypeBlocked;
+
+  /// No description provided for @notifEventChanged.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動異動'**
+  String get notifEventChanged;
+
+  /// No description provided for @actCreated.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'新增'**
+  String get actCreated;
+
+  /// No description provided for @actUpdated.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'更新'**
+  String get actUpdated;
+
+  /// No description provided for @actDeleted.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已取消'**
+  String get actDeleted;
+
+  /// No description provided for @actOccCancelled.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'單次取消'**
+  String get actOccCancelled;
+
+  /// No description provided for @actOccChanged.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'單次改期'**
+  String get actOccChanged;
 
   /// No description provided for @toolsTitle.
   ///

@@ -6,8 +6,16 @@ final eventsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   return Supabase.instance.client
       .from('events')
       .select(
-          'id, title, type, start_at, duration_minutes, recurrence_rule, webex_url, youtube_url, content')
+          'id, title, event_type_id, start_at, duration_minutes, recurrence_rule, webex_url, youtube_url, content')
       .order('start_at', ascending: true);
+});
+
+/// 事件类型(动态表,管理员维护;PRD v0.5.7)
+final eventTypesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  return Supabase.instance.client
+      .from('event_types')
+      .select('id, name_hant, name_hans, icon, sort_order, active')
+      .order('sort_order', ascending: true);
 });
 
 /// 单次修改(改期/取消)
