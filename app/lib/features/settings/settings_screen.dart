@@ -135,6 +135,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const Divider(height: 32),
 
+          // ---- 外观(浅色/深色/跟随系统) ----
+          Text(l10n.themeTitle, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          SegmentedButton<ThemeMode>(
+            segments: [
+              ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: const Icon(Icons.brightness_auto),
+                  label: Text(l10n.themeSystem)),
+              ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: const Icon(Icons.light_mode_outlined),
+                  label: Text(l10n.themeLight)),
+              ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: const Icon(Icons.dark_mode_outlined),
+                  label: Text(l10n.themeDark)),
+            ],
+            selected: {ref.watch(themeModeProvider)},
+            onSelectionChanged: (s) =>
+                ref.read(themeModeProvider.notifier).set(s.first),
+          ),
+          const Divider(height: 32),
+
           // ---- 地区 ----
           Text(l10n.onboardingRegion, style: Theme.of(context).textTheme.titleMedium),
           Text(l10n.onboardingRegionHint, style: Theme.of(context).textTheme.bodySmall),

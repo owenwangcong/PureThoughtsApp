@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_thoughts/core/prefs.dart';
+import 'package:pure_thoughts/core/theme/app_theme.dart';
 import 'package:pure_thoughts/features/auth/auth_screen.dart';
 import 'package:pure_thoughts/features/onboarding/onboarding_screen.dart';
 import 'package:pure_thoughts/l10n/gen/app_localizations.dart';
@@ -28,6 +29,7 @@ void main() {
           locale: locale,
           supportedLocales: locales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
+          theme: AppTheme.light,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2.0)),
             child: child!,

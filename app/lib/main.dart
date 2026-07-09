@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/env.dart';
 import 'core/prefs.dart';
 import 'core/settings.dart';
+import 'core/theme/app_theme.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'router.dart';
 
@@ -43,10 +44,10 @@ class PureThoughtsApp extends ConsumerWidget {
       locale: locale,
       supportedLocales: const [LocaleController.zhHant, LocaleController.zhHans],
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF8D6E63), // 沉静的暖木色基调
-      ),
+      // 宣纸 + 古铜金双主题(PRD v0.5.4 §11)
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ref.watch(themeModeProvider),
       // 全局字号缩放:与系统缩放叠乘,布局须适配大字号(NFR)
       builder: (context, child) {
         final mq = MediaQuery.of(context);

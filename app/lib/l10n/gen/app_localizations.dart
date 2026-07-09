@@ -914,6 +914,48 @@ abstract class AppLocalizations {
   /// **'隨喜讚歎!發願圓滿'**
   String get vowCongrats;
 
+  /// No description provided for @themeTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'外觀'**
+  String get themeTitle;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'跟隨系統'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'淺色'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'深色'**
+  String get themeDark;
+
+  /// No description provided for @groupsEmptyHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'輸入群 ID 申請加入,或建立新群組,與同修一起精進。'**
+  String get groupsEmptyHint;
+
+  /// No description provided for @logsEmptyHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'本群還沒有報數,點右下角「報數」開始。'**
+  String get logsEmptyHint;
+
+  /// No description provided for @vowsEmptyHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'發一個願,讓精進有方向。'**
+  String get vowsEmptyHint;
+
   /// No description provided for @calendarTitle.
   ///
   /// In zh_Hant, this message translates to:

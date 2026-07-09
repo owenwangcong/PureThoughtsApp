@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/prefs.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../dashboard/quick_report_section.dart';
@@ -188,22 +189,11 @@ class HomeScreen extends ConsumerWidget {
     AsyncValue<List<PracticeType>> types,
   ) {
     return types.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.loadFailed),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => ref.invalidate(globalPracticeTypesProvider),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
-        ),
+        loading: () => const SkeletonList(),
+        error: (_, _) =>
+            ErrorRetry(onRetry: () => ref.invalidate(globalPracticeTypesProvider)),
         data: (items) => items.isEmpty
-            ? Center(child: Text(l10n.emptyList))
+            ? EmptyState(icon: Icons.menu_book_outlined, title: l10n.emptyList)
             // 按分类分组:經/咒/懺/念佛/靜坐(PRD v0.5.2)
             : ListView(
                 children: [

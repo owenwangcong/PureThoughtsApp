@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../groups/groups_providers.dart';
@@ -209,10 +210,16 @@ class _VowsScreenState extends ConsumerState<VowsScreen> {
         label: Text(l10n.createVow),
       ),
       body: vows.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.loadFailed)),
+        loading: () => const SkeletonList(rows: 3, rowHeight: 96),
+        error: (_, _) => ErrorRetry(onRetry: () => ref.invalidate(myVowsProvider)),
         data: (list) {
-          if (list.isEmpty) return Center(child: Text(l10n.emptyList));
+          if (list.isEmpty) {
+            return EmptyState(
+              icon: Icons.volunteer_activism_outlined,
+              title: l10n.emptyList,
+              hint: l10n.vowsEmptyHint,
+            );
+          }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(myVowsProvider),
             child: ListView(

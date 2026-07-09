@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/settings.dart';
 import '../../core/units.dart';
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'dashboard_providers.dart';
 
@@ -45,8 +46,9 @@ class GroupStatsScreen extends ConsumerWidget {
           ref.invalidate(groupTodayReportersProvider(groupId));
         },
         child: daily.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(child: Text(l10n.loadFailed)),
+          loading: () => const SkeletonList(rows: 5),
+          error: (_, _) =>
+              ErrorRetry(onRetry: () => ref.invalidate(groupDailyStatsProvider(groupId))),
           data: (rows) {
             final todayRows = rows.where((r) => r['local_date'] == today).toList();
             final trendDays = List.generate(14, (i) {

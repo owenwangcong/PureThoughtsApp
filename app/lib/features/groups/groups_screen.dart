@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'groups_providers.dart';
 
@@ -111,15 +112,17 @@ class GroupsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.groupsTitle)),
       body: groups.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.loadFailed)),
+        loading: () => const SkeletonList(),
+        error: (_, _) => ErrorRetry(onRetry: () => ref.invalidate(myGroupsProvider)),
         data: (items) => RefreshIndicator(
           onRefresh: () async => ref.invalidate(myGroupsProvider),
           child: items.isEmpty
               ? ListView(children: [
-                  Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(l10n.emptyList, textAlign: TextAlign.center),
+                  const SizedBox(height: 48),
+                  EmptyState(
+                    icon: Icons.groups_outlined,
+                    title: l10n.emptyList,
+                    hint: l10n.groupsEmptyHint,
                   ),
                 ])
               : ListView.separated(

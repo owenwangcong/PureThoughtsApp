@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ThemeMode;
 import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +12,27 @@ abstract final class PrefKeys {
   static const region = 'region'; // 'cn' | 'other'
   static const onboardingDone = 'onboarding_done';
   static const lastReportGroup = 'last_report_group'; // 多群时記住上次报数的群
+  static const themeMode = 'theme_mode'; // system | light | dark
 }
+
+/// 外观:跟随系统 / 浅色 / 深色(PRD v0.5.4 §11 双主题)
+class ThemeModeController extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() =>
+      switch (ref.watch(sharedPrefsProvider).getString(PrefKeys.themeMode)) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+
+  void set(ThemeMode mode) {
+    state = mode;
+    ref.read(sharedPrefsProvider).setString(PrefKeys.themeMode, mode.name);
+  }
+}
+
+final themeModeProvider =
+    NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
 
 /// UI 语言,默认繁体(PRD §11)
 class LocaleController extends Notifier<Locale> {
