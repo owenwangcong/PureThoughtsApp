@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/channels.dart';
 import '../../core/prefs.dart';
 import '../../core/settings.dart';
-import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
@@ -14,272 +12,188 @@ import '../dashboard/quick_report_section.dart';
 import '../groups/groups_providers.dart';
 import '../notifications/notifications_providers.dart';
 
-/// 全局功课项(主清单),匿名即可读(RLS:group_id is null 公开)
-class PracticeType {
-  const PracticeType({
-    required this.id,
-    required this.nameHant,
-    required this.nameHans,
-    required this.category,
-    required this.unit,
-  });
-
-  final String id;
-  final String nameHant;
-  final String nameHans;
-  final String category;
-  final String unit;
-
-  factory PracticeType.fromJson(Map<String, dynamic> json) => PracticeType(
-        id: json['id'] as String,
-        nameHant: json['name_hant'] as String,
-        nameHans: json['name_hans'] as String,
-        category: json['category'] as String,
-        unit: json['unit'] as String,
-      );
-
-  String nameFor(Locale locale) => locale.scriptCode == 'Hans' ? nameHans : nameHant;
-}
-
-final globalPracticeTypesProvider = FutureProvider<List<PracticeType>>((ref) async {
-  final rows = await Supabase.instance.client
-      .from('practice_types')
-      .select('id, name_hant, name_hans, category, unit')
-      .isFilter('group_id', null)
-      .order('sort_order', ascending: true);
-  return rows.map(PracticeType.fromJson).toList();
-});
-
-/// 骨架期首页:展示全局功课清单,验证「App 启动并匿名读到公开表数据」(PLAN P0.6 验收)
+/// 首页(PRD v0.5.8):登录与未登录**同一套分组界面**(日課/共修/修行/通用);
+/// 未登录时点击账号类功能(報數/快捷報數/群組/統計/發願/通知)强制跳登录页;
+/// 直播/經本/日曆/工具/設定匿名可用。
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  /// 账号类功能守卫:未登录 → 登录页
+  void _guard(BuildContext context, WidgetRef ref, VoidCallback action) {
+    if (ref.read(currentUserProvider) == null) {
+      context.push('/auth');
+    } else {
+      action();
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final locale = ref.watch(localeProvider);
-    final types = ref.watch(globalPracticeTypesProvider);
     final user = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(user == null ? l10n.practiceListTitle : l10n.appTitle),
-        // 登录态导航走首页功能宫格,顶栏只留通知铃(PRD v0.5.5)
-        actions: user == null
-            ? [
-                TextButton(
-                  onPressed: () => context.push('/auth'),
-                  child: Text(l10n.authSignIn),
-                ),
-                IconButton(
-                  tooltip: l10n.liveTitle,
-                  icon: const Icon(Icons.live_tv),
-                  onPressed: () => context.push('/live'),
-                ),
-                IconButton(
-                  tooltip: l10n.scripturesTitle,
-                  icon: const Icon(Icons.menu_book_outlined),
-                  onPressed: () => context.push(Uri(
-                    path: '/webview',
-                    queryParameters: {
-                      'url': Channels.scripturesUrl,
-                      'title': l10n.scripturesTitle,
-                      'zoom': '1',
-                    },
-                  ).toString()),
-                ),
-                IconButton(
-                  tooltip: l10n.calendarTitle,
-                  icon: const Icon(Icons.calendar_month),
-                  onPressed: () => context.push('/calendar'),
-                ),
-                IconButton(
-                  tooltip: l10n.toolsTitle,
-                  icon: const Icon(Icons.self_improvement),
-                  onPressed: () => context.push('/tools'),
-                ),
-                IconButton(
-                  tooltip: l10n.settingsTitle,
-                  icon: const Icon(Icons.settings),
-                  onPressed: () => context.push('/settings'),
-                ),
-              ]
-            : [
-                // 通知/設定:顶栏小图标与宫格双入口(PRD v0.5.5)
-                _NotificationBell(onTap: () => context.push('/notifications')),
-                IconButton(
-                  tooltip: l10n.settingsTitle,
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () => context.push('/settings'),
-                ),
-              ],
+        title: Text(l10n.appTitle),
+        actions: [
+          if (user == null)
+            TextButton(
+              onPressed: () => context.push('/auth'),
+              child: Text(l10n.authSignIn),
+            ),
+          _NotificationBell(
+            onTap: () =>
+                _guard(context, ref, () => context.push('/notifications')),
+          ),
+          IconButton(
+            tooltip: l10n.settingsTitle,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
       ),
-      body: user == null
-          // 匿名:浏览全局功课清单(公开内容)
-          ? _buildPracticeList(context, ref, l10n, locale, types)
-          // 登录:分组式功能布局(PRD v0.5.5:日課 / 共修 / 修行 / 通用)
-          : ListView(
-              padding: const EdgeInsets.only(bottom: 32),
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 32),
+        children: [
+          // ---- 日課:最高频动作,大色块强调 ----
+          SectionHeader(l10n.sectionDaily),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
               children: [
-                // ---- 日課:最高频动作,大色块强调 ----
-                SectionHeader(l10n.sectionDaily),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.edit_note,
-                          label: l10n.reportLog,
-                          emphasis: _TileEmphasis.primary,
-                          onTap: () => _startReport(context, ref),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.bolt,
-                          label: l10n.quickReportTitle,
-                          emphasis: _TileEmphasis.container,
-                          onTap: () => showQuickReportSheet(context),
-                        ),
-                      ),
-                    ],
+                Expanded(
+                  child: _BigTile(
+                    icon: Icons.edit_note,
+                    label: l10n.reportLog,
+                    emphasis: _TileEmphasis.primary,
+                    onTap: () =>
+                        _guard(context, ref, () => _startReport(context, ref)),
                   ),
                 ),
-
-                // ---- 共修 ----
-                SectionHeader(l10n.sectionSangha),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.live_tv,
-                              label: l10n.liveTitle,
-                              onTap: () => context.push('/live'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.menu_book_outlined,
-                              label: l10n.scripturesTitle,
-                              // 直达经本网站,不经列表层(2026-07-09 用户定案)
-                              onTap: () => context.push(Uri(
-                                path: '/webview',
-                                queryParameters: {
-                                  'url': Channels.scripturesUrl,
-                                  'title': l10n.scripturesTitle,
-                                  'zoom': '1',
-                                },
-                              ).toString()),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.groups,
-                              label: l10n.groupsTitle,
-                              onTap: () => context.push('/groups'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.calendar_month,
-                              label: l10n.calendarTitle,
-                              onTap: () => context.push('/calendar'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ---- 修行:个人纪录与工具 ----
-                SectionHeader(l10n.sectionSelf),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.insights,
-                              label: l10n.myStats,
-                              onTap: () => context.push('/dashboard'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.volunteer_activism_outlined,
-                              label: l10n.vowsTitle,
-                              onTap: () => context.push('/vows'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.self_improvement,
-                              label: l10n.timerTitle,
-                              onTap: () => context.push('/tools/timer'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _BigTile(
-                              icon: Icons.radio_button_checked,
-                              label: l10n.counterTitle,
-                              onTap: () => context.push('/tools/counter'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ---- 通用 ----
-                SectionHeader(l10n.sectionGeneral),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.notifications_outlined,
-                          label: l10n.notificationsTitle,
-                          onTap: () => context.push('/notifications'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _BigTile(
-                          icon: Icons.settings_outlined,
-                          label: l10n.settingsTitle,
-                          onTap: () => context.push('/settings'),
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _BigTile(
+                    icon: Icons.bolt,
+                    label: l10n.quickReportTitle,
+                    emphasis: _TileEmphasis.container,
+                    onTap: () =>
+                        _guard(context, ref, () => showQuickReportSheet(context)),
                   ),
                 ),
               ],
             ),
+          ),
+
+          // ---- 共修 ----
+          SectionHeader(l10n.sectionSangha),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.live_tv,
+                        label: l10n.liveTitle,
+                        onTap: () => context.push('/live'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.menu_book_outlined,
+                        label: l10n.scripturesTitle,
+                        // 直达经本网站,不经列表层(2026-07-09 用户定案)
+                        onTap: () => context.push(Uri(
+                          path: '/webview',
+                          queryParameters: {
+                            'url': Channels.scripturesUrl,
+                            'title': l10n.scripturesTitle,
+                            'zoom': '1',
+                          },
+                        ).toString()),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.groups,
+                        label: l10n.groupsTitle,
+                        onTap: () =>
+                            _guard(context, ref, () => context.push('/groups')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.calendar_month,
+                        label: l10n.calendarTitle,
+                        onTap: () => context.push('/calendar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ---- 修行:个人纪录与工具 ----
+          SectionHeader(l10n.sectionSelf),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.insights,
+                        label: l10n.myStats,
+                        onTap: () =>
+                            _guard(context, ref, () => context.push('/dashboard')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.volunteer_activism_outlined,
+                        label: l10n.vowsTitle,
+                        onTap: () =>
+                            _guard(context, ref, () => context.push('/vows')),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.self_improvement,
+                        label: l10n.timerTitle,
+                        onTap: () => context.push('/tools/timer'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.radio_button_checked,
+                        label: l10n.counterTitle,
+                        onTap: () => context.push('/tools/counter'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -328,49 +242,6 @@ class HomeScreen extends ConsumerWidget {
     if (picked == null || !context.mounted) return;
     prefs.setString(PrefKeys.lastReportGroup, picked);
     context.push('/groups/$picked/report');
-  }
-
-  Widget _buildPracticeList(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations l10n,
-    Locale locale,
-    AsyncValue<List<PracticeType>> types,
-  ) {
-    return types.when(
-        loading: () => const SkeletonList(),
-        error: (_, _) =>
-            ErrorRetry(onRetry: () => ref.invalidate(globalPracticeTypesProvider)),
-        data: (items) => items.isEmpty
-            ? EmptyState(icon: Icons.menu_book_outlined, title: l10n.emptyList)
-            // 按分类分组:經/咒/懺/念佛/靜坐(PRD v0.5.2)
-            : ListView(
-                children: [
-                  for (final cat in practiceCategories)
-                    if (items.any((t) => t.category == cat)) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                        child: Text(
-                          categoryLabel(l10n, cat),
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
-                              ?.copyWith(color: Theme.of(context).colorScheme.primary),
-                        ),
-                      ),
-                      for (final item in items.where((t) => t.category == cat))
-                        ListTile(
-                          dense: true,
-                          title: Text(item.nameFor(locale)),
-                          trailing: Text(
-                            unitLabel(l10n, item.unit),
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                    ],
-                ],
-              ),
-    );
   }
 }
 
