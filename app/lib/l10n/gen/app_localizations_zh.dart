@@ -458,6 +458,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vowsEmptyHint => '發一個願,讓精進有方向。';
 
   @override
+  String get scripturesTitle => '在線經本';
+
+  @override
   String get liveTitle => '直播';
 
   @override
@@ -1030,6 +1033,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get vowsEmptyHint => '发一个愿,让精进有方向。';
 
   @override
+  String get scripturesTitle => '在线经本';
+
+  @override
   String get liveTitle => '直播';
 
   @override
@@ -1600,6 +1606,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowsEmptyHint => '發一個願,讓精進有方向。';
+
+  @override
+  String get scripturesTitle => '在線經本';
 
   @override
   String get liveTitle => '直播';
