@@ -12,6 +12,7 @@ import '../groups/add_practice_type_dialog.dart';
 import '../groups/groups_providers.dart';
 import 'batch_utils.dart';
 import 'logs_providers.dart';
+import 'offline_queue.dart';
 
 enum _SubjectMode { self, member, name }
 
@@ -126,7 +127,7 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
       final uid = Supabase.instance.client.auth.currentUser!.id;
       final localDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
       final note = _note.text.trim();
-      await Supabase.instance.client.from('practice_logs').insert([
+      final result = await submitPracticeLogs(ref, [
         for (final id in _selectedOrder)
           {
             'group_id': widget.groupId,
@@ -139,6 +140,12 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
             if (mode == _SubjectMode.name) 'subject_name': _name.text.trim(),
           }
       ]);
+      if (result == SubmitResult.queued) {
+        // 离线:已暂存,联网自动补传(P5.1)
+        messenger.showSnackBar(SnackBar(content: Text(l10n.offlineQueued)));
+        if (mounted) context.pop();
+        return;
+      }
       ref.invalidate(groupLogsProvider(widget.groupId));
       ref.invalidate(proxyNamesProvider(widget.groupId));
       ref.invalidate(myRecentSelfLogsProvider);

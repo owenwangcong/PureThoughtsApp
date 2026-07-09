@@ -9,6 +9,7 @@ import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../groups/groups_providers.dart';
 import '../logs/logs_providers.dart';
+import '../logs/offline_queue.dart';
 import 'dashboard_providers.dart';
 
 String _fmtNum(Object? n) {
@@ -84,7 +85,7 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
     try {
       final uid = Supabase.instance.client.auth.currentUser!.id;
       final localDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      await Supabase.instance.client.from('practice_logs').insert([
+      final result = await submitPracticeLogs(ref, [
         for (final key in _selectedOrder)
           {
             'group_id': itemByKey[key]!['group_id'],
@@ -94,6 +95,11 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
             'local_date': localDate,
           }
       ]);
+      if (result == SubmitResult.queued) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.offlineQueued)));
+        if (mounted) Navigator.pop(context);
+        return;
+      }
       ref.invalidate(myRecentSelfLogsProvider);
       ref.invalidate(myDailyStatsProvider);
       ref.invalidate(myTotalsProvider);

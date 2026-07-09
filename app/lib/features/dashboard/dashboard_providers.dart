@@ -110,6 +110,31 @@ final groupTodayReportersProvider =
   return users.length;
 });
 
+/// Realtime 订阅(P5.2):本群报数变更 → 实时刷新统计与记录
+/// (RLS 保证只收到有权限的行;页面存续期间保持订阅)
+final groupLogsRealtimeProvider = Provider.family<void, String>((ref, groupId) {
+  final client = Supabase.instance.client;
+  final channel = client
+      .channel('realtime-logs-$groupId')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'practice_logs',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'group_id',
+          value: groupId,
+        ),
+        callback: (_) {
+          ref.invalidate(groupDailyStatsProvider(groupId));
+          ref.invalidate(groupTotalsProvider(groupId));
+          ref.invalidate(groupTodayReportersProvider(groupId));
+        },
+      )
+      .subscribe();
+  ref.onDispose(() => client.removeChannel(channel));
+});
+
 /// 连续用功天数(仅自己可见;中断温和归零,PRD §4.3)
 int calcStreak(Iterable<String> localDates, DateTime today) {
   final days = localDates.toSet();

@@ -10,6 +10,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../dashboard/quick_report_section.dart';
 import '../groups/groups_providers.dart';
+import '../logs/offline_queue.dart';
 import '../notifications/notifications_providers.dart';
 
 /// 首页(PRD v0.5.8):登录与未登录**同一套分组界面**(日課/共修/修行/通用);
@@ -31,6 +32,8 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(currentUserProvider);
+    // 离线报数自动补传(每会话一次,P5.1)
+    if (user != null) scheduleOfflineFlush(context, ref);
 
     return Scaffold(
       appBar: AppBar(

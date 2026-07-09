@@ -26,6 +26,7 @@ class GroupStatsScreen extends ConsumerWidget {
     final daily = ref.watch(groupDailyStatsProvider(groupId));
     final totals = ref.watch(groupTotalsProvider(groupId));
     final reporters = ref.watch(groupTodayReportersProvider(groupId));
+    ref.watch(groupLogsRealtimeProvider(groupId)); // 实时刷新(P5.2)
 
     final names = ref.watch(allPracticeTypesMapProvider);
 
