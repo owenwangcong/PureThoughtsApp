@@ -6,6 +6,24 @@
 
 ---
 
+## ⚡ 快速通道(推荐):一键脚本
+
+手动只需 3 步,其余全部由脚本自动完成(生成密钥/签 JWT/起服务/HTTPS/migration/函数/cron/种子/备份):
+
+1. **开 EC2**(按下方第 1 章:Ubuntu 24.04、t3.medium、安全组只开 22/80/443、绑 Elastic IP);
+2. **DNS**:`api.你的域名` A 记录指向 Elastic IP;
+3. **SSH 上服务器跑一条命令**,按提示填域名和 SMTP(E5):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/owenwangcong/PureThoughtsApp/master/scripts/deploy/setup-supabase-ec2.sh -o setup.sh
+bash setup.sh
+```
+
+跑完把屏幕提示的凭据文件存进密码管理器,再做收尾 3 步(Codemagic 填环境组 / 设首个管理员 / 恢复演练)。
+以下手动章节作为脚本的**原理说明与排障参考**。
+
+---
+
 ## 0. 事前准备(需要你先有)
 
 | 项 | 说明 |
