@@ -1,0 +1,5 @@
+# 服务器脚本与 SQL 必须 LF(Windows 工作区若为 CRLF,bash 会报 '\r: command not found')
+*.sh  text eol=lf
+*.sql text eol=lf
+*.ts  text eol=lf
+codemagic.yaml text eol=lf
