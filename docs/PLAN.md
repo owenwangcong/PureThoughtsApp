@@ -52,6 +52,8 @@
 **开发环境策略(2026-07-07 决定)**:先用 **Supabase CLI 本地 Docker 栈**开发测试(P0.0),P0.6 / P0.7 / P1 全部先对着本地栈做,migration 在本地验证后原样推到生产;远程部署(P0.1–P0.5)可并行推进,**最晚须在 P1.10 内测发布前完成**。
 
 - [x] **P0.0** 本地开发栈(S)— Supabase CLI 2.109.1(npm devDependency)+ Docker 本地全栈;DB 端口改 54325 避开本机其他容器(config.toml)。验收 ✅ 2026-07-07:REST / Auth 均以 anon key 访问返回 200。
+> 📘 P0.1–P0.5 的完整操作手册见 [`infra/deploy-aws-ec2.md`](infra/deploy-aws-ec2.md)(AWS EC2,2026-07-10)。
+
 - [ ] **P0.1** 机房实测选址(M)— 候选 HK / SG / Tokyo,从大陆(E6)与海外分别实测延迟、丢包、TLS 握手;产出 `docs/infra/latency-report.md`。验收:有数据支撑地选定机房。
 - [ ] **P0.2** 部署自托管 Supabase(M)— 官方 Docker Compose;自有域名 + TLS;**只暴露 Kong 443**,Postgres/Studio 不上公网(Studio 走白名单)。验收:HTTPS 可达,anon key 能查公开表。
 - [ ] **P0.3** Auth 配置(M)— SMTP(E5)验证邮件 / 重置密码;Google OAuth(E4);Apple Sign-In(E3)。验收:三种方式均能完成注册登录。
