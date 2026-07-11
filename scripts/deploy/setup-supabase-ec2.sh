@@ -82,7 +82,17 @@ set_env() { # KEY VALUE(存在则替换,不存在则追加)
 }
 get_env() { grep "^$1=" .env | head -1 | cut -d= -f2-; }
 
-if [ -f utils/generate-keys.sh ]; then
+# 密钥只生成一次:.env 里还是演示值才生成;已是真实密钥则跳过(保证脚本可重复执行——
+# 重复生成会换掉 POSTGRES_PASSWORD,与已初始化的数据库卷对不上,整套服务连不上库)
+CUR_JWT=$(get_env JWT_SECRET)
+if [ -n "$CUR_JWT" ] && [[ "$CUR_JWT" != your-super-secret* ]]; then
+  echo "==> 密钥已存在,跳过生成(重复执行)"
+elif [ -d volumes/db/data ] && [ -n "$(ls -A volumes/db/data 2>/dev/null)" ]; then
+  echo "❌ 数据库卷已初始化,但 .env 还是演示密钥(多半是之前手动 up 过)。"
+  echo "   请先彻底清理再重跑:"
+  echo "   cd $DIR && sudo docker compose down -v && cd ~ && rm -rf $DIR"
+  exit 1
+elif [ -f utils/generate-keys.sh ]; then
   # 新版官方结构(2026):一条命令生成全部密钥(JWT/加密键/DB 与管理台密码)写入 .env
   echo "==> 生成密钥(官方 utils/generate-keys.sh)"
   bash utils/generate-keys.sh --update-env >/dev/null
