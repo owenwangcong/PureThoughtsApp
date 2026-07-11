@@ -37,15 +37,17 @@ bash setup.sh
 | 发信服务(E5) | Resend 或 AWS SES 的 SMTP 凭据(注册验证邮件必需) |
 | 本机 | 本仓库 + `npx supabase` CLI(已具备) |
 
-**区域选择(P0.1)**:候选 `ap-east-1`(香港)/ `ap-southeast-1`(新加坡)/ `ap-northeast-1`(东京)。
-正式选定前,让大陆的同修对三个区域各 ping/加载一次测试页(E6),选延迟最稳的。**先用香港起步即可,数据可迁移。**
+**区域选择(P0.1)**:✅ 2026-07-11 定案 **`ap-southeast-1`(新加坡)**——与现有 pure-thoughts.com
+服务器同区,该服务器多年服务同一批用户(含大陆),可达性有实践背书;大陆网络正式复核保留在 E6。
 
 ---
 
 ## 1. 开 EC2 实例
 
-1. **AMI**:Ubuntu Server 24.04 LTS(x86_64)。
-2. **规格**:`t3.medium`(2vCPU/4GB)起步可用;预算允许上 `t3.large`(8GB)更从容。
+1. **AMI**:Ubuntu Server 24.04 LTS(**推荐 64-bit ARM** 配 t4g 实例;x86_64 配 t3)。
+2. **规格**:推荐 **`t4g.medium`**(ARM,2vCPU/4GB,新加坡约 30 USD/月,比 t3.medium 省约 20%,
+   Supabase 镜像原生支持 ARM);网站将来迁入(附 B)后升 `t4g.large`(8GB)。
+   换规格 = 停机改类型再开机约 2 分钟,Elastic IP 不变,随时可调。
 3. **磁盘**:gp3,50 GB。
 4. **安全组**(只开这三个,**不开 5432/8000**):
    | 端口 | 来源 | 用途 |

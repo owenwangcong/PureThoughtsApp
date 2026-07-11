@@ -2,7 +2,7 @@
 
 > **本文件是执行计划与进度的唯一事实来源**;需求细节一律以 [`PRD.md`](PRD.md)(v0.5.1)为准,本文只负责"做什么、什么顺序、现在到哪了"。
 > **使用规则见 §8**:开工先看 §1;任务完成即勾选并更新总览;新任务先写进本文再动手。
-> 最后更新:2026-07-09
+> 最后更新:2026-07-11
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Phase | 内容 | 状态 | 进度 | 完成日期 |
 |---|---|---|:---:|---|
-| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 4/9(余 P0.1–0.5 待外部依赖) | — |
+| **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 5/9(P0.1 ✅ 新加坡;P0.2 进行中——EC2 已开待跑脚本;P0.3 待 E5 SMTP) | — |
 | **P1** | MVP:核心闭环(群 + 报数 + 统计)+ 上架合规 | 🔄 进行中 | 11/13(P1.1/P1.10 部分完成,余项全待外部依赖) | — |
 | **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | 🔄 进行中 | 5/8(P2.1/2.2 ⛔ 待 E3/E4/E5;P2.7 部分依赖 E6) | — |
 | **P3** | 视频 + 在线经本 | 🔄 进行中 | 2/3(余 P3.3 大陆降级,依赖 E6 实测) | — |
@@ -30,7 +30,7 @@
 
 | # | 依赖 | 用于 | 阻塞任务 | 状态 |
 |---|---|---|---|:---:|
-| E1 | 境外服务器 | 自托管 Supabase | P0.1, P0.2 | 🔄 2026-07-11:共置方案 A **实测否决**(现有服务器为 Ubuntu 16.04 EOL,老内核跑不动 Supabase 镜像);**改方案 B:新开 EC2(Ubuntu 24.04,t3.medium,ap-southeast-1 新加坡,与现有服务器同区)**,待开机 + 跑脚本模式 1;区域境外红线已确认 ✅(现有服务器实测在新加坡) |
+| E1 | 境外服务器 | 自托管 Supabase | P0.1, P0.2 | 🔄 2026-07-11:共置方案 A **实测否决**(旧服务器 Ubuntu 16.04 EOL,老内核跑不动 Supabase 镜像)→ 方案 B **新 EC2 已开机**(Ubuntu 24.04,ap-southeast-1 新加坡);余:DNS 切到新机 + 跑一键脚本模式 1(卡 E5 SMTP 凭据);境外红线 ✅ |
 | E2 | 域名 | TLS / 自有 API 地址 | P0.2 | ✅ 2026-07-10:`pure-thoughts.com`(现有,含 WordPress 主站/Discuz/FastAPI);API 用子域 `api.pure-thoughts.com`;2026-07-11:api 证书用 certbot(webroot 方式,兼容 Bitnami Apache,自动续期) |
 | E3 | Apple Developer 账号(个人或组织,99 USD/年) | Sign in with Apple、APNs、TestFlight | P0.3, P2.1, P1.10 | ⬜ |
 | E4 | Google Cloud / Firebase 项目 | Google OAuth、FCM | P0.3, P2.1 | ⬜ |
@@ -54,7 +54,7 @@
 - [x] **P0.0** 本地开发栈(S)— Supabase CLI 2.109.1(npm devDependency)+ Docker 本地全栈;DB 端口改 54325 避开本机其他容器(config.toml)。验收 ✅ 2026-07-07:REST / Auth 均以 anon key 访问返回 200。
 > 📘 P0.1–P0.5 的完整操作手册见 [`infra/deploy-aws-ec2.md`](infra/deploy-aws-ec2.md)(AWS EC2,2026-07-10)。
 
-- [ ] **P0.1** 机房实测选址(M)— 候选 HK / SG / Tokyo,从大陆(E6)与海外分别实测延迟、丢包、TLS 握手;产出 `docs/infra/latency-report.md`。验收:有数据支撑地选定机房。
+- [x] **P0.1** 机房选址 ✅ 2026-07-11:**ap-southeast-1 新加坡**——与现有 pure-thoughts.com 服务器同区,该服务器多年服务同一批用户(含大陆),可达性有实践背书,免去三区对比实测;大陆网络正式复核保留在 E6(上线前 P2.7/P3.3 一并做)。
 - [ ] **P0.2** 部署自托管 Supabase(M)— 官方 Docker Compose;自有域名 + TLS;**只暴露 Kong 443**,Postgres/Studio 不上公网(Studio 走白名单)。验收:HTTPS 可达,anon key 能查公开表。
 - [ ] **P0.3** Auth 配置(M)— SMTP(E5)验证邮件 / 重置密码;Google OAuth(E4);Apple Sign-In(E3)。验收:三种方式均能完成注册登录。
 - [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。
