@@ -147,78 +147,19 @@ Studio 管理台:`https://api.pure-thoughts.com`(会弹 Basic Auth,用 DASHBOARD
 
 ---
 
-## 5. 应用本项目的数据库与函数
+## 5. 应用本项目的数据库与函数(脚本已全部自动完成)
 
-### 5.1 跑 migration
+> 脚本在服务器本机依序完成:执行 `supabase/migrations/*.sql` 建表/RLS/触发器
+>(带 `_applied_migrations` 追踪表,可重复执行)→ 种生产内容(17 个功课项 + 经本,
+> **不含测试账号**;本地 `seed.sql` 只属于本地开发)→ 部署 Edge Functions
+>(delete-account / live-probe)→ 注册 pg_cron 开播探测(每 5 分钟)。
+> 手动验证函数:`curl -X POST https://api.pure-thoughts.com/functions/v1/live-probe -H "Authorization: Bearer <ANON_KEY>" -H "apikey: <ANON_KEY>"`
 
-**脚本路线不需要本节**(脚本在服务器上 `docker exec supabase-db psql` 直接执行,不走网络端口)。
-手动路线、或**以后开发了新 migration 要推生产**时,从 Windows 本机经 SSH 隧道执行——
-5432 故意不对公网开放(防扫描爆破),隧道借已开放的 22 端口建加密通道,是本机进库的唯一方式:
-
-```powershell
-# 终端 1:开隧道(把服务器的 5432 映射到本机 55432)
-ssh -i your-key.pem -L 55432:localhost:5432 ubuntu@<Elastic IP>
-
-# 终端 2:项目根目录
-npx supabase db push --db-url "postgresql://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/postgres"
-```
-
-或不开隧道:SSH 上服务器,`sudo docker exec -i supabase-db psql -U postgres -v ON_ERROR_STOP=1 < xxx.sql`。
-临时用图形工具(pgAdmin/DataGrip)查生产库同样走隧道连 `127.0.0.1:55432`。
-
-### 5.2 生产种子(只种内容,**不种测试账号**)
-
-`supabase/seed.sql` 是本地开发用的(含 test.local 测试账号),**不要整份跑到生产**。
-经隧道用 psql 只执行内容部分:
-
-```sql
--- 全局功课清单(17 项,从 seed.sql 复制 practice_types 那一段)
--- 在线经本
-insert into public.scriptures (title, web_url, sort_order)
-values ('乾隆大藏經', 'https://qldazangjing.com/', 1);
--- 事件类型已由 migration 0008 自带,无需种
-```
-
-### 5.3 部署 Edge Functions(delete-account / live-probe)
+**唯一需要手动的一步——设第一个 App 管理员**(你在 App 里注册账号后,服务器上执行):
 
 ```bash
-# 服务器上:函数目录挂载在 volumes/functions
-cd ~/purethoughts
-git clone --depth 1 https://github.com/owenwangcong/PureThoughtsApp /tmp/app
-cp -r /tmp/app/supabase/functions/* volumes/functions/
-docker compose restart functions
-# 验证
-curl -X POST https://api.pure-thoughts.com/functions/v1/live-probe \
-  -H "Authorization: Bearer <ANON_KEY>" -H "apikey: <ANON_KEY>"
-```
-
-### 5.4 pg_cron:开播自动探测(每 5 分钟)
-
-经隧道 psql 执行(把 `<ANON_KEY>` 换成真值):
-
-```sql
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
-
-select cron.schedule(
-  'live-probe-5min', '*/5 * * * *',
-  $$
-  select net.http_post(
-    url := 'http://kong:8000/functions/v1/live-probe',
-    headers := '{"Authorization": "Bearer <ANON_KEY>", "apikey": "<ANON_KEY>", "Content-Type": "application/json"}'::jsonb,
-    body := '{}'::jsonb
-  );
-  $$
-);
-```
-
-### 5.5 设第一个 App 管理员
-
-用户先在 App 里注册,然后经隧道:
-
-```sql
-update public.profiles set is_app_admin = true
-where id = (select id from auth.users where email = '<管理员邮箱>');
+sudo docker exec supabase-db psql -U postgres -c \
+  "update public.profiles set is_app_admin = true where id = (select id from auth.users where email = '<管理员邮箱>')"
 ```
 
 ---
@@ -355,6 +296,17 @@ pure-thoughts.com, www.pure-thoughts.com {
 docker compose ps                  # 健康状态
 docker compose logs -f auth        # 看某服务日志(auth/rest/functions/db...)
 docker compose pull && docker compose up -d   # 升级(先在心里默念:备份是新鲜的)
+```
+
+**以后有新 migration 要推生产**(本地验证过后,二选一):
+
+```bash
+# a) 服务器上直接执行(推荐,简单)
+sudo docker exec -i supabase-db psql -U postgres -v ON_ERROR_STOP=1 < 新文件.sql
+
+# b) Windows 本机经 SSH 隧道(5432 不开公网,隧道借 22 端口;图形工具查库同此)
+ssh -i your-key.pem -L 55432:localhost:5432 ubuntu@<Elastic IP>   # 终端 1 保持开着
+npx supabase db push --db-url "postgresql://postgres:<密码>@127.0.0.1:55432/postgres"  # 终端 2
 ```
 
 **升级纪律**:升级前确认当天备份存在;Supabase 镜像大版本升级先读官方 self-host 变更说明。
