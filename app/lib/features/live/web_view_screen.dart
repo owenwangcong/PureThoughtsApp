@@ -58,12 +58,31 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
         onProgress: (p) => setState(() => _progress = p),
+        onNavigationRequest: (request) {
+          final uri = Uri.tryParse(request.url);
+          // wbx:// intent:// market:// 等应用协议 WebView 打不开,
+          // 会整页显示 ERR_UNKNOWN_URL_SCHEME;拦下来交给系统
+          //(装了 Webex App 就顺势唤起,没装则静默忽略)
+          if (uri != null && uri.scheme != 'http' && uri.scheme != 'https') {
+            launchUrl(uri, mode: LaunchMode.externalNonBrowserApplication)
+                .catchError((_) => false);
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
         onPageFinished: (_) {
           _applyZoom();
           _schedulePrefill();
         },
-      ))
-      ..loadRequest(Uri.parse(widget.url));
+      ));
+    if (_isWebex) {
+      // Webex 对移动端 UA 一律推 App 下载页(不给浏览器加入入口);
+      // 用桌面 Chrome UA 才有"从浏览器加入"。效果不佳时右上角 Webex App 兜底。
+      _controller.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+          '(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36');
+    }
+    _controller.loadRequest(Uri.parse(widget.url));
 
     // Android:网页的麦克风/摄像头申请直接放行(系统层权限已由入口预请求)
     final platform = _controller.platform;

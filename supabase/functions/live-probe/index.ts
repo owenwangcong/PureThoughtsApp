@@ -23,24 +23,41 @@ Deno.serve(async (req) => {
   let isLive = false;
   let videoId: string | null = null;
   let title: string | null = null;
+  let diag: Record<string, unknown> = {};
   try {
     const res = await fetch(CHANNEL_LIVE_URL, {
       redirect: "follow",
       headers: {
+        // 完整 Chrome 标记:缺 Chrome/xx token 时 YouTube 对部分(尤其数据中心)IP
+        // 返回降级页面,页面里没有 isLiveNow 字段 → 生产上实播被判为未开播
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
         "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
-        Cookie: "CONSENT=YES+cb",
+        Cookie: "CONSENT=YES+cb; SOCS=CAI",
       },
     });
     const html = await res.text();
-    // 权威信号是 liveBroadcastDetails.isLiveNow:
-    // 频道有"预告中"直播时页面也会出现 "isLive":true(实测误报),isUpcoming 场景必须排除
-    isLive = html.includes('"isLiveNow":true');
     videoId =
       html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/)?.[1] ?? null;
     title = html.match(/<title>(.*?)<\/title>/)?.[1]
       ?.replace(" - YouTube", "").trim() ?? null;
+    // 权威信号是 liveBroadcastDetails.isLiveNow:
+    // 频道有"预告中"直播时页面也会出现 "isLive":true(实测误报),isUpcoming 场景必须排除。
+    // 次级判定:部分服务端拿到的页面无 isLiveNow 字段 → canonical 已指向 watch 页
+    // 且有 isLive:true 且非预告,也判为开播。
+    const hasLiveNow = html.includes('"isLiveNow":true');
+    const hasIsLive = html.includes('"isLive":true');
+    const hasUpcoming = html.includes('"isUpcoming":true');
+    isLive = hasLiveNow || (videoId !== null && hasIsLive && !hasUpcoming);
+    // 诊断信息随响应返回,便于生产排查(pg_cron 与 App 都不消费该字段)
+    diag = {
+      status: res.status,
+      final_url: res.url,
+      html_len: html.length,
+      hasLiveNow,
+      hasIsLive,
+      hasUpcoming,
+    };
   } catch (_) {
     // 探测失败按"状态未知"处理:不改动现有记录
     return new Response(JSON.stringify({ live: null, error: "probe_failed" }), {
@@ -76,14 +93,15 @@ Deno.serve(async (req) => {
         channels: ["inapp"],
       });
     }
-    return new Response(JSON.stringify({ live: true, video_id: videoId, title }), {
-      headers: cors,
-    });
+    return new Response(
+      JSON.stringify({ live: true, video_id: videoId, title, diag }),
+      { headers: cors },
+    );
   }
 
   if (open) {
     await admin.from("live_streams").update({ ended_at: new Date().toISOString() })
       .eq("id", open.id);
   }
-  return new Response(JSON.stringify({ live: false }), { headers: cors });
+  return new Response(JSON.stringify({ live: false, diag }), { headers: cors });
 });

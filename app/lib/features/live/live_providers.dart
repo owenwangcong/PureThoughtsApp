@@ -6,21 +6,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// 探测失败时回退读 live_streams 表(生产环境由 pg_cron 维护)。
 final currentLiveProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   try {
-    final res = await Supabase.instance.client.functions.invoke('live-probe');
+    // 探测要抓 YouTube 页面,给足但有限的时间;不设超时的话
+    // 后端不可达/挂起时界面会无限转圈
+    final res = await Supabase.instance.client.functions
+        .invoke('live-probe')
+        .timeout(const Duration(seconds: 12));
     final data = res.data;
     if (data is Map && data['live'] == true) {
       return {'video_id': data['video_id'], 'title': data['title']};
     }
     if (data is Map && data['live'] == false) return null;
   } catch (_) {
-    // 探测不可用 → 回退查表
+    // 探测不可用/超时 → 回退查表
   }
   final rows = await Supabase.instance.client
       .from('live_streams')
       .select('video_id, title')
       .eq('platform', 'youtube')
       .isFilter('ended_at', null)
-      .limit(1);
+      .limit(1)
+      .timeout(const Duration(seconds: 8));
   return rows.isEmpty ? null : rows.first;
 });
 
