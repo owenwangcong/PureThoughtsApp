@@ -31,7 +31,7 @@
 | # | 依赖 | 用于 | 阻塞任务 | 状态 |
 |---|---|---|---|:---:|
 | E1 | 境外服务器(HK/SG/Tokyo 之一)采购 | 自托管 Supabase | P0.1, P0.2 | ⬜ |
-| E2 | 域名(API 用,建议同时备 App 官网域名) | TLS / 自有 API 地址 | P0.2 | ⬜ |
+| E2 | 域名 | TLS / 自有 API 地址 | P0.2 | ✅ 2026-07-10:`pure-thoughts.com`(现有,含 WordPress 主站/Discuz/FastAPI);API 用子域 `api.pure-thoughts.com` |
 | E3 | Apple Developer 账号(个人或组织,99 USD/年) | Sign in with Apple、APNs、TestFlight | P0.3, P2.1, P1.10 | ⬜ |
 | E4 | Google Cloud / Firebase 项目 | Google OAuth、FCM | P0.3, P2.1 | ⬜ |
 | E5 | 发信服务账号(Resend / SES) | 注册验证邮件、邮件兜底 | P0.3, P2.2 | ⬜ |

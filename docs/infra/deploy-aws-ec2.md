@@ -284,6 +284,44 @@ flutter run -d R52W809056B `
 
 ---
 
+## 附:方案 A —— 与现有 Bitnami 服务器共置(备选,省一台机器)
+
+> 现有服务器跑着 WordPress + Discuz + FastAPI(占用 8000/8001)。共置的前提:
+> `free -h` 显示**空闲内存 ≥ 3GB**,且现有证书为通配符(`*.pure-thoughts.com`),否则为
+> api 子域单独 certbot 签一张。风险自担:内存压力与安全爆破半径共享。
+
+1. **避开端口冲突**:Supabase `.env` 中设 `KONG_HTTP_PORT=8010`(FastAPI 已占 8000/8001)。
+   一键脚本跑之前先改,或跑完后改 + `docker compose up -d`;**跳过脚本的 Caddy 部分**(Apache 代替)。
+2. **DNS**:`api.pure-thoughts.com` A 记录指向本机。
+3. **Apache vhost**(加到 httpd.conf 末尾,证书路径按实际):
+
+```apache
+<VirtualHost *:443>
+    ServerName api.pure-thoughts.com
+    SSLEngine on
+    SSLCertificateFile      "/path/to/cert.crt"
+    SSLCertificateKeyFile   "/path/to/key"
+    SSLCertificateChainFile "/path/to/ca-bundle"
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+
+    # Realtime WebSocket(须在通用规则之前)
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/(.*) ws://127.0.0.1:8010/$1 [P,L]
+
+    ProxyPass        / http://127.0.0.1:8010/
+    ProxyPassReverse / http://127.0.0.1:8010/
+</VirtualHost>
+```
+
+4. `sudo /opt/bitnami/ctlscript.sh restart apache`,然后按第 9 章验收清单逐项验证。
+   注:pg_cron 的探测 URL 用容器内部 `http://kong:8000` 不变,无需调整。
+
+---
+
 ## 10. 日常运维速查
 
 ```bash
