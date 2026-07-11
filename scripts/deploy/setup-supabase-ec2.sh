@@ -145,8 +145,14 @@ if [ "$MODE" = "2" ]; then
 fi
 
 # ---------------------------------------------------------------- 本项目:函数 + SQL
-echo "==> 拉取应用仓库(migration / Edge Functions)"
-rm -rf /tmp/app && git clone --depth 1 -q "$APP_REPO" /tmp/app
+echo "==> 获取应用仓库(migration / Edge Functions)"
+if [ -d "$HOME/PureThoughtsApp/supabase/migrations" ]; then
+  # 私有仓库场景:用户已从本机 scp 上来的副本优先,无需 GitHub 凭据
+  echo "    使用本地副本 ~/PureThoughtsApp"
+  rm -rf /tmp/app && cp -r "$HOME/PureThoughtsApp" /tmp/app
+else
+  rm -rf /tmp/app && git clone --depth 1 -q "$APP_REPO" /tmp/app
+fi
 mkdir -p volumes/functions
 cp -r /tmp/app/supabase/functions/* volumes/functions/
 
