@@ -22,12 +22,16 @@ class WebViewScreen extends ConsumerStatefulWidget {
     this.title,
     this.applyFontScale = false,
     this.prefillName,
+    this.externalUrl,
   });
 
   final String url;
   final String? title;
   final bool applyFontScale;
   final String? prefillName;
+
+  /// 右上角"外部打開"用的链接(默认同 [url];Webex 用 join 链接以唤起 App)
+  final String? externalUrl;
 
   @override
   ConsumerState<WebViewScreen> createState() => _WebViewScreenState();
@@ -110,6 +114,8 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
   var inp = document.querySelector('input#guest_name')
     || document.querySelector('input[name="guestName"]')
     || document.querySelector('input[data-test="guest-name-input"]')
+    || document.querySelector('input[placeholder*="name" i]')
+    || document.querySelector('input[aria-label*="name" i]')
     || document.querySelector('input[type="text"]');
   if (inp && !inp.value) {
     var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
@@ -144,7 +150,8 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
           IconButton(
             tooltip: _isWebex ? 'Webex App' : 'Browser',
             icon: Icon(_isWebex ? Icons.exit_to_app : Icons.open_in_new),
-            onPressed: () => launchUrl(Uri.parse(widget.url),
+            onPressed: () => launchUrl(
+                Uri.parse(widget.externalUrl ?? widget.url),
                 mode: LaunchMode.externalApplication),
           ),
         ],

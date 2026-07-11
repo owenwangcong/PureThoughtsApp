@@ -134,9 +134,9 @@ class LiveScreen extends ConsumerWidget {
                     FilledButton.tonalIcon(
                       icon: const Icon(Icons.login),
                       label: Text(l10n.joinWebex),
-                      // 应用内加入(权限预请求 + 访客名预填)
+                      // 应用内加入(网页客户端直达,免下载页;权限预请求 + 访客名预填)
                       onPressed: () =>
-                          openWebexInApp(context, ref, url: Channels.webexJoinUrl),
+                          openWebexInApp(context, ref, url: Channels.webexWebClientUrl),
                     ),
                     // 永远保留 Webex App 选项(用户定案)
                     TextButton.icon(

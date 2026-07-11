@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../core/channels.dart';
 import '../auth/auth_providers.dart';
 
 /// 统一的 Webex 应用内加入入口(PRD §6):
@@ -27,6 +28,8 @@ Future<void> openWebexInApp(
     queryParameters: {
       'url': url,
       'title': 'Webex',
+      // 右上角"外部打開"仍用 join 鏈接(可喚起 Webex App,用户定案永久保留)
+      'ext': Channels.webexJoinUrl,
       if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
     },
   ).toString());
