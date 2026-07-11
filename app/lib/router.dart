@@ -84,6 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           title: state.uri.queryParameters['title'],
           applyFontScale: state.uri.queryParameters['zoom'] == '1',
           prefillName: state.uri.queryParameters['name'],
+          prefillEmail: state.uri.queryParameters['mail'],
           externalUrl: state.uri.queryParameters['ext'],
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
+import '../../core/channels.dart';
 import '../../core/settings.dart';
 
 /// 应用内浏览器(PRD §6/§7):YouTube 频道页、Webex 会议、经本等。
@@ -22,6 +23,7 @@ class WebViewScreen extends ConsumerStatefulWidget {
     this.title,
     this.applyFontScale = false,
     this.prefillName,
+    this.prefillEmail,
     this.externalUrl,
   });
 
@@ -29,6 +31,7 @@ class WebViewScreen extends ConsumerStatefulWidget {
   final String? title;
   final bool applyFontScale;
   final String? prefillName;
+  final String? prefillEmail;
 
   /// 右上角"外部打開"用的链接(默认同 [url];Webex 用 join 链接以唤起 App)
   final String? externalUrl;
@@ -76,7 +79,7 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
         },
         onPageFinished: (_) {
           _applyZoom();
-          _schedulePrefill();
+          _scheduleWebexAutomation();
         },
       ));
     if (_isWebex) {
@@ -103,43 +106,80 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
         "document.body.style.zoom='${scale.toStringAsFixed(2)}'");
   }
 
-  /// Webex 页面自动化(SPA 渲染较晚,页面完成后按梯次多次执行):
-  /// 1. 自动点击"从浏览器加入"跳过下载页(2026-07-11 实测 JS click 有效);
-  /// 2. 访客名预填尽力而为——目前访客表单在 web.webex.com 跨域 iframe 内,
-  ///    主文档注入触不到,靠表单自带"Remember me"(默认勾选)记忆;
-  ///    保留注入以兼容未来同域渲染。页面结构变化时静默失效。
-  void _schedulePrefill() {
+  String _jsEsc(String s) =>
+      s.replaceAll('\\', r'\\').replaceAll("'", r"\'");
+
+  /// Webex 网页客户端全自动加入(2026-07-11 在真实会议上全链路验证):
+  /// web.webex.com/join-meeting 是顶层页面(无跨域 iframe),流程为
+  /// ① 填会议链接 → 点 Next(Webex 用 momentum 组件,按钮在关闭 shadow root
+  ///    里,querySelector 不可达 → 深度遍历开放 shadow root 找宿主元素,
+  ///    派发 pointer+click 合成事件,实测有效);
+  /// ② 访客表单(第 1/2 个 text 输入 = 名字/邮箱,都是 type=text)填后点
+  ///    "Join meeting";名字邮箱齐全才自动加入,缺则留给用户手填。
+  /// 页面结构变化时静默失效(用户手动操作,Remember me 会记住)。
+  void _scheduleWebexAutomation() {
     if (!_isWebex) return;
-    final safe = (widget.prefillName ?? '')
-        .replaceAll('\\', r'\\')
-        .replaceAll("'", r"\'");
+    final name = _jsEsc(widget.prefillName ?? '');
+    final mail = _jsEsc(widget.prefillEmail ?? '');
+    const link = Channels.webexJoinUrl;
     final js = """
 (function() {
+  function deepAll(root, sel, out) {
+    root.querySelectorAll(sel).forEach(function(e) { out.push(e); });
+    root.querySelectorAll('*').forEach(function(el) {
+      if (el.shadowRoot) deepAll(el.shadowRoot, sel, out);
+    });
+    return out;
+  }
+  function fire(el) {
+    ['pointerdown', 'pointerup', 'click'].forEach(function(t) {
+      el.dispatchEvent(new MouseEvent(t, {bubbles: true, composed: true, cancelable: true}));
+    });
+  }
+  function clickByText(texts) {
+    deepAll(document, '*', []).forEach(function(e) {
+      var t = (e.textContent || '').trim();
+      if (texts.indexOf(t) !== -1 && e.children.length <= 2) fire(e);
+    });
+  }
+  function setVal(inp, v) {
+    if (!inp || !v || inp.value) return;
+    var s = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    s.call(inp, v);
+    inp.dispatchEvent(new Event('input', {bubbles: true, composed: true}));
+    inp.dispatchEvent(new Event('change', {bubbles: true, composed: true}));
+  }
+  // 兜底:若落在旧下载页(*.my.webex.com),自动点"从浏览器加入"
   document.querySelectorAll('button').forEach(function(b) {
     var t = (b.textContent || '').trim().toLowerCase();
     if (t.indexOf('browser') !== -1 || t.indexOf('瀏覽器') !== -1 || t.indexOf('浏览器') !== -1) b.click();
   });
-  var name = '$safe';
-  if (!name) return;
-  var inp = document.querySelector('input#guest_name')
-    || document.querySelector('input[name="guestName"]')
-    || document.querySelector('input[data-test="guest-name-input"]')
-    || document.querySelector('input[placeholder*="name" i]')
-    || document.querySelector('input[aria-label*="name" i]')
-    || document.querySelector('input[type="text"]');
-  if (inp && !inp.value) {
-    var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-    setter.call(inp, name);
-    inp.dispatchEvent(new Event('input', {bubbles: true}));
-    inp.dispatchEvent(new Event('change', {bubbles: true}));
+  if (location.host !== 'web.webex.com') return;
+  var texts = deepAll(document, 'input', []).filter(function(i) { return i.type === 'text'; });
+  if (location.pathname.indexOf('join-meeting') !== -1) {
+    if (texts[0] && !texts[0].value) {
+      setVal(texts[0], '$link');
+      setTimeout(function() { clickByText(['Next', '下一步']); }, 600);
+    }
+  } else {
+    setVal(texts[0], '$name');
+    setVal(texts[1], '$mail');
+    setTimeout(function() {
+      clickByText(['Use microphone and camera', '使用麥克風和攝影機', '使用麦克风和摄像头']);
+      if ('$name' && '$mail' && texts[0] && texts[0].value && texts[1] && texts[1].value) {
+        clickByText(['Join meeting', '加入會議', '加入会议']);
+      }
+    }, 800);
   }
 })();
 """;
     for (final delay in const [
       Duration.zero,
       Duration(seconds: 2),
-      Duration(seconds: 5),
-      Duration(seconds: 9),
+      Duration(seconds: 4),
+      Duration(seconds: 7),
+      Duration(seconds: 11),
+      Duration(seconds: 15),
     ]) {
       _timers.add(Timer(delay, () {
         if (mounted) _controller.runJavaScript(js).ignore();

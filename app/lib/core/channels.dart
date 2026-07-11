@@ -2,9 +2,13 @@
 abstract final class Channels {
   static const youtubeChannelUrl = 'https://www.youtube.com/@善護念';
   static const youtubeLiveUrl = 'https://www.youtube.com/@善護念/live';
-  // 应用内加入也用 join 链接:桌面 UA 下它给出"从浏览器加入"入口,由
-  // WebViewScreen 自动点击直达访客表单(2026-07-11 实测;webappng landing
-  // 直链没有会话上下文会被弹回营销页,不可用)
   static const webexJoinUrl = 'https://purethoughts.my.webex.com/join/Shanhunian';
+
+  /// 应用内加入的入口(2026-07-11 实测定案):web.webex.com 的通用加入页是
+  /// **顶层页面**(无跨域 iframe),WebViewScreen 可全程 JS 自动化——
+  /// 填会议链接→Next→访客表单填名字/邮箱→加入。
+  /// (join 链接的下载页会把访客表单套在跨域 iframe 里,注入触不到,弃用;
+  /// webappng landing 直链无会话上下文会弹回营销页,不可用。)
+  static const webexBrowserJoinUrl = 'https://web.webex.com/join-meeting';
   static const scripturesUrl = 'https://qldazangjing.com/'; // 乾隆大藏經(E9)
 }
