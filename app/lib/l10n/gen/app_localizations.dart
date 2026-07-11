@@ -1058,24 +1058,6 @@ abstract class AppLocalizations {
   /// **'固定共修房間,開始時間見活動日曆'**
   String get webexHint;
 
-  /// No description provided for @videoFallbackHint.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'此影片無法在 App 內直接播放(頻道可能未開啟「允許嵌入」),請改用以下方式觀看'**
-  String get videoFallbackHint;
-
-  /// No description provided for @watchOnWeb.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'在網頁中觀看'**
-  String get watchOnWeb;
-
-  /// No description provided for @openInYoutube.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'用 YouTube 打開'**
-  String get openInYoutube;
-
   /// No description provided for @replaysTitle.
   ///
   /// In zh_Hant, this message translates to:

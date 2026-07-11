@@ -491,15 +491,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webexHint => '固定共修房間,開始時間見活動日曆';
 
   @override
-  String get videoFallbackHint => '此影片無法在 App 內直接播放(頻道可能未開啟「允許嵌入」),請改用以下方式觀看';
-
-  @override
-  String get watchOnWeb => '在網頁中觀看';
-
-  @override
-  String get openInYoutube => '用 YouTube 打開';
-
-  @override
   String get replaysTitle => '往期回看';
 
   @override
@@ -1120,15 +1111,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get webexHint => '固定共修房间,开始时间见活动日历';
 
   @override
-  String get videoFallbackHint => '此视频无法在 App 内直接播放(频道可能未开启「允许嵌入」),请改用以下方式观看';
-
-  @override
-  String get watchOnWeb => '在网页中观看';
-
-  @override
-  String get openInYoutube => '用 YouTube 打开';
-
-  @override
   String get replaysTitle => '往期回看';
 
   @override
@@ -1747,15 +1729,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get webexHint => '固定共修房間,開始時間見活動日曆';
-
-  @override
-  String get videoFallbackHint => '此影片無法在 App 內直接播放(頻道可能未開啟「允許嵌入」),請改用以下方式觀看';
-
-  @override
-  String get watchOnWeb => '在網頁中觀看';
-
-  @override
-  String get openInYoutube => '用 YouTube 打開';
 
   @override
   String get replaysTitle => '往期回看';
