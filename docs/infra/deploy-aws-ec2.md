@@ -77,22 +77,21 @@ sudo apt update && sudo apt install -y unattended-upgrades fail2ban
 
 ```bash
 git clone --depth 1 https://github.com/supabase/supabase
-mkdir -p ~/purethoughts && cp -r supabase/docker/* ~/purethoughts/
+# ⚠️ 用 /. 结尾,不要用 /*(* 不匹配 .env.example 等隐藏文件)
+mkdir -p ~/purethoughts && cp -r supabase/docker/. ~/purethoughts/
 cd ~/purethoughts && cp .env.example .env
 ```
 
 ### 3.1 生成密钥(关键!)
 
+上游 2026 年新结构自带官方生成器,一条命令生成全部密钥
+(JWT_SECRET、ANON/SERVICE_ROLE JWT、各加密键、DB 与管理台密码)并写入 `.env`:
+
 ```bash
-# 40+ 字符的 JWT 密钥与数据库密码
-openssl rand -base64 48   # → JWT_SECRET
-openssl rand -base64 24   # → POSTGRES_PASSWORD
-openssl rand -base64 24   # → DASHBOARD_PASSWORD
+bash utils/generate-keys.sh --update-env
 ```
 
-**ANON_KEY / SERVICE_ROLE_KEY** 必须是用上面 JWT_SECRET 签名的 JWT:
-打开官方文档 `supabase.com/docs/guides/self-hosting/docker#generate-api-keys`,
-用页面上的生成器分别生成 `anon` 和 `service_role` 两把 key(粘贴你的 JWT_SECRET 生成)。
+(旧结构才需要手动 openssl + 官方网页生成器,已过时。)
 
 ### 3.2 编辑 `.env`(核心项)
 

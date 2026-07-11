@@ -68,27 +68,11 @@ fi
 # ---------------------------------------------------------------- 取官方 compose
 echo "==> 下载 Supabase 官方 Docker 配置"
 rm -rf /tmp/sb && git clone --depth 1 -q https://github.com/supabase/supabase /tmp/sb
-mkdir -p "$DIR" && cp -rn /tmp/sb/docker/* "$DIR"/ && cd "$DIR"
+# 注意用 /. 结尾:带上 .env.example 等隐藏文件(* 通配符不匹配点文件)
+mkdir -p "$DIR" && cp -rn /tmp/sb/docker/. "$DIR"/ && cd "$DIR"
 [ -f .env ] || cp .env.example .env
 
 # ---------------------------------------------------------------- 生成密钥
-echo "==> 生成密钥与 JWT"
-JWT_SECRET=$(openssl rand -hex 32)
-PG_PASS=$(openssl rand -hex 16)
-DASH_PASS=$(openssl rand -hex 12)
-
-b64url() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
-sign_jwt() { # $1 = role
-  local now exp h p s
-  now=$(date +%s); exp=$((now + 315360000)) # 10 年
-  h=$(printf '{"alg":"HS256","typ":"JWT"}' | b64url)
-  p=$(printf '{"role":"%s","iss":"supabase","iat":%s,"exp":%s}' "$1" "$now" "$exp" | b64url)
-  s=$(printf '%s.%s' "$h" "$p" | openssl dgst -sha256 -hmac "$JWT_SECRET" -binary | b64url)
-  printf '%s.%s.%s' "$h" "$p" "$s"
-}
-ANON_KEY=$(sign_jwt anon)
-SERVICE_KEY=$(sign_jwt service_role)
-
 set_env() { # KEY VALUE(存在则替换,不存在则追加)
   if grep -q "^$1=" .env; then
     sed -i "s|^$1=.*|$1=$2|" .env
@@ -96,15 +80,47 @@ set_env() { # KEY VALUE(存在则替换,不存在则追加)
     echo "$1=$2" >> .env
   fi
 }
-set_env POSTGRES_PASSWORD "$PG_PASS"
-set_env JWT_SECRET "$JWT_SECRET"
-set_env ANON_KEY "$ANON_KEY"
-set_env SERVICE_ROLE_KEY "$SERVICE_KEY"
-set_env SITE_URL "https://$DOMAIN"
-set_env API_EXTERNAL_URL "https://$DOMAIN"
-set_env SUPABASE_PUBLIC_URL "https://$DOMAIN"
+get_env() { grep "^$1=" .env | head -1 | cut -d= -f2-; }
+
+if [ -f utils/generate-keys.sh ]; then
+  # 新版官方结构(2026):一条命令生成全部密钥(JWT/加密键/DB 与管理台密码)写入 .env
+  echo "==> 生成密钥(官方 utils/generate-keys.sh)"
+  bash utils/generate-keys.sh --update-env >/dev/null
+else
+  # 旧版结构:自签 HS256 JWT
+  echo "==> 生成密钥与 JWT(自签)"
+  JWT_SECRET=$(openssl rand -hex 32)
+  b64url() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+  sign_jwt() { # $1 = role
+    local now exp h p s
+    now=$(date +%s); exp=$((now + 315360000)) # 10 年
+    h=$(printf '{"alg":"HS256","typ":"JWT"}' | b64url)
+    p=$(printf '{"role":"%s","iss":"supabase","iat":%s,"exp":%s}' "$1" "$now" "$exp" | b64url)
+    s=$(printf '%s.%s' "$h" "$p" | openssl dgst -sha256 -hmac "$JWT_SECRET" -binary | b64url)
+    printf '%s.%s.%s' "$h" "$p" "$s"
+  }
+  set_env JWT_SECRET "$JWT_SECRET"
+  set_env ANON_KEY "$(sign_jwt anon)"
+  set_env SERVICE_ROLE_KEY "$(sign_jwt service_role)"
+  set_env POSTGRES_PASSWORD "$(openssl rand -hex 16)"
+  set_env DASHBOARD_PASSWORD "$(openssl rand -hex 12)"
+fi
+JWT_SECRET=$(get_env JWT_SECRET)
+ANON_KEY=$(get_env ANON_KEY)
+SERVICE_KEY=$(get_env SERVICE_ROLE_KEY)
+PG_PASS=$(get_env POSTGRES_PASSWORD)
+DASH_PASS=$(get_env DASHBOARD_PASSWORD)
+
+# 站点 URL:保留上游默认值的路径结构,只替换协议+主机(新版 API_EXTERNAL_URL 可能带 /auth/v1 路径)
+for k in SITE_URL API_EXTERNAL_URL SUPABASE_PUBLIC_URL; do
+  cur=$(get_env "$k")
+  if [ -n "$cur" ]; then
+    set_env "$k" "$(echo "$cur" | sed -E "s|https?://[^/]+|https://$DOMAIN|")"
+  else
+    set_env "$k" "https://$DOMAIN"
+  fi
+done
 set_env DASHBOARD_USERNAME admin
-set_env DASHBOARD_PASSWORD "$DASH_PASS"
 set_env SMTP_HOST "$SMTP_HOST"
 set_env SMTP_PORT "$SMTP_PORT"
 set_env SMTP_USER "$SMTP_USER"
