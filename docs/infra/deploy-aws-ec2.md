@@ -8,15 +8,11 @@
 
 ## ⚡ 快速通道(推荐):一键脚本
 
-手动只需 3 步,其余全部由脚本自动完成(生成密钥/签 JWT/起服务/HTTPS/migration/函数/cron/种子/备份)。
-脚本支持两种模式:**1 = 独立服务器**(全新 EC2,Caddy 自动 HTTPS —— **当前选定方向**,
-2026-07-11 共置方案 A 实测否决,见文末附录)/ **2 = 共置已有 Apache 服务器**(保留能力,备用)。
+手动只需 3 步,其余全部由脚本自动完成(生成密钥/起服务/HTTPS/migration/函数/cron/种子/备份):
 
-独立服务器模式:
-
-1. **开 EC2**(按下方第 1 章:Ubuntu 24.04、t3.medium、安全组只开 22/80/443、绑 Elastic IP);
+1. **开 EC2**(按下方第 1 章:Ubuntu 24.04 ARM、t4g.medium、安全组只开 22/80/443、绑 Elastic IP);
 2. **DNS**:`api.pure-thoughts.com` A 记录指向 Elastic IP;
-3. **SSH 上服务器跑一条命令**,按提示填域名和 SMTP(E5):
+3. **SSH 上服务器跑一条命令**,模式选 `1`,按提示填域名和 SMTP(E5):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/owenwangcong/PureThoughtsApp/master/scripts/deploy/setup-supabase-ec2.sh -o setup.sh
@@ -67,7 +63,9 @@ ssh -i your-key.pem ubuntu@<Elastic IP>
 
 # Docker 官方安装
 curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker ubuntu && newgrp docker
+sudo usermod -aG docker ubuntu
+# ⚠️ 组成员要退出重连 SSH 才生效;不重连的话 docker 命令会报
+#    "permission denied ... docker.sock",临时可在命令前加 sudo
 
 # 基础加固
 sudo apt update && sudo apt install -y unattended-upgrades fail2ban
@@ -95,20 +93,17 @@ bash utils/generate-keys.sh --update-env
 
 (旧结构才需要手动 openssl + 官方网页生成器,已过时。)
 
-### 3.2 编辑 `.env`(核心项)
+### 3.2 编辑 `.env`(生成器没覆盖的部分)
+
+密钥类(POSTGRES_PASSWORD / JWT_SECRET / ANON_KEY / SERVICE_ROLE_KEY / DASHBOARD_PASSWORD)
+已由 3.1 写好,手动只需改:
 
 ```ini
-POSTGRES_PASSWORD=<上面生成>
-JWT_SECRET=<上面生成>
-ANON_KEY=<生成的 anon JWT>
-SERVICE_ROLE_KEY=<生成的 service_role JWT>
-
-SITE_URL=https://api.pure-thoughts.com
-API_EXTERNAL_URL=https://api.pure-thoughts.com
+# 站点 URL:把默认值里的 http://localhost:8000(或 :3000)换成 https://api.pure-thoughts.com,
+# ⚠️ 保留默认值自带的路径(如新版 API_EXTERNAL_URL 带 /auth/v1,只换协议+主机)
+SITE_URL=…
+API_EXTERNAL_URL=…
 SUPABASE_PUBLIC_URL=https://api.pure-thoughts.com
-
-DASHBOARD_USERNAME=admin
-DASHBOARD_PASSWORD=<上面生成>
 
 # 邮件(E5,Resend 示例;SES 同理)
 SMTP_ADMIN_EMAIL=no-reply@pure-thoughts.com
@@ -154,17 +149,22 @@ Studio 管理台:`https://api.pure-thoughts.com`(会弹 Basic Auth,用 DASHBOARD
 
 ## 5. 应用本项目的数据库与函数
 
-### 5.1 跑 migration(从你的 Windows 本机,经 SSH 隧道)
+### 5.1 跑 migration
+
+**脚本路线不需要本节**(脚本在服务器上 `docker exec supabase-db psql` 直接执行,不走网络端口)。
+手动路线、或**以后开发了新 migration 要推生产**时,从 Windows 本机经 SSH 隧道执行——
+5432 故意不对公网开放(防扫描爆破),隧道借已开放的 22 端口建加密通道,是本机进库的唯一方式:
 
 ```powershell
-# 终端 1:开隧道(5432 不对公网开放,这是唯一入库通道)
+# 终端 1:开隧道(把服务器的 5432 映射到本机 55432)
 ssh -i your-key.pem -L 55432:localhost:5432 ubuntu@<Elastic IP>
 
 # 终端 2:项目根目录
 npx supabase db push --db-url "postgresql://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/postgres"
 ```
 
-9 个 migration 会按序执行(全部表/RLS/RPC/触发器/事件类型/Realtime 发布)。
+或不开隧道:SSH 上服务器,`sudo docker exec -i supabase-db psql -U postgres -v ON_ERROR_STOP=1 < xxx.sql`。
+临时用图形工具(pgAdmin/DataGrip)查生产库同样走隧道连 `127.0.0.1:55432`。
 
 ### 5.2 生产种子(只种内容,**不种测试账号**)
 
@@ -289,134 +289,20 @@ flutter run -d R52W809056B `
 
 ---
 
-## 附:方案 A —— 与现有 Bitnami 服务器共置(❌ 2026-07-11 实测否决)
+## 附 A:与旧 Bitnami 服务器共置(❌ 2026-07-11 实测否决)
 
-> **否决原因**:实机为 Ubuntu 16.04 xenial(2021 年 EOL),内核 4.4 时代。Docker 官方源已无
-> xenial 包;即便装旧版 Docker,Supabase 现代镜像(新 glibc 需要 `clone3` 等系统调用)在老内核上
-> 无法可靠运行。**改走方案 B(独立新 EC2,ap-southeast-1 新加坡,与现有服务器同区)**,
-> 即本文正文的标准流程(脚本模式 1)。以下步骤仅留作历史记录。
-> 旧服务器上已签的 api 证书记得清理(DNS 指走后续期会一直失败):
-> `sudo certbot delete --cert-name api.pure-thoughts.com`,并删除 httpd.conf 里的两个 api vhost。
+> **否决原因**:旧服务器为 Ubuntu 16.04 xenial(2021 年 EOL,内核 4.4 时代)。Docker 官方源已无
+> xenial 包;即便装旧版 Docker,Supabase 现代镜像(新 glibc 依赖 `clone3` 等新系统调用)在老内核上
+> 无法可靠运行。改走正文的独立新 EC2 方案。
+> 脚本的模式 2(共置 Apache:预检内存/端口、Kong 改 8010/8453、跳过 Caddy)保留为通用能力;
+> 当时的 certbot/vhost 详细步骤见 git 历史(commit `0e6432c`)。
 
-> 现有服务器:WordPress 主站 + Discuz(bbs)+ FastAPI(127.0.0.1:8000/8001),Bitnami Apache 做前门。
-> API 走子域 `api.pure-thoughts.com`,证书用 **certbot(Let's Encrypt)单独签**,vhost 手动引用
-> (certbot 的 `--apache` 插件识别不了 Bitnami 的非标准布局,所以用 `certonly --webroot` 只取证书,
-> 这也和现有手动证书的管理方式一致)。
-
-### A.0 预检(不满足就别共置)
+**旧服务器待清理**(DNS 指向新机之后):
 
 ```bash
-free -h        # available ≥ 3GB,否则 Supabase 会把主站一起拖垮 → 先升配或改方案 B
-ss -ltn        # 确认 8010 / 8453 / 4000 / 5432 / 6543 空闲(一键脚本也会自动检查)
+sudo certbot delete --cert-name api.pure-thoughts.com   # 否则续期失败会一直发告警邮件
+# 并删除 httpd.conf 里新增的两个 api.pure-thoughts.com vhost,重启 Apache
 ```
-
-⚠️ 红线复核:该服务器必须在**中国大陆境外**(PRD §12.5)。
-
-### A.1 DNS
-
-`api.pure-thoughts.com` A 记录 → 本机公网 IP(与主站同 IP)。
-
-### A.2 先建 80 端口 vhost(供 certbot 验证 + 强制跳 HTTPS)
-
-ACME 验证用**专用目录 + Alias + 显式放行**(不要用 htdocs 当 webroot——会被
-WordPress 重写规则或目录权限拦成 403):
-
-```bash
-sudo mkdir -p /opt/bitnami/letsencrypt
-```
-
-加到 `/opt/bitnami/apache/conf/httpd.conf` 末尾(或 vhosts 目录):
-
-```apache
-<VirtualHost *:80>
-    ServerName api.pure-thoughts.com
-    DocumentRoot "/opt/bitnami/apache/htdocs"
-
-    # ACME 验证:专用目录,显式放行
-    Alias /.well-known/acme-challenge/ "/opt/bitnami/letsencrypt/.well-known/acme-challenge/"
-    <Directory "/opt/bitnami/letsencrypt/.well-known/acme-challenge">
-        Options None
-        AllowOverride None
-        Require all granted
-    </Directory>
-
-    RewriteEngine On
-    # ACME 验证路径放行,其余全部跳 HTTPS
-    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
-    RewriteRule ^(.*)$ https://api.pure-thoughts.com$1 [R=301,L]
-</VirtualHost>
-```
-
-重启后**先手动自测再跑 certbot**(Let's Encrypt 对失败验证有频率限制):
-
-```bash
-sudo /opt/bitnami/ctlscript.sh restart apache
-sudo mkdir -p /opt/bitnami/letsencrypt/.well-known/acme-challenge
-echo ok | sudo tee /opt/bitnami/letsencrypt/.well-known/acme-challenge/test.txt
-curl -s http://api.pure-thoughts.com/.well-known/acme-challenge/test.txt   # 必须输出 ok
-sudo rm /opt/bitnami/letsencrypt/.well-known/acme-challenge/test.txt
-```
-
-### A.3 certbot 签证书(webroot 方式)
-
-```bash
-sudo apt install -y certbot
-sudo certbot certonly --webroot -w /opt/bitnami/letsencrypt \
-  -d api.pure-thoughts.com --agree-tos --no-eff-email -m <你的邮箱>
-
-# 续期后自动重启 Apache(Debian/Ubuntu 的 certbot 自带 systemd timer,每日自动检查续期)
-sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-apache.sh >/dev/null <<'EOF'
-#!/bin/bash
-/opt/bitnami/ctlscript.sh restart apache
-EOF
-sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-apache.sh
-sudo certbot renew --dry-run   # 验证续期链路通
-```
-
-证书落在 `/etc/letsencrypt/live/api.pure-thoughts.com/`(`fullchain.pem` + `privkey.pem`),以后不用手动换证书。
-
-### A.4 跑一键脚本,模式选 **2**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/owenwangcong/PureThoughtsApp/master/scripts/deploy/setup-supabase-ec2.sh -o setup.sh
-bash setup.sh    # 模式填 2;自动设 KONG_HTTP_PORT=8010 / KONG_HTTPS_PORT=8453,跳过 Caddy
-```
-
-### A.5 加 443 vhost(反代到 Kong 8010)
-
-```apache
-<VirtualHost *:443>
-    ServerName api.pure-thoughts.com
-    SSLEngine on
-    SSLCertificateFile    "/etc/letsencrypt/live/api.pure-thoughts.com/fullchain.pem"
-    SSLCertificateKeyFile "/etc/letsencrypt/live/api.pure-thoughts.com/privkey.pem"
-
-    ProxyPreserveHost On
-    ProxyRequests Off
-    ProxyTimeout 120
-
-    # Realtime WebSocket(须在通用规则之前)
-    RewriteEngine On
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule ^/(.*) ws://127.0.0.1:8010/$1 [P,L]
-
-    ProxyPass        / http://127.0.0.1:8010/
-    ProxyPassReverse / http://127.0.0.1:8010/
-</VirtualHost>
-```
-
-需要的模块:`mod_proxy` / `mod_proxy_http` / `mod_proxy_wstunnel` / `mod_rewrite` / `mod_ssl`。
-Bitnami 默认已载入前后四个;若 `proxy_wstunnel` 没开,在 httpd.conf 打开对应 `LoadModule` 行。
-
-```bash
-sudo /opt/bitnami/ctlscript.sh restart apache
-curl https://api.pure-thoughts.com/auth/v1/health   # 应返回 GoTrue 信息
-```
-
-然后按第 9 章验收清单逐项验证。
-注:pg_cron 的探测 URL 用容器内部 `http://kong:8000` 不变,无需调整;
-Studio 管理台即 `https://api.pure-thoughts.com`(Basic Auth,凭据在脚本输出文件里)。
 
 ---
 
