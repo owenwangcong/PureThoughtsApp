@@ -30,7 +30,7 @@
 
 | # | 依赖 | 用于 | 阻塞任务 | 状态 |
 |---|---|---|---|:---:|
-| E1 | 境外服务器 | 自托管 Supabase | P0.1, P0.2 | 🔄 2026-07-11 定向:**共置现有 pure-thoughts.com 服务器(方案 A)**,步骤见 deploy 文档附录;跑脚本前须过预检(available ≥ 3GB、端口空闲)并**确认服务器在大陆境外**(红线) |
+| E1 | 境外服务器 | 自托管 Supabase | P0.1, P0.2 | 🔄 2026-07-11:共置方案 A **实测否决**(现有服务器为 Ubuntu 16.04 EOL,老内核跑不动 Supabase 镜像);**改方案 B:新开 EC2(Ubuntu 24.04,t3.medium,ap-southeast-1 新加坡,与现有服务器同区)**,待开机 + 跑脚本模式 1;区域境外红线已确认 ✅(现有服务器实测在新加坡) |
 | E2 | 域名 | TLS / 自有 API 地址 | P0.2 | ✅ 2026-07-10:`pure-thoughts.com`(现有,含 WordPress 主站/Discuz/FastAPI);API 用子域 `api.pure-thoughts.com`;2026-07-11:api 证书用 certbot(webroot 方式,兼容 Bitnami Apache,自动续期) |
 | E3 | Apple Developer 账号(个人或组织,99 USD/年) | Sign in with Apple、APNs、TestFlight | P0.3, P2.1, P1.10 | ⬜ |
 | E4 | Google Cloud / Firebase 项目 | Google OAuth、FCM | P0.3, P2.1 | ⬜ |

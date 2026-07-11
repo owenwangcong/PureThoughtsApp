@@ -9,8 +9,8 @@
 ## ⚡ 快速通道(推荐):一键脚本
 
 手动只需 3 步,其余全部由脚本自动完成(生成密钥/签 JWT/起服务/HTTPS/migration/函数/cron/种子/备份)。
-脚本支持两种模式:**1 = 独立服务器**(全新 EC2,Caddy 自动 HTTPS)/ **2 = 共置已有 Apache 服务器**
-(Bitnami,跳过 Caddy、Kong 走 8010,证书与 vhost 见文末附录方案 A —— **当前选定方向**)。
+脚本支持两种模式:**1 = 独立服务器**(全新 EC2,Caddy 自动 HTTPS —— **当前选定方向**,
+2026-07-11 共置方案 A 实测否决,见文末附录)/ **2 = 共置已有 Apache 服务器**(保留能力,备用)。
 
 独立服务器模式:
 
@@ -288,7 +288,14 @@ flutter run -d R52W809056B `
 
 ---
 
-## 附:方案 A —— 与现有 Bitnami 服务器共置(2026-07-11 选定方向)
+## 附:方案 A —— 与现有 Bitnami 服务器共置(❌ 2026-07-11 实测否决)
+
+> **否决原因**:实机为 Ubuntu 16.04 xenial(2021 年 EOL),内核 4.4 时代。Docker 官方源已无
+> xenial 包;即便装旧版 Docker,Supabase 现代镜像(新 glibc 需要 `clone3` 等系统调用)在老内核上
+> 无法可靠运行。**改走方案 B(独立新 EC2,ap-southeast-1 新加坡,与现有服务器同区)**,
+> 即本文正文的标准流程(脚本模式 1)。以下步骤仅留作历史记录。
+> 旧服务器上已签的 api 证书记得清理(DNS 指走后续期会一直失败):
+> `sudo certbot delete --cert-name api.pure-thoughts.com`,并删除 httpd.conf 里的两个 api vhost。
 
 > 现有服务器:WordPress 主站 + Discuz(bbs)+ FastAPI(127.0.0.1:8000/8001),Bitnami Apache 做前门。
 > API 走子域 `api.pure-thoughts.com`,证书用 **certbot(Let's Encrypt)单独签**,vhost 手动引用
