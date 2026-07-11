@@ -103,14 +103,24 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
         "document.body.style.zoom='${scale.toStringAsFixed(2)}'");
   }
 
-  /// Webex 访客名预填:SPA 渲染较晚,页面完成后多次尝试注入。
-  /// 页面结构变化时静默失效(用户手动填,WebView 会记住)。
+  /// Webex 页面自动化(SPA 渲染较晚,页面完成后按梯次多次执行):
+  /// 1. 自动点击"从浏览器加入"跳过下载页(2026-07-11 实测 JS click 有效);
+  /// 2. 访客名预填尽力而为——目前访客表单在 web.webex.com 跨域 iframe 内,
+  ///    主文档注入触不到,靠表单自带"Remember me"(默认勾选)记忆;
+  ///    保留注入以兼容未来同域渲染。页面结构变化时静默失效。
   void _schedulePrefill() {
-    final name = widget.prefillName;
-    if (!_isWebex || name == null || name.isEmpty) return;
-    final safe = name.replaceAll('\\', r'\\').replaceAll("'", r"\'");
+    if (!_isWebex) return;
+    final safe = (widget.prefillName ?? '')
+        .replaceAll('\\', r'\\')
+        .replaceAll("'", r"\'");
     final js = """
 (function() {
+  document.querySelectorAll('button').forEach(function(b) {
+    var t = (b.textContent || '').trim().toLowerCase();
+    if (t.indexOf('browser') !== -1 || t.indexOf('瀏覽器') !== -1 || t.indexOf('浏览器') !== -1) b.click();
+  });
+  var name = '$safe';
+  if (!name) return;
   var inp = document.querySelector('input#guest_name')
     || document.querySelector('input[name="guestName"]')
     || document.querySelector('input[data-test="guest-name-input"]')
@@ -119,13 +129,18 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
     || document.querySelector('input[type="text"]');
   if (inp && !inp.value) {
     var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-    setter.call(inp, '$safe');
+    setter.call(inp, name);
     inp.dispatchEvent(new Event('input', {bubbles: true}));
     inp.dispatchEvent(new Event('change', {bubbles: true}));
   }
 })();
 """;
-    for (final delay in const [Duration.zero, Duration(seconds: 2), Duration(seconds: 5)]) {
+    for (final delay in const [
+      Duration.zero,
+      Duration(seconds: 2),
+      Duration(seconds: 5),
+      Duration(seconds: 9),
+    ]) {
       _timers.add(Timer(delay, () {
         if (mounted) _controller.runJavaScript(js).ignore();
       }));

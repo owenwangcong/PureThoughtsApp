@@ -9,8 +9,34 @@ import '../../l10n/gen/app_localizations.dart';
 
 /// App 内 YouTube 播放(直播与回看共用;PRD §6 YouTube 内嵌播放)。
 /// 注:受 YouTube ToS 限制不做后台/息屏播放(PRD §8)。
-/// 频道未开"允许嵌入"等情况 iframe 会拒播(错误 101/150),
-/// 此时给出网页观看 / YouTube App 两个备用入口。
+/// 播放器被拒(101/150 嵌入受限、153 无有效 Referer 等)时,
+/// 给出网页观看 / YouTube App 两个备用入口。
+class _RefererFixedController extends YoutubePlayerController {
+  // YouTube 2025 起拒绝无 Referer / 冒充 youtube.com 来源的嵌入(错误 153,
+  // 实测浏览器直开 /embed 同样报 153,带真实站点 Referer 的 iframe 则正常播)。
+  // 包 5.2.2 的 origin 参数同时充当 baseUrl(Referer)与 YT.Player host,无法分开:
+  // origin=null 让 playerVars 不带 origin、host 落默认 youtube.com,
+  // 再覆写 load() 把 baseUrl 固定为本项目域名,构成"真实 Referer + 官方 host"组合。
+  _RefererFixedController()
+      : super(
+          params: const YoutubePlayerParams(
+            origin: null,
+            showFullscreenButton: true,
+            strictRelatedVideos: true,
+          ),
+        );
+
+  @override
+  Future<void> load({
+    required YoutubePlayerParams params,
+    String? baseUrl,
+    String id = 'player',
+  }) {
+    return super.load(
+        params: params, baseUrl: 'https://pure-thoughts.com', id: id);
+  }
+}
+
 class VideoPlayerScreen extends StatefulWidget {
   const VideoPlayerScreen({super.key, required this.videoId});
 
@@ -30,14 +56,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController.fromVideoId(
-      videoId: widget.videoId,
-      autoPlay: true,
-      params: const YoutubePlayerParams(
-        showFullscreenButton: true,
-        strictRelatedVideos: true,
-      ),
-    );
+    _controller = _RefererFixedController();
+    _controller.loadVideoById(videoId: widget.videoId);
     _sub = _controller.stream.listen((v) {
       if (v.error != YoutubeError.none && v.error != _error && mounted) {
         setState(() => _error = v.error);

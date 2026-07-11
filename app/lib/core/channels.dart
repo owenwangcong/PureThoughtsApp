@@ -2,12 +2,9 @@
 abstract final class Channels {
   static const youtubeChannelUrl = 'https://www.youtube.com/@善護念';
   static const youtubeLiveUrl = 'https://www.youtube.com/@善護念/live';
+  // 应用内加入也用 join 链接:桌面 UA 下它给出"从浏览器加入"入口,由
+  // WebViewScreen 自动点击直达访客表单(2026-07-11 实测;webappng landing
+  // 直链没有会话上下文会被弹回营销页,不可用)
   static const webexJoinUrl = 'https://purethoughts.my.webex.com/join/Shanhunian';
-
-  /// Webex 網頁客戶端訪客直達入口(免 App 下載頁,應用內加入用):
-  /// uuid = 固定個人會議室的會議 UUID(取自 join 鏈接跳轉頁);房間更換時需同步更新
-  static const webexWebClientUrl =
-      'https://purethoughts.my.webex.com/webappng/sites/purethoughts.my/dashboard/landing'
-      '?siteurl=purethoughts.my&type=Attendee&uuid=82acaa3f02a24c34ac261094bd05654a';
   static const scripturesUrl = 'https://qldazangjing.com/'; // 乾隆大藏經(E9)
 }

@@ -28,7 +28,7 @@ Future<void> openWebexInApp(
     queryParameters: {
       'url': url,
       'title': 'Webex',
-      // 右上角"外部打開"仍用 join 鏈接(可喚起 Webex App,用户定案永久保留)
+      // 右上角"外部打開"用 join 鏈接(可喚起 Webex App,用户定案永久保留)
       'ext': Channels.webexJoinUrl,
       if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
     },
