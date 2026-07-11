@@ -8,10 +8,14 @@
 
 ## ⚡ 快速通道(推荐):一键脚本
 
-手动只需 3 步,其余全部由脚本自动完成(生成密钥/签 JWT/起服务/HTTPS/migration/函数/cron/种子/备份):
+手动只需 3 步,其余全部由脚本自动完成(生成密钥/签 JWT/起服务/HTTPS/migration/函数/cron/种子/备份)。
+脚本支持两种模式:**1 = 独立服务器**(全新 EC2,Caddy 自动 HTTPS)/ **2 = 共置已有 Apache 服务器**
+(Bitnami,跳过 Caddy、Kong 走 8010,证书与 vhost 见文末附录方案 A —— **当前选定方向**)。
+
+独立服务器模式:
 
 1. **开 EC2**(按下方第 1 章:Ubuntu 24.04、t3.medium、安全组只开 22/80/443、绑 Elastic IP);
-2. **DNS**:`api.你的域名` A 记录指向 Elastic IP;
+2. **DNS**:`api.pure-thoughts.com` A 记录指向 Elastic IP;
 3. **SSH 上服务器跑一条命令**,按提示填域名和 SMTP(E5):
 
 ```bash
@@ -29,7 +33,7 @@ bash setup.sh
 | 项 | 说明 |
 |---|---|
 | AWS 账号 | 可开 EC2 的权限 |
-| 域名(E2) | 例:`purethoughts.app`,API 用子域 `api.purethoughts.app` |
+| 域名(E2) | ✅ `pure-thoughts.com`(现有),API 用子域 `api.pure-thoughts.com`,证书 certbot 单独签 |
 | 发信服务(E5) | Resend 或 AWS SES 的 SMTP 凭据(注册验证邮件必需) |
 | 本机 | 本仓库 + `npx supabase` CLI(已具备) |
 
@@ -50,7 +54,7 @@ bash setup.sh
    | 80 | 0.0.0.0/0 | TLS 签发(HTTP 挑战) |
    | 443 | 0.0.0.0/0 | API(唯一对外入口) |
 5. 分配 **Elastic IP** 并绑定实例。
-6. DNS:在域名商处加 A 记录 `api.purethoughts.app → <Elastic IP>`。
+6. DNS:在域名商处加 A 记录 `api.pure-thoughts.com → <Elastic IP>`。
 
 ---
 
@@ -98,15 +102,15 @@ JWT_SECRET=<上面生成>
 ANON_KEY=<生成的 anon JWT>
 SERVICE_ROLE_KEY=<生成的 service_role JWT>
 
-SITE_URL=https://api.purethoughts.app
-API_EXTERNAL_URL=https://api.purethoughts.app
-SUPABASE_PUBLIC_URL=https://api.purethoughts.app
+SITE_URL=https://api.pure-thoughts.com
+API_EXTERNAL_URL=https://api.pure-thoughts.com
+SUPABASE_PUBLIC_URL=https://api.pure-thoughts.com
 
 DASHBOARD_USERNAME=admin
 DASHBOARD_PASSWORD=<上面生成>
 
 # 邮件(E5,Resend 示例;SES 同理)
-SMTP_ADMIN_EMAIL=no-reply@purethoughts.app
+SMTP_ADMIN_EMAIL=no-reply@pure-thoughts.com
 SMTP_HOST=smtp.resend.com
 SMTP_PORT=465
 SMTP_USER=resend
@@ -134,15 +138,15 @@ docker compose ps   # 全部 healthy 才算成
 ```bash
 sudo apt install -y caddy
 sudo tee /etc/caddy/Caddyfile > /dev/null <<'EOF'
-api.purethoughts.app {
+api.pure-thoughts.com {
     reverse_proxy localhost:8000
 }
 EOF
 sudo systemctl restart caddy
 ```
 
-验证:`curl https://api.purethoughts.app/auth/v1/health` 应返回 GoTrue 信息。
-Studio 管理台:`https://api.purethoughts.app`(会弹 Basic Auth,用 DASHBOARD_USERNAME/PASSWORD)。
+验证:`curl https://api.pure-thoughts.com/auth/v1/health` 应返回 GoTrue 信息。
+Studio 管理台:`https://api.pure-thoughts.com`(会弹 Basic Auth,用 DASHBOARD_USERNAME/PASSWORD)。
 **不要**把 Studio 分享给任何人;需要更严可在 Caddy 里对 `/project/*` 加 IP 白名单。
 
 ---
@@ -183,7 +187,7 @@ git clone --depth 1 https://github.com/owenwangcong/PureThoughtsApp /tmp/app
 cp -r /tmp/app/supabase/functions/* volumes/functions/
 docker compose restart functions
 # 验证
-curl -X POST https://api.purethoughts.app/functions/v1/live-probe \
+curl -X POST https://api.pure-thoughts.com/functions/v1/live-probe \
   -H "Authorization: Bearer <ANON_KEY>" -H "apikey: <ANON_KEY>"
 ```
 
@@ -241,7 +245,7 @@ sudo chmod +x /usr/local/bin/pt-backup.sh
 
 ## 7. 监控(P0.5)
 
-- **UptimeRobot(免费)**:监控 `https://api.purethoughts.app/auth/v1/health`,邮件告警。
+- **UptimeRobot(免费)**:监控 `https://api.pure-thoughts.com/auth/v1/health`,邮件告警。
 - **CloudWatch**:EC2 磁盘 >80%、CPU >90% 各设一条告警。
 
 ---
@@ -253,7 +257,7 @@ sudo chmod +x /usr/local/bin/pt-backup.sh
 Codemagic 控制台 → 项目环境变量组 `production`:
 
 ```
-SUPABASE_URL      = https://api.purethoughts.app
+SUPABASE_URL      = https://api.pure-thoughts.com
 SUPABASE_ANON_KEY = <生产 ANON_KEY>
 SENTRY_DSN        = (可选)
 ```
@@ -265,7 +269,7 @@ SENTRY_DSN        = (可选)
 ```powershell
 cd app
 flutter run -d R52W809056B `
-  --dart-define=SUPABASE_URL=https://api.purethoughts.app `
+  --dart-define=SUPABASE_URL=https://api.pure-thoughts.com `
   --dart-define=SUPABASE_ANON_KEY=<生产 ANON_KEY>
 ```
 
@@ -284,27 +288,82 @@ flutter run -d R52W809056B `
 
 ---
 
-## 附:方案 A —— 与现有 Bitnami 服务器共置(备选,省一台机器)
+## 附:方案 A —— 与现有 Bitnami 服务器共置(2026-07-11 选定方向)
 
-> 现有服务器跑着 WordPress + Discuz + FastAPI(占用 8000/8001)。共置的前提:
-> `free -h` 显示**空闲内存 ≥ 3GB**,且现有证书为通配符(`*.pure-thoughts.com`),否则为
-> api 子域单独 certbot 签一张。风险自担:内存压力与安全爆破半径共享。
+> 现有服务器:WordPress 主站 + Discuz(bbs)+ FastAPI(127.0.0.1:8000/8001),Bitnami Apache 做前门。
+> API 走子域 `api.pure-thoughts.com`,证书用 **certbot(Let's Encrypt)单独签**,vhost 手动引用
+> (certbot 的 `--apache` 插件识别不了 Bitnami 的非标准布局,所以用 `certonly --webroot` 只取证书,
+> 这也和现有手动证书的管理方式一致)。
 
-1. **避开端口冲突**:Supabase `.env` 中设 `KONG_HTTP_PORT=8010`(FastAPI 已占 8000/8001)。
-   一键脚本跑之前先改,或跑完后改 + `docker compose up -d`;**跳过脚本的 Caddy 部分**(Apache 代替)。
-2. **DNS**:`api.pure-thoughts.com` A 记录指向本机。
-3. **Apache vhost**(加到 httpd.conf 末尾,证书路径按实际):
+### A.0 预检(不满足就别共置)
+
+```bash
+free -h        # available ≥ 3GB,否则 Supabase 会把主站一起拖垮 → 先升配或改方案 B
+ss -ltn        # 确认 8010 / 8453 / 4000 / 5432 / 6543 空闲(一键脚本也会自动检查)
+```
+
+⚠️ 红线复核:该服务器必须在**中国大陆境外**(PRD §12.5)。
+
+### A.1 DNS
+
+`api.pure-thoughts.com` A 记录 → 本机公网 IP(与主站同 IP)。
+
+### A.2 先建 80 端口 vhost(供 certbot 验证 + 强制跳 HTTPS)
+
+加到 `/opt/bitnami/apache/conf/httpd.conf` 末尾(或 vhosts 目录):
+
+```apache
+<VirtualHost *:80>
+    ServerName api.pure-thoughts.com
+    DocumentRoot "/opt/bitnami/apache/htdocs"
+    RewriteEngine On
+    # ACME 验证路径放行,其余全部跳 HTTPS
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule ^(.*)$ https://api.pure-thoughts.com$1 [R=301,L]
+</VirtualHost>
+```
+
+```bash
+sudo /opt/bitnami/ctlscript.sh restart apache
+```
+
+### A.3 certbot 签证书(webroot 方式)
+
+```bash
+sudo apt install -y certbot
+sudo certbot certonly --webroot -w /opt/bitnami/apache/htdocs \
+  -d api.pure-thoughts.com --agree-tos --no-eff-email -m <你的邮箱>
+
+# 续期后自动重启 Apache(Debian/Ubuntu 的 certbot 自带 systemd timer,每日自动检查续期)
+sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-apache.sh >/dev/null <<'EOF'
+#!/bin/bash
+/opt/bitnami/ctlscript.sh restart apache
+EOF
+sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-apache.sh
+sudo certbot renew --dry-run   # 验证续期链路通
+```
+
+证书落在 `/etc/letsencrypt/live/api.pure-thoughts.com/`(`fullchain.pem` + `privkey.pem`),以后不用手动换证书。
+
+### A.4 跑一键脚本,模式选 **2**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/owenwangcong/PureThoughtsApp/master/scripts/deploy/setup-supabase-ec2.sh -o setup.sh
+bash setup.sh    # 模式填 2;自动设 KONG_HTTP_PORT=8010 / KONG_HTTPS_PORT=8453,跳过 Caddy
+```
+
+### A.5 加 443 vhost(反代到 Kong 8010)
 
 ```apache
 <VirtualHost *:443>
     ServerName api.pure-thoughts.com
     SSLEngine on
-    SSLCertificateFile      "/path/to/cert.crt"
-    SSLCertificateKeyFile   "/path/to/key"
-    SSLCertificateChainFile "/path/to/ca-bundle"
+    SSLCertificateFile    "/etc/letsencrypt/live/api.pure-thoughts.com/fullchain.pem"
+    SSLCertificateKeyFile "/etc/letsencrypt/live/api.pure-thoughts.com/privkey.pem"
 
     ProxyPreserveHost On
     ProxyRequests Off
+    ProxyTimeout 120
 
     # Realtime WebSocket(须在通用规则之前)
     RewriteEngine On
@@ -317,8 +376,17 @@ flutter run -d R52W809056B `
 </VirtualHost>
 ```
 
-4. `sudo /opt/bitnami/ctlscript.sh restart apache`,然后按第 9 章验收清单逐项验证。
-   注:pg_cron 的探测 URL 用容器内部 `http://kong:8000` 不变,无需调整。
+需要的模块:`mod_proxy` / `mod_proxy_http` / `mod_proxy_wstunnel` / `mod_rewrite` / `mod_ssl`。
+Bitnami 默认已载入前后四个;若 `proxy_wstunnel` 没开,在 httpd.conf 打开对应 `LoadModule` 行。
+
+```bash
+sudo /opt/bitnami/ctlscript.sh restart apache
+curl https://api.pure-thoughts.com/auth/v1/health   # 应返回 GoTrue 信息
+```
+
+然后按第 9 章验收清单逐项验证。
+注:pg_cron 的探测 URL 用容器内部 `http://kong:8000` 不变,无需调整;
+Studio 管理台即 `https://api.pure-thoughts.com`(Basic Auth,凭据在脚本输出文件里)。
 
 ---
 

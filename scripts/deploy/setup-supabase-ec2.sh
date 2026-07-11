@@ -1,14 +1,20 @@
 #!/bin/bash
 # ============================================================================
-# 善护念 PureThoughts · 自托管 Supabase 一键部署(Ubuntu 24.04,AWS EC2)
+# 善护念 PureThoughts · 自托管 Supabase 一键部署
 #
-# 前提:1) EC2 已开(安全组只开 22/80/443)  2) 域名 A 记录已指向本机公网 IP
+# 两种模式:
+#   1 = 独立服务器(Ubuntu 24.04 全新 EC2):自动装 Caddy,HTTPS 全自动
+#   2 = 共置已有 Apache 服务器(如 Bitnami):跳过 Caddy,Kong 改端口 8010,
+#       证书用 certbot、vhost 手动配(步骤见 docs/infra/deploy-aws-ec2.md 附录方案 A)
+#
+# 前提:1) 域名 A 记录已指向本机公网 IP  2) 独立模式:安全组只开 22/80/443
 # 用法:ssh 到服务器后执行
-#   curl -fsSL https://raw.githubusercontent.com/owenwangcong/PureThoughtsApp/master/scripts/deploy/setup-supabase-ec2.sh | bash
-# 或把本文件拷上去 bash 运行。全程约 5-10 分钟。
+#   curl -fsSL https://raw.githubusercontent.com/owenwangcong/PureThoughtsApp/master/scripts/deploy/setup-supabase-ec2.sh -o setup.sh
+#   bash setup.sh
+# 全程约 5-10 分钟。
 #
 # 自动完成:Docker + Supabase(官方 compose)+ 密钥生成(含 JWT 签名)
-#   + Caddy HTTPS + 本项目 9 个 migration + 2 个 Edge Function
+#   + HTTPS(模式 1)+ 本项目全部 migration + Edge Functions
 #   + pg_cron 开播探测 + 生产内容种子 + 每日备份
 # ============================================================================
 set -euo pipefail
@@ -19,13 +25,32 @@ DIR="$HOME/purethoughts"
 echo "=============================================="
 echo " 善护念 Supabase 一键部署"
 echo "=============================================="
-read -rp "API 域名(A 记录须已指向本机,如 api.purethoughts.app): " DOMAIN
+read -rp "部署模式 [1=独立服务器(Caddy 自动 HTTPS) 2=共置已有 Apache(Bitnami)] [1]: " MODE
+MODE=${MODE:-1}
+read -rp "API 域名(A 记录须已指向本机,如 api.pure-thoughts.com): " DOMAIN
 read -rp "SMTP 主机(如 smtp.resend.com): " SMTP_HOST
 read -rp "SMTP 端口 [465]: " SMTP_PORT; SMTP_PORT=${SMTP_PORT:-465}
 read -rp "SMTP 用户名(Resend 填 resend): " SMTP_USER
 read -rsp "SMTP 密码/API Key: " SMTP_PASS; echo
 read -rp "发件邮箱(如 no-reply@purethoughts.app): " SMTP_FROM
 read -rp "S3 备份桶名(留空则仅备份到本机 ~/backups): " S3_BUCKET
+
+# ---------------------------------------------------------------- 共置模式预检
+if [ "$MODE" = "2" ]; then
+  echo "==> 共置模式预检(内存 / 端口)"
+  AVAIL_MB=$(awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo)
+  if [ "$AVAIL_MB" -lt 3000 ]; then
+    echo "❌ 可用内存仅 ${AVAIL_MB}MB(< 3GB)。共置 Supabase 会把主站一起拖垮,请先升配或改用独立服务器。"
+    exit 1
+  fi
+  for p in 8010 8453 4000 5432 6543; do
+    if ss -ltn "sport = :$p" 2>/dev/null | grep -q LISTEN; then
+      echo "❌ 端口 $p 已被占用(ss -ltn 查看)。请释放或改 .env 后重跑。"
+      exit 1
+    fi
+  done
+  echo "    可用内存 ${AVAIL_MB}MB,端口 8010/8453/4000/5432/6543 空闲 ✓"
+fi
 
 # ---------------------------------------------------------------- 依赖
 if ! command -v docker >/dev/null; then
@@ -34,7 +59,11 @@ if ! command -v docker >/dev/null; then
   sudo usermod -aG docker "$USER"
 fi
 sudo apt-get update -qq
-sudo apt-get install -y -qq caddy git openssl >/dev/null
+if [ "$MODE" = "1" ]; then
+  sudo apt-get install -y -qq caddy git openssl >/dev/null
+else
+  sudo apt-get install -y -qq git openssl >/dev/null
+fi
 
 # ---------------------------------------------------------------- 取官方 compose
 echo "==> 下载 Supabase 官方 Docker 配置"
@@ -83,6 +112,11 @@ set_env SMTP_PASS "$SMTP_PASS"
 set_env SMTP_ADMIN_EMAIL "$SMTP_FROM"
 set_env SMTP_SENDER_NAME "PureThoughts"
 set_env ENABLE_EMAIL_AUTOCONFIRM false
+if [ "$MODE" = "2" ]; then
+  # 共置:避开 FastAPI 的 8000 与 Bitnami Apache 的 8443
+  set_env KONG_HTTP_PORT 8010
+  set_env KONG_HTTPS_PORT 8453
+fi
 
 # ---------------------------------------------------------------- 本项目:函数 + SQL
 echo "==> 拉取应用仓库(migration / Edge Functions)"
@@ -155,13 +189,17 @@ select cron.schedule('live-probe-5min', '*/5 * * * *', \$\$
 SQL
 
 # ---------------------------------------------------------------- HTTPS
-echo "==> 配置 Caddy(自动 HTTPS)"
-sudo tee /etc/caddy/Caddyfile >/dev/null <<EOF
+if [ "$MODE" = "1" ]; then
+  echo "==> 配置 Caddy(自动 HTTPS)"
+  sudo tee /etc/caddy/Caddyfile >/dev/null <<EOF
 $DOMAIN {
     reverse_proxy localhost:8000
 }
 EOF
-sudo systemctl restart caddy
+  sudo systemctl restart caddy
+else
+  echo "==> 共置模式:跳过 Caddy。请按文档附录方案 A 配置 certbot 证书 + Apache vhost(反代 127.0.0.1:8010)"
+fi
 
 # ---------------------------------------------------------------- 备份
 echo "==> 安装每日备份(03:00)"
@@ -196,6 +234,12 @@ echo " ✅ 部署完成"
 echo "=============================================="
 echo " 凭据已写入 $CREDS(读完请删除)"
 echo ""
+if [ "$MODE" = "2" ]; then
+  echo " ⚠️ 共置模式:Supabase 已在 127.0.0.1:8010 运行,但还没有对外入口。"
+  echo "    请按 docs/infra/deploy-aws-ec2.md 附录方案 A 完成:"
+  echo "    certbot 签发 $DOMAIN 证书 → Apache 加 80/443 vhost → 重启 Apache"
+  echo ""
+fi
 echo " 验证:  curl https://$DOMAIN/auth/v1/health"
 echo ""
 echo " 剩余 3 步(见 docs/infra/deploy-aws-ec2.md):"
