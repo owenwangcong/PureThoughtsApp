@@ -1,4 +1,4 @@
-package com.purethoughts.pure_thoughts
+package com.aeonlectron.purethoughts
 
 import io.flutter.embedding.android.FlutterActivity
 

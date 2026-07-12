@@ -14,7 +14,7 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.purethoughts.pure_thoughts"
+    namespace = "com.aeonlectron.purethoughts"
     // sentry_flutter 要求 compileSdk 36;just_audio/wakelock_plus 等要求 NDK 27
     compileSdk = 36
     ndkVersion = "27.0.12077973"
@@ -29,8 +29,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.purethoughts.pure_thoughts"
+        // 与 iOS bundle id / App Store Connect 注册保持一致(com.aeonlectron.*)
+        applicationId = "com.aeonlectron.purethoughts"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24 // audio_session(just_audio 依赖)要求 Android 7.0+

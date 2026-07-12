@@ -59,7 +59,7 @@
 - [ ] **P0.3** Auth 配置(M)— **用户名+密码注册登录**(PRD v0.5.9:免邮箱验证,生产 `ENABLE_EMAIL_AUTOCONFIRM=true`);SMTP(E5)降级为重置密码/邮件兜底用,非注册阻塞;Google/Apple 登录移出 MVP。验收:纯用户名与真实邮箱两种形式均能注册并立即登录;填了恢复邮箱的账号能收到重置邮件。
 - [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。
 - [ ] **P0.5** 监控告警(S)— Uptime 监控 + 磁盘/CPU 告警。验收:模拟宕机能收到告警。
-- [x] **P0.6** Flutter 工程骨架(M)— `app/`(org com.purethoughts,iOS+Android):Riverpod 3 + go_router + supabase_flutter 2.15 + gen-l10n(zh_Hant 默认/zh_Hans/zh 回退)+ 全局字号缩放(0.8–2.0 与系统叠乘)+ sentry(DSN 为空不启用)+ dart-define 环境配置(默认本地栈)。验收 ✅ 2026-07-07:冒烟测试匿名读到 5 条全局功课清单、报数表被拒;`analyze` 0 issue;单测 4/4;debug APK 构建通过。注:真机/模拟器跑通放在 P1.1 随 Auth 界面一起验证;Android 模拟器连本地栈用 `10.0.2.2:54321`。
+- [x] **P0.6** Flutter 工程骨架(M)— `app/`(应用 ID `com.aeonlectron.purethoughts`,2026-07-12 由 com.purethoughts 改名对齐 App Store Connect 注册,iOS+Android):Riverpod 3 + go_router + supabase_flutter 2.15 + gen-l10n(zh_Hant 默认/zh_Hans/zh 回退)+ 全局字号缩放(0.8–2.0 与系统叠乘)+ sentry(DSN 为空不启用)+ dart-define 环境配置(默认本地栈)。验收 ✅ 2026-07-07:冒烟测试匿名读到 5 条全局功课清单、报数表被拒;`analyze` 0 issue;单测 4/4;debug APK 构建通过。注:真机/模拟器跑通放在 P1.1 随 Auth 界面一起验证;Android 模拟器连本地栈用 `10.0.2.2:54321`。
 - [x] **P0.7** 数据库 schema v1(L)— 16 表 + 枚举 + RLS + 6 个 RPC(join_group / delete_practice_log / 转让 / 重置码 / 取码 / vow_progress)+ 3 视图 + 触发器(自动 profile / 建群 / unit 快照 / proxy_names 记忆 / 代报通知 / 更新守卫),`supabase/migrations/20260707000001_init_schema.sql`;pgTAP 测试 31 项 `supabase/tests/rls.test.sql`。验收 ✅ 2026-07-07:`db reset` 一键通过,`test db` 31/31。要点:软删走 delete_practice_log() RPC(PG 会用 SELECT 策略校验 UPDATE 新行);join_code 独立表 + RPC 防遍历。
 - [x] **P0.8** 质量门(S)— `scripts/check.ps1`:一条命令跑 `flutter analyze` + `flutter test` + pgTAP(栈未运行则跳过)。验收 ✅ 2026-07-07。
 
