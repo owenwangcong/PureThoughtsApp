@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/env.dart';
+import '../../core/prefs.dart';
 import '../../core/settings.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
@@ -21,6 +24,48 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _displayName = TextEditingController();
   var _savingName = false;
+
+  bool get _debugEnvIsProd =>
+      ref.read(sharedPrefsProvider).getString(PrefKeys.debugEnv) == 'prod';
+
+  /// debug 版专属:切换本地栈 / 生产实例(写偏好,重启 App 生效)
+  Future<void> _switchDebugEnv() async {
+    final prefs = ref.read(sharedPrefsProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final cur = _debugEnvIsProd ? 'prod' : 'local';
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('切換開發環境'),
+        children: [
+          RadioListTile<String>(
+            value: 'local',
+            groupValue: cur,
+            title: const Text('本地棧'),
+            subtitle: Text(Env.supabaseUrl),
+            onChanged: (v) => Navigator.pop(context, v),
+          ),
+          RadioListTile<String>(
+            value: 'prod',
+            groupValue: cur,
+            title: const Text('生產'),
+            subtitle: Text(Env.prodSupabaseAnonKey.isEmpty
+                ? '不可用:需以 --dart-define-from-file=env/dev.json 構建並填入生產 ANON_KEY'
+                : Env.prodSupabaseUrl),
+            onChanged: Env.prodSupabaseAnonKey.isEmpty
+                ? null
+                : (v) => Navigator.pop(context, v),
+          ),
+        ],
+      ),
+    );
+    if (picked == null || picked == cur) return;
+    await prefs.setString(PrefKeys.debugEnv, picked);
+    if (mounted) setState(() {});
+    messenger.showSnackBar(const SnackBar(
+      content: Text('已切換,請完全關閉並重新打開 App 生效'),
+    ));
+  }
 
   @override
   void dispose() {
@@ -197,6 +242,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/admin/reports'),
             ),
+
+          // ---- 开发环境切换(仅 debug 构建;release 编译期剔除,文案不入 l10n) ----
+          if (kDebugMode) ...[
+            const Divider(height: 32),
+            ListTile(
+              leading: const Icon(Icons.developer_mode),
+              title: const Text('開發環境'),
+              subtitle: Text(_debugEnvIsProd
+                  ? '生產:${Env.prodSupabaseUrl}'
+                  : '本地:${Env.supabaseUrl}'),
+              trailing: const Icon(Icons.swap_horiz),
+              onTap: _switchDebugEnv,
+            ),
+          ],
 
           // ---- 登出 / 删除账号 ----
           if (user != null) ...[

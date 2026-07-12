@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -13,8 +14,18 @@ import 'router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.supabaseAnonKey);
   final prefs = await SharedPreferences.getInstance();
+  // debug 版应用内环境切换(设置页「開發環境」):写入偏好,重启生效;
+  // release 构建 kDebugMode 恒 false,该分支被编译器剔除
+  var supabaseUrl = Env.supabaseUrl;
+  var supabaseKey = Env.supabaseAnonKey;
+  if (kDebugMode &&
+      prefs.getString(PrefKeys.debugEnv) == 'prod' &&
+      Env.prodSupabaseAnonKey.isNotEmpty) {
+    supabaseUrl = Env.prodSupabaseUrl;
+    supabaseKey = Env.prodSupabaseAnonKey;
+  }
+  await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseKey);
 
   final app = ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],

@@ -13,6 +13,7 @@ abstract final class PrefKeys {
   static const onboardingDone = 'onboarding_done';
   static const lastReportGroup = 'last_report_group'; // 多群时記住上次报数的群
   static const themeMode = 'theme_mode'; // system | light | dark
+  static const debugEnv = 'debug_env'; // 'local' | 'prod'(仅 debug 版环境切换器)
 }
 
 /// 外观:跟随系统 / 浅色 / 深色(PRD v0.5.4 §11 双主题)

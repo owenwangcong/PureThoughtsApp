@@ -1,0 +1,5 @@
+{
+  "SUPABASE_URL": "http://127.0.0.1:54321",
+  "PROD_SUPABASE_URL": "https://api.pure-thoughts.com",
+  "PROD_SUPABASE_ANON_KEY": ""
+}

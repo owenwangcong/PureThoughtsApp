@@ -18,6 +18,17 @@ abstract final class Env {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
   );
 
+  /// 生产实例地址与 key —— **仅供 debug 版应用内环境切换器使用**
+  /// (设置页「開發環境」,kDebugMode 专属;release 恒用上面 Codemagic 注入的值)。
+  /// 经 --dart-define-from-file=env/dev.json 注入(dev.json 不入库,见 env/dev.json.example)。
+  static const prodSupabaseUrl = String.fromEnvironment(
+    'PROD_SUPABASE_URL',
+    defaultValue: 'https://api.pure-thoughts.com',
+  );
+
+  static const prodSupabaseAnonKey =
+      String.fromEnvironment('PROD_SUPABASE_ANON_KEY', defaultValue: '');
+
   /// 为空则不启用 Sentry(本地开发默认关闭)
   static const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
 }

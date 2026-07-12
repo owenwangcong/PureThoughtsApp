@@ -73,8 +73,11 @@ flutter pub get          # 安装依赖
 flutter analyze          # 静态检查(提交前必须无 error)
 flutter test             # 全部测试
 flutter test test/xxx_test.dart   # 单个测试文件
-flutter run              # 运行(需连接设备/模拟器)
+flutter run --dart-define-from-file=env/dev.json   # 开发运行(需连接设备/模拟器)
 flutter gen-l10n         # 生成简繁本地化(配置后)
+
+# env/dev.json 从 env/dev.json.example 复制,填入生产 ANON_KEY(gitignored);
+# debug 版设置页底部有「開發環境」切换项(本地栈 ⇄ 生产,重启 App 生效),release 不含。
 
 # 构建与发布统一走 Codemagic(codemagic.yaml),不在本机做 release 构建;
 # 签名密钥在 app/android/keys/(不入库,须备份),Codemagic 端以 purethoughts_upload 引用。
