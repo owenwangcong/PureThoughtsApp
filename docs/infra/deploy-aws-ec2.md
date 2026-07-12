@@ -298,15 +298,25 @@ docker compose logs -f auth        # 看某服务日志(auth/rest/functions/db..
 docker compose pull && docker compose up -d   # 升级(先在心里默念:备份是新鲜的)
 ```
 
-**以后有新 migration 要推生产**(本地验证过后,二选一):
+**以后有新 migration 要推生产**(本地验证过后)——**推荐:重跑一键脚本**,它只补
+`_applied_migrations` 记账表里没有的新文件并记账,可重复执行:
 
 ```bash
-# a) 服务器上直接执行(推荐,简单)
-sudo docker exec -i supabase-db psql -U postgres -v ON_ERROR_STOP=1 < 新文件.sql
-
-# b) Windows 本机经 SSH 隧道(5432 不开公网,隧道借 22 端口;图形工具查库同此)
-ssh -i your-key.pem -L 55432:localhost:5432 ubuntu@<Elastic IP>   # 终端 1 保持开着
-npx supabase db push --db-url "postgresql://postgres:<密码>@127.0.0.1:55432/postgres"  # 终端 2
+# 私有仓库:先从本机 scp 最新 supabase/ 目录到 ~/PureThoughtsApp,再:
+bash ~/PureThoughtsApp/scripts/deploy/setup-supabase-ec2.sh   # 模式 1,密钥已存在会自动跳过生成
 ```
+
+⚠️ 不要用绕过记账的方式推(手动 psql 单文件、`supabase db push`)——`_applied_migrations`
+不知道该文件已应用,下次重跑脚本会重复执行报错中断。若确需手动执行,补一条记账:
+
+```bash
+sudo docker exec supabase-db psql -U postgres -c \
+  "insert into public._applied_migrations (name) values ('<文件名.sql>')"
+```
+
+**结构一致性纪律**:生产 Studio 只改**数据**,永不改**结构**;结构变更一律
+"新 migration 文件 → 本地 `db reset` + `test db` 验证 → 推生产",保证本地与生产同构。
+核对两边结构:本地 `npx supabase db dump --local --schema public`,
+生产 `sudo docker exec supabase-db pg_dump -U postgres --schema-only --schema public postgres`,diff 之。
 
 **升级纪律**:升级前确认当天备份存在;Supabase 镜像大版本升级先读官方 self-host 变更说明。
