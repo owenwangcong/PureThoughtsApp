@@ -298,6 +298,23 @@ docker compose logs -f auth        # 看某服务日志(auth/rest/functions/db..
 docker compose pull && docker compose up -d   # 升级(先在心里默念:备份是新鲜的)
 ```
 
+**改 `.env` 配置后必须 `up -d` 重建容器**——`docker compose restart` **不会**重读 `.env`,
+改了等于没改。以生产曾踩过的 `ENABLE_EMAIL_AUTOCONFIRM`(注册免邮箱验证,PRD v0.5.9)为例:
+
+```bash
+cd ~/purethoughts
+sed -i 's/^ENABLE_EMAIL_AUTOCONFIRM=.*/ENABLE_EMAIL_AUTOCONFIRM=true/' .env
+grep -q '^ENABLE_EMAIL_AUTOCONFIRM=' .env || echo 'ENABLE_EMAIL_AUTOCONFIRM=true' >> .env
+sudo docker compose up -d auth     # 重建 auth 容器(只动这一个服务)
+
+# 把开关打开前注册、卡在"未验证"的存量账号一次性放行:
+sudo docker exec supabase-db psql -U postgres -c \
+  "update auth.users set email_confirmed_at = now() where email_confirmed_at is null;"
+
+# 验证(应见 "mailer_autoconfirm": true):
+curl -s https://api.pure-thoughts.com/auth/v1/settings -H "apikey: <ANON_KEY>" | grep autoconfirm
+```
+
 **以后有新 migration 要推生产**(本地验证过后)——**推荐:重跑一键脚本**,它只补
 `_applied_migrations` 记账表里没有的新文件并记账,可重复执行:
 
