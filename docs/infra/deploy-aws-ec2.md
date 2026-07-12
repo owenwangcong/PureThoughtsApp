@@ -113,8 +113,8 @@ SMTP_USER=resend
 SMTP_PASS=<Resend API Key>
 SMTP_SENDER_NAME=善護念
 
-# 注册开启邮箱确认(生产必开;本地默认关)
-ENABLE_EMAIL_AUTOCONFIRM=false
+# 注册免邮箱验证(PRD v0.5.9:用户名+密码体系,邮箱选填仅作找回)
+ENABLE_EMAIL_AUTOCONFIRM=true
 ```
 
 > 💾 **把整份 `.env` 存进密码管理器**——它就是生产环境的全部钥匙。
@@ -318,5 +318,13 @@ sudo docker exec supabase-db psql -U postgres -c \
 "新 migration 文件 → 本地 `db reset` + `test db` 验证 → 推生产",保证本地与生产同构。
 核对两边结构:本地 `npx supabase db dump --local --schema public`,
 生产 `sudo docker exec supabase-db pg_dump -U postgres --schema-only --schema public postgres`,diff 之。
+
+**管理员代重置密码**(PRD v0.5.9:纯用户名账号无邮箱,忘记密码由管理员协助;
+纯用户名账号的 Auth 邮箱 = `<用户名>@u.pure-thoughts.com`):
+
+```bash
+sudo docker exec supabase-db psql -U postgres -c \
+  "update auth.users set encrypted_password = crypt('新密码', gen_salt('bf')) where email = '<用户名>@u.pure-thoughts.com'"
+```
 
 **升级纪律**:升级前确认当天备份存在;Supabase 镜像大版本升级先读官方 self-host 变更说明。

@@ -25,14 +25,27 @@ DIR="$HOME/purethoughts"
 echo "=============================================="
 echo " 善护念 Supabase 一键部署"
 echo "=============================================="
+# 交互提示:重复执行时直接回车即保留 .env 现值(避免复跑清空配置)
+prompt_keep() { # $1=变量名 $2=.env 键名 $3=提示语 $4=是否密文(1=是)
+  local old="" input
+  [ -f "$DIR/.env" ] && old=$(grep "^$2=" "$DIR/.env" | head -1 | cut -d= -f2-)
+  if [ "$4" = "1" ]; then
+    read -rsp "$3${old:+ [回车保留现值]}: " input; echo
+  else
+    read -rp "$3${old:+ [回车保留 $old]}: " input
+  fi
+  printf -v "$1" '%s' "${input:-$old}"
+}
+
 read -rp "部署模式 [1=独立服务器(Caddy 自动 HTTPS) 2=共置已有 Apache(Bitnami)] [1]: " MODE
 MODE=${MODE:-1}
-read -rp "API 域名(A 记录须已指向本机,如 api.pure-thoughts.com): " DOMAIN
-read -rp "SMTP 主机(如 smtp.resend.com): " SMTP_HOST
-read -rp "SMTP 端口 [465]: " SMTP_PORT; SMTP_PORT=${SMTP_PORT:-465}
-read -rp "SMTP 用户名(Resend 填 resend): " SMTP_USER
-read -rsp "SMTP 密码/API Key: " SMTP_PASS; echo
-read -rp "发件邮箱(如 no-reply@purethoughts.app): " SMTP_FROM
+prompt_keep DOMAIN SITE_URL "API 域名(A 记录须已指向本机,如 api.pure-thoughts.com)" 0
+DOMAIN=${DOMAIN#https://}; DOMAIN=${DOMAIN#http://}; DOMAIN=${DOMAIN%%/*}
+prompt_keep SMTP_HOST SMTP_HOST "SMTP 主机(如 smtp.resend.com)" 0
+prompt_keep SMTP_PORT SMTP_PORT "SMTP 端口 [587]" 0; SMTP_PORT=${SMTP_PORT:-587}
+prompt_keep SMTP_USER SMTP_USER "SMTP 用户名(Resend 填 resend)" 0
+prompt_keep SMTP_PASS SMTP_PASS "SMTP 密码/API Key" 1
+prompt_keep SMTP_FROM SMTP_ADMIN_EMAIL "发件邮箱(如 no-reply@pure-thoughts.com)" 0
 read -rp "S3 备份桶名(留空则仅备份到本机 ~/backups): " S3_BUCKET
 
 # ---------------------------------------------------------------- 共置模式预检
@@ -137,7 +150,8 @@ set_env SMTP_USER "$SMTP_USER"
 set_env SMTP_PASS "$SMTP_PASS"
 set_env SMTP_ADMIN_EMAIL "$SMTP_FROM"
 set_env SMTP_SENDER_NAME "PureThoughts"
-set_env ENABLE_EMAIL_AUTOCONFIRM false
+# PRD v0.5.9:账号体系 = 用户名+密码,注册免邮箱验证(邮箱选填仅作找回)
+set_env ENABLE_EMAIL_AUTOCONFIRM true
 if [ "$MODE" = "2" ]; then
   # 共置:避开 FastAPI 的 8000 与 Bitnami Apache 的 8443
   set_env KONG_HTTP_PORT 8010
@@ -177,6 +191,9 @@ for f in /tmp/app/supabase/migrations/*.sql; do
       "insert into public._applied_migrations (name) values ('$name')"
   fi
 done
+
+echo "==> 重载 Edge Functions(复跑时使函数代码更新生效)"
+sudo docker compose restart functions >/dev/null
 
 echo "==> 生产内容种子(功课清单/经本;不含测试账号)"
 sudo docker exec -i supabase-db psql -U postgres -v ON_ERROR_STOP=1 -q <<'SQL'

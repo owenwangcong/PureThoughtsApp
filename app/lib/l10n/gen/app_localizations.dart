@@ -206,6 +206,42 @@ abstract class AppLocalizations {
   /// **'重設密碼郵件已發送,請查收'**
   String get authResetSent;
 
+  /// No description provided for @authUsername.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用戶名或郵箱'**
+  String get authUsername;
+
+  /// No description provided for @authUsernameHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'3–30 位小寫字母、數字或 . _ -;也可直接用郵箱'**
+  String get authUsernameHint;
+
+  /// No description provided for @authUsernameInvalid.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用戶名需 3–30 位字母、數字或 . _ -(或有效郵箱)'**
+  String get authUsernameInvalid;
+
+  /// No description provided for @authRecoveryEmail.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'電郵(選填)'**
+  String get authRecoveryEmail;
+
+  /// No description provided for @authRecoveryEmailHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'僅用於忘記密碼時找回,可不填'**
+  String get authRecoveryEmailHint;
+
+  /// No description provided for @authResetNeedAdmin.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'此帳號未綁定郵箱,請聯繫群主或管理員重置密碼'**
+  String get authResetNeedAdmin;
+
   /// No description provided for @authToSignUp.
   ///
   /// In zh_Hant, this message translates to:

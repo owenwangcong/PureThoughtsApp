@@ -5,11 +5,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../l10n/gen/app_localizations.dart';
 import 'profile_sync.dart';
+import 'username.dart';
 
 enum _AuthMode { signIn, signUp, reset }
 
-/// 邮箱登录 / 注册 / 找回密码。
-/// Google / Apple 登录待 OAuth 配置(PLAN E3/E4)后补充。
+/// 用户名+密码 注册 / 登录 / 找回密码(PRD v0.5.9)。
+/// 用户名映射内部邮箱(username.dart);注册免邮箱验证;
+/// 选填恢复邮箱存 profiles.recovery_email。
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
@@ -19,16 +21,18 @@ class AuthScreen extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
+  final _username = TextEditingController();
   final _password = TextEditingController();
+  final _recoveryEmail = TextEditingController();
   var _mode = _AuthMode.signIn;
   var _busy = false;
   String? _error;
 
   @override
   void dispose() {
-    _email.dispose();
+    _username.dispose();
     _password.dispose();
+    _recoveryEmail.dispose();
     super.dispose();
   }
 
@@ -36,6 +40,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     if (!_formKey.currentState!.validate()) return;
     final l10n = AppLocalizations.of(context);
     final auth = Supabase.instance.client.auth;
+    final email = loginEmailFor(_username.text)!;
     setState(() {
       _busy = true;
       _error = null;
@@ -43,13 +48,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     try {
       switch (_mode) {
         case _AuthMode.signIn:
-          await auth.signInWithPassword(email: _email.text.trim(), password: _password.text);
+          await auth.signInWithPassword(email: email, password: _password.text);
         case _AuthMode.signUp:
-          await auth.signUp(email: _email.text.trim(), password: _password.text);
+          await auth.signUp(email: email, password: _password.text);
+          await _saveRecoveryEmail();
         case _AuthMode.reset:
-          await auth.resetPasswordForEmail(_email.text.trim());
+          // 纯用户名账号没有真实邮箱,自助重置走不通 → 提示联系管理员
+          if (isInternalEmail(email)) {
+            setState(() => _error = l10n.authResetNeedAdmin);
+            return;
+          }
+          await auth.resetPasswordForEmail(email);
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.authResetSent)));
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(l10n.authResetSent)));
             setState(() => _mode = _AuthMode.signIn);
           }
           return;
@@ -62,6 +74,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _saveRecoveryEmail() async {
+    final recovery = _recoveryEmail.text.trim().toLowerCase();
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    if (recovery.isEmpty || uid == null) return;
+    try {
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'recovery_email': recovery}).eq('id', uid);
+    } catch (_) {
+      // 恢复邮箱保存失败不阻断注册(可稍后在设置中补)
     }
   }
 
@@ -87,12 +112,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextFormField(
-                    controller: _email,
+                    controller: _username,
                     keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(labelText: l10n.authEmail),
+                    autofillHints: const [AutofillHints.username],
+                    decoration: InputDecoration(
+                      labelText: l10n.authUsername,
+                      helperText:
+                          _mode == _AuthMode.signUp ? l10n.authUsernameHint : null,
+                    ),
                     validator: (v) =>
-                        (v == null || !v.contains('@')) ? l10n.authEmailInvalid : null,
+                        loginEmailFor(v ?? '') == null ? l10n.authUsernameInvalid : null,
                   ),
                   if (_mode != _AuthMode.reset) ...[
                     const SizedBox(height: 12),
@@ -102,6 +131,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(labelText: l10n.authPassword),
                       validator: (v) => (v == null || v.length < 6) ? l10n.authPasswordMin : null,
+                    ),
+                  ],
+                  if (_mode == _AuthMode.signUp) ...[
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _recoveryEmail,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [AutofillHints.email],
+                      decoration: InputDecoration(
+                        labelText: l10n.authRecoveryEmail,
+                        helperText: l10n.authRecoveryEmailHint,
+                      ),
+                      validator: (v) {
+                        final t = (v ?? '').trim();
+                        if (t.isEmpty) return null; // 选填
+                        return loginEmailFor(t) != null && t.contains('@')
+                            ? null
+                            : l10n.authEmailInvalid;
+                      },
                     ),
                   ],
                   if (_error != null) ...[

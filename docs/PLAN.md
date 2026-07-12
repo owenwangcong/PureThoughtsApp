@@ -32,9 +32,9 @@
 |---|---|---|---|:---:|
 | E1 | 境外服务器 | 自托管 Supabase | P0.1, P0.2 | 🔄 2026-07-11:共置方案 A **实测否决**(旧服务器 Ubuntu 16.04 EOL,老内核跑不动 Supabase 镜像)→ 方案 B **新 EC2 已开机**(Ubuntu 24.04,ap-southeast-1 新加坡);余:DNS 切到新机 + 跑一键脚本模式 1(卡 E5 SMTP 凭据);境外红线 ✅ |
 | E2 | 域名 | TLS / 自有 API 地址 | P0.2 | ✅ 2026-07-10:`pure-thoughts.com`(现有,含 WordPress 主站/Discuz/FastAPI);API 用子域 `api.pure-thoughts.com`;2026-07-11:api 证书用 certbot(webroot 方式,兼容 Bitnami Apache,自动续期) |
-| E3 | Apple Developer 账号(个人或组织,99 USD/年) | Sign in with Apple、APNs、TestFlight | P0.3, P2.1, P1.10 | ⬜ |
-| E4 | Google Cloud / Firebase 项目 | Google OAuth、FCM | P0.3, P2.1 | ⬜ |
-| E5 | 发信服务账号(Resend / SES) | 注册验证邮件、邮件兜底 | P0.3, P2.2 | ⬜ |
+| E3 | Apple Developer 账号(个人或组织,99 USD/年) | APNs、TestFlight(Sign in with Apple 已随 v0.5.9 移出 MVP) | P2.1, P1.10 | ⬜ |
+| E4 | Google Cloud / Firebase 项目 | FCM(Google OAuth 已随 v0.5.9 移出 MVP) | P2.1 | ⬜ |
+| E5 | 发信服务账号(Resend / SES) | 重置密码邮件、邮件兜底(v0.5.9 起注册不依赖邮件) | P2.2 | ✅ 2026-07-11:Resend 已配通(smtp.resend.com:587,域名已验证) |
 | E6 | 大陆真实网络的测试协助(自己或成员) | 机房实测、可达性验收 | P0.1, P2.7, P3.3 | ⬜ |
 | E13 | Codemagic 控制台配置:上传 upload keystore(引用名 purethoughts_upload)+ production 环境变量组(SUPABASE_URL/ANON_KEY 待 E1) | CI 构建与发布(codemagic.yaml,2026-07-08 定案:不在本机做 release 构建) | P1.10 分发 | ⬜ |
 | E7 | 回向文文案(内容方提供) | 发愿达成页 | P2.5 | ⬜ |
@@ -56,7 +56,7 @@
 
 - [x] **P0.1** 机房选址 ✅ 2026-07-11:**ap-southeast-1 新加坡**——与现有 pure-thoughts.com 服务器同区,该服务器多年服务同一批用户(含大陆),可达性有实践背书,免去三区对比实测;大陆网络正式复核保留在 E6(上线前 P2.7/P3.3 一并做)。
 - [ ] **P0.2** 部署自托管 Supabase(M)— 官方 Docker Compose;自有域名 + TLS;**只暴露 Kong 443**,Postgres/Studio 不上公网(Studio 走白名单)。验收:HTTPS 可达,anon key 能查公开表。
-- [ ] **P0.3** Auth 配置(M)— SMTP(E5)验证邮件 / 重置密码;Google OAuth(E4);Apple Sign-In(E3)。验收:三种方式均能完成注册登录。
+- [ ] **P0.3** Auth 配置(M)— **用户名+密码注册登录**(PRD v0.5.9:免邮箱验证,生产 `ENABLE_EMAIL_AUTOCONFIRM=true`);SMTP(E5)降级为重置密码/邮件兜底用,非注册阻塞;Google/Apple 登录移出 MVP。验收:纯用户名与真实邮箱两种形式均能注册并立即登录;填了恢复邮箱的账号能收到重置邮件。
 - [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。
 - [ ] **P0.5** 监控告警(S)— Uptime 监控 + 磁盘/CPU 告警。验收:模拟宕机能收到告警。
 - [x] **P0.6** Flutter 工程骨架(M)— `app/`(org com.purethoughts,iOS+Android):Riverpod 3 + go_router + supabase_flutter 2.15 + gen-l10n(zh_Hant 默认/zh_Hans/zh 回退)+ 全局字号缩放(0.8–2.0 与系统叠乘)+ sentry(DSN 为空不启用)+ dart-define 环境配置(默认本地栈)。验收 ✅ 2026-07-07:冒烟测试匿名读到 5 条全局功课清单、报数表被拒;`analyze` 0 issue;单测 4/4;debug APK 构建通过。注:真机/模拟器跑通放在 P1.1 随 Auth 界面一起验证;Android 模拟器连本地栈用 `10.0.2.2:54321`。
@@ -71,7 +71,7 @@
 
 **目标**:注册 → 建群/入群 → 报数 → 统计的完整闭环,加上架必需的合规项;结束时发内测包。
 
-- [ ] **P1.1** 🔄 Auth 界面与流程(M)— 已完成(2026-07-07):邮箱注册/登录/找回密码(发信)、首启引导(语言→字号→地区,即时生效+持久化)、偏好登录后同步 profiles、匿名浏览不强制登录、登出;冒烟测试跑通注册→建档→同步→登出。**待办**:Google/Apple 登录(⛔ 依赖 E3/E4)、重置密码的深链回跳(随 E2 域名配置)、真机/模拟器走查。
+- [ ] **P1.1** 🔄 Auth 界面与流程(M)— 已完成(2026-07-07):注册/登录/找回密码、首启引导(语言→字号→地区,即时生效+持久化)、偏好登录后同步 profiles、匿名浏览不强制登录、登出;冒烟测试跑通注册→建档→同步→登出。**2026-07-11 改版(PRD v0.5.9)**:注册/登录改**用户名+密码**(用户名映射 `@u.pure-thoughts.com` 内部邮箱,含 @ 视为真实邮箱账号),注册免邮箱验证,选填恢复邮箱(migration 0010 `profiles.recovery_email`),找回密码:真实邮箱自助 / 纯用户名走管理员重置(运维命令见 deploy 文档 §10)。Google/Apple 登录移出 MVP。**余**:重置密码深链回跳、真机走查。
 - [x] **P1.2** Profile 与设置(S)— 设置页:display_name 编辑、简繁切换、字号、地区,改动即时生效 + 本地持久化 + 登录态云端同步;登出入口。时区列暂不同步(报数显式传 local_date,见 P1.1 注)。验收 ✅ 2026-07-07。
 - [x] **P1.3** 建群与入群(M)— 群列表(含审核中状态)、建群、群 ID 展示/复制(仅群主,RPC)、输码+说明申请入群、群主审核(通过/拒绝)、成员显示名列表、群公告展示。验收 ✅ 2026-07-07:e2e 冒烟跑通建群→申请→审核→成员可见全链路。
 - [x] **P1.4** 群生命周期(M)— 退群 / 移除 / 转让 / 解散(RPC 软删,二次确认)/ 群 ID 重置 / 公告编辑。修复:guard_group_members 原以 definer 运行导致 current_user 恒为属主、守卫失效且转让被拦(migration 0002);解散走 dissolve_group() RPC(软删 RLS 陷阱同报数)。验收 ✅ 2026-07-07:pgTAP 40/40(生命周期 9 项),e2e 冒烟含转让/重置/退群/解散。注:公告更新生成通知记录推迟到 P2.3 通知中心一起做。
