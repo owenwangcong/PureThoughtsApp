@@ -21,8 +21,17 @@ Future<void> openWebexInApp(
   } catch (_) {
     // 权限框架不可用时照常进入(纯收看不需要)
   }
-  final name =
-      ref.read(myProfileProvider).value?['display_name'] as String?;
+  // 等个人档案就绪再取显示名(直接 read .value 在档案未加载完时会拿到 null,
+  // 导致自动填充静默跳过);超时/出错则退回已缓存值
+  String? name;
+  try {
+    final profile = await ref
+        .read(myProfileProvider.future)
+        .timeout(const Duration(seconds: 5));
+    name = profile?['display_name'] as String?;
+  } catch (_) {
+    name = ref.read(myProfileProvider).value?['display_name'] as String?;
+  }
   final email = Supabase.instance.client.auth.currentUser?.email;
   if (!context.mounted) return;
   context.push(Uri(
