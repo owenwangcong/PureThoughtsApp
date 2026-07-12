@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#B0905A"/>
+      <stop offset="100%" stop-color="#7A5F33"/>
+    </linearGradient>
+    <linearGradient id="goldMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C0A268"/>
+      <stop offset="100%" stop-color="#8A6D3B"/>
+    </linearGradient>
+    <linearGradient id="goldLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D6BC7E"/>
+      <stop offset="100%" stop-color="#A98950"/>
+    </linearGradient>
+    <clipPath id="water">
+      <path d="M0 0 L1024 0 L1024 705 Q 512 795 0 705 Z"/>
+    </clipPath>
+  </defs>
+  <circle cx="512" cy="512" r="424" fill="none" stroke="#C9B27C" stroke-width="9" opacity="0.6"/>
+  <g clip-path="url(#water)">
+    <g fill="url(#gold)">
+      <path d="M250 480 C 205 570, 258 665, 512 780 C 415 600, 325 520, 250 480 Z"/>
+      <path d="M774 480 C 819 570, 766 665, 512 780 C 609 600, 699 520, 774 480 Z"/>
+    </g>
+    <g fill="url(#goldMid)">
+      <path d="M352 352 C 282 460, 295 610, 512 790 C 458 560, 408 440, 352 352 Z"/>
+      <path d="M672 352 C 742 460, 729 610, 512 790 C 566 560, 616 440, 672 352 Z"/>
+    </g>
+    <path d="M512 278 C 596 372, 620 528, 512 800 C 404 528, 428 372, 512 278 Z" fill="url(#goldLight)"/>
+  </g>
+  <circle cx="512" cy="224" r="18" fill="#8A6D3B"/>
+  <path d="M300 748 Q 512 812 724 748" fill="none" stroke="#8A6D3B" stroke-width="16" stroke-linecap="round" opacity="0.8"/>
+  <path d="M390 804 Q 512 846 634 804" fill="none" stroke="#8A6D3B" stroke-width="11" stroke-linecap="round" opacity="0.45"/>
+</svg>

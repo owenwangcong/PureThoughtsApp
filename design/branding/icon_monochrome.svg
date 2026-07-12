@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <clipPath id="water">
+      <path d="M0 0 L1024 0 L1024 705 Q 512 795 0 705 Z"/>
+    </clipPath>
+  </defs>
+  <g transform="translate(512 512) scale(0.96) translate(-512 -512)" fill="#FFFFFF">
+    <g clip-path="url(#water)">
+      <path d="M250 480 C 205 570, 258 665, 512 780 C 415 600, 325 520, 250 480 Z"/>
+      <path d="M774 480 C 819 570, 766 665, 512 780 C 609 600, 699 520, 774 480 Z"/>
+      <path d="M352 352 C 282 460, 295 610, 512 790 C 458 560, 408 440, 352 352 Z"/>
+      <path d="M672 352 C 742 460, 729 610, 512 790 C 566 560, 616 440, 672 352 Z"/>
+      <path d="M512 278 C 596 372, 620 528, 512 800 C 404 528, 428 372, 512 278 Z"/>
+    </g>
+    <circle cx="512" cy="224" r="18"/>
+    <path d="M300 748 Q 512 812 724 748" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" opacity="0.9"/>
+    <path d="M390 804 Q 512 846 634 804" fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round" opacity="0.6"/>
+  </g>
+</svg>
