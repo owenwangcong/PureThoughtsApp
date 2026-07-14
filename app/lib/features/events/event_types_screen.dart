@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -110,12 +111,10 @@ class EventTypesScreen extends ConsumerWidget {
       ref.invalidate(eventsProvider);
     } on PostgrestException catch (e) {
       messenger.showSnackBar(SnackBar(
-        content: Text(e.code == '23503'
-            ? l10n.deleteTypeBlocked
-            : '${l10n.authFailed}${e.message}'),
+        content: Text(e.code == '23503' ? l10n.deleteTypeBlocked : errText(l10n, e)),
       ));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 

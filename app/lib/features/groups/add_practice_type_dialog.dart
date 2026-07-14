@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
 
@@ -77,7 +78,7 @@ Future<String?> showAddPracticeTypeDialog(
         .single();
     return row['id'] as String;
   } catch (e) {
-    messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+    messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     return null;
   }
 }

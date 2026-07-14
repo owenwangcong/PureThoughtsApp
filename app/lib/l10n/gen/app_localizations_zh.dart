@@ -640,6 +640,42 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get dedicationText =>
       '願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。';
+
+  @override
+  String get errNetwork => '網絡連接失敗,請檢查網絡後重試';
+
+  @override
+  String get errGeneric => '操作失敗,請稍後再試';
+
+  @override
+  String get errAuthInvalidCredentials => '用戶名或密碼錯誤';
+
+  @override
+  String get errAuthAlreadyRegistered => '該帳號已被註冊,請直接登入';
+
+  @override
+  String get errAuthWeakPassword => '密碼至少 6 位';
+
+  @override
+  String get errAuthNotActivated => '帳號尚未啟用,請聯繫管理員';
+
+  @override
+  String get errAuthRateLimited => '操作過於頻繁,請稍後再試';
+
+  @override
+  String get errAuthSignupDisabled => '暫未開放註冊';
+
+  @override
+  String get errAuthBanned => '帳號已被停用,請聯繫管理員';
+
+  @override
+  String get errNoPermission => '沒有權限執行此操作';
+
+  @override
+  String get errDuplicate => '資料重複,請勿重複提交';
+
+  @override
+  String get errSessionExpired => '登入已過期,請重新登入';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1278,6 +1314,42 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String get dedicationText =>
       '愿以此功德,庄严佛净土。\n上报四重恩,下济三途苦。\n若有见闻者,悉发菩提心。\n尽此一报身,同生极乐国。';
+
+  @override
+  String get errNetwork => '网络连接失败,请检查网络后重试';
+
+  @override
+  String get errGeneric => '操作失败,请稍后再试';
+
+  @override
+  String get errAuthInvalidCredentials => '用户名或密码错误';
+
+  @override
+  String get errAuthAlreadyRegistered => '该账号已被注册,请直接登录';
+
+  @override
+  String get errAuthWeakPassword => '密码至少 6 位';
+
+  @override
+  String get errAuthNotActivated => '账号尚未启用,请联系管理员';
+
+  @override
+  String get errAuthRateLimited => '操作过于频繁,请稍后再试';
+
+  @override
+  String get errAuthSignupDisabled => '暂未开放注册';
+
+  @override
+  String get errAuthBanned => '账号已被停用,请联系管理员';
+
+  @override
+  String get errNoPermission => '没有权限执行此操作';
+
+  @override
+  String get errDuplicate => '数据重复,请勿重复提交';
+
+  @override
+  String get errSessionExpired => '登录已过期,请重新登录';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1916,4 +1988,40 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String get dedicationText =>
       '願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。';
+
+  @override
+  String get errNetwork => '網絡連接失敗,請檢查網絡後重試';
+
+  @override
+  String get errGeneric => '操作失敗,請稍後再試';
+
+  @override
+  String get errAuthInvalidCredentials => '用戶名或密碼錯誤';
+
+  @override
+  String get errAuthAlreadyRegistered => '該帳號已被註冊,請直接登入';
+
+  @override
+  String get errAuthWeakPassword => '密碼至少 6 位';
+
+  @override
+  String get errAuthNotActivated => '帳號尚未啟用,請聯繫管理員';
+
+  @override
+  String get errAuthRateLimited => '操作過於頻繁,請稍後再試';
+
+  @override
+  String get errAuthSignupDisabled => '暫未開放註冊';
+
+  @override
+  String get errAuthBanned => '帳號已被停用,請聯繫管理員';
+
+  @override
+  String get errNoPermission => '沒有權限執行此操作';
+
+  @override
+  String get errDuplicate => '資料重複,請勿重複提交';
+
+  @override
+  String get errSessionExpired => '登入已過期,請重新登入';
 }

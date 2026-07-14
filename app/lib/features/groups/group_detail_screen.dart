@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -58,7 +59,7 @@ class GroupDetailScreen extends ConsumerWidget {
       _invalidateAll(ref);
       if (popAfter && context.mounted) context.go('/groups');
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 
@@ -339,7 +340,7 @@ class _PracticeTypesSection extends ConsumerWidget {
           .update({'active': active}).eq('id', typeId);
       ref.invalidate(groupPracticeTypesProvider(groupId));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 

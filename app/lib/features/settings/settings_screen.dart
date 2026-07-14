@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/env.dart';
 import '../../core/prefs.dart';
 import '../../core/settings.dart';
@@ -318,10 +319,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       messenger.showSnackBar(SnackBar(
         content: Text(code == 'owner_of_active_group'
             ? l10n.deleteOwnerBlocked
-            : '${l10n.authFailed}$e'),
+            : errText(l10n, e)),
       ));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 }

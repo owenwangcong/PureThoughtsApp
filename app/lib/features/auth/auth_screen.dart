@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'profile_sync.dart';
 import 'username.dart';
@@ -68,10 +69,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
       await syncProfileFromPrefs(ref);
       if (mounted) context.go('/');
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() => _error = errText(l10n, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -155,7 +154,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     Text(
-                      '${l10n.authFailed}\n$_error',
+                      _error!,
                       style: TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ],

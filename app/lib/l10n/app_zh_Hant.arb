@@ -216,5 +216,17 @@
   "soundToggle": "鈴聲",
   "toReport": "轉為報數",
   "dedicationTitle": "迴向",
-  "dedicationText": "願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。"
+  "dedicationText": "願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。",
+  "errNetwork": "網絡連接失敗,請檢查網絡後重試",
+  "errGeneric": "操作失敗,請稍後再試",
+  "errAuthInvalidCredentials": "用戶名或密碼錯誤",
+  "errAuthAlreadyRegistered": "該帳號已被註冊,請直接登入",
+  "errAuthWeakPassword": "密碼至少 6 位",
+  "errAuthNotActivated": "帳號尚未啟用,請聯繫管理員",
+  "errAuthRateLimited": "操作過於頻繁,請稍後再試",
+  "errAuthSignupDisabled": "暫未開放註冊",
+  "errAuthBanned": "帳號已被停用,請聯繫管理員",
+  "errNoPermission": "沒有權限執行此操作",
+  "errDuplicate": "資料重複,請勿重複提交",
+  "errSessionExpired": "登入已過期,請重新登入"
 }
