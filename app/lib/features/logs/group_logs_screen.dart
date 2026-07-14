@@ -10,6 +10,7 @@ import '../auth/auth_providers.dart';
 import '../groups/groups_providers.dart';
 import '../moderation/moderation_providers.dart';
 import '../moderation/report_dialog.dart';
+import 'batch_utils.dart';
 import 'logs_providers.dart';
 
 /// 本群报数记录:成员可见全部(PRD §12.3);
@@ -128,54 +129,71 @@ class GroupLogsScreen extends ConsumerWidget {
               hint: l10n.logsEmptyHint,
             );
           }
+          // 同一次提交的多条报数分组为一张卡片一起显示(PRD v0.5.10)
+          final batches = groupByBatch(list.cast<Map<String, dynamic>>());
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(groupLogsProvider(groupId)),
-            child: ListView.separated(
-              itemCount: list.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: batches.length,
               itemBuilder: (context, i) {
-                final log = list[i];
-                final t = typeOf[log['practice_type_id']];
-                final typeName = t == null
-                    ? ''
-                    : (locale.scriptCode == 'Hans' ? t['name_hans'] : t['name_hant'])
-                        as String;
-                final subject = (log['subject_name'] as String?) ??
-                    nameOf[(log['subject_user_id'] ?? log['reporter_id']) as String?] ??
+                final batch = batches[i];
+                final head = batch.first;
+                final subject = (head['subject_name'] as String?) ??
+                    nameOf[(head['subject_user_id'] ?? head['reporter_id']) as String?] ??
                     l10n.fellowPractitioner;
                 final reporter =
-                    nameOf[log['reporter_id'] as String?] ?? l10n.fellowPractitioner;
-                final isProxy = log['subject_user_id'] != null || log['subject_name'] != null;
-                final qty = log['quantity'];
-                final canEdit = log['reporter_id'] == user?.id;
-                final canDelete = canEdit ||
-                    log['subject_user_id'] == user?.id ||
-                    isOwner;
+                    nameOf[head['reporter_id'] as String?] ?? l10n.fellowPractitioner;
+                final isProxy =
+                    head['subject_user_id'] != null || head['subject_name'] != null;
+                final note = head['note'] as String?;
 
-                return ListTile(
-                  title: Text(
-                      '$subject · $typeName ${_fmtQty(qty)} ${unitLabel(l10n, log['unit'] as String)}'),
-                  subtitle: Text([
-                    log['local_date'] as String,
-                    if (isProxy) '$reporter ${l10n.proxyBy}',
-                    if (log['note'] != null) log['note'] as String,
-                  ].join(' · ')),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (v) {
-                      if (v == 'edit') _edit(context, ref, log);
-                      if (v == 'delete') _delete(context, ref, log['id'] as String);
-                      if (v == 'report') {
-                        showReportDialog(context,
-                            targetType: 'log', targetId: log['id'] as String);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      if (canEdit)
-                        PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                      if (canDelete)
-                        PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
-                      if (!canEdit)
-                        PopupMenuItem(value: 'report', child: Text(l10n.reportAction)),
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 批次头:对象 · 日期 ·(代报人)·(备注)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(subject,
+                                style: Theme.of(context).textTheme.titleMedium),
+                            const SizedBox(height: 2),
+                            Text(
+                              [
+                                head['local_date'] as String,
+                                if (isProxy) '$reporter ${l10n.proxyBy}',
+                                ?note,
+                              ].join(' · '),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // 批内每条功课:名称 · 数量单位 + 独立菜单(改/删/举报按 log 生效)
+                      for (final log in batch)
+                        _LogItemRow(
+                          typeName: typeOf[log['practice_type_id']] == null
+                              ? ''
+                              : (locale.scriptCode == 'Hans'
+                                  ? typeOf[log['practice_type_id']]!['name_hans']
+                                  : typeOf[log['practice_type_id']]!['name_hant']) as String,
+                          qty: _fmtQty(log['quantity']),
+                          unit: unitLabel(l10n, log['unit'] as String),
+                          canEdit: log['reporter_id'] == user?.id,
+                          canDelete: log['reporter_id'] == user?.id ||
+                              log['subject_user_id'] == user?.id ||
+                              isOwner,
+                          onEdit: () => _edit(context, ref, log),
+                          onDelete: () => _delete(context, ref, log['id'] as String),
+                          onReport: () => showReportDialog(context,
+                              targetType: 'log', targetId: log['id'] as String),
+                        ),
+                      const SizedBox(height: 6),
                     ],
                   ),
                 );
@@ -190,5 +208,56 @@ class GroupLogsScreen extends ConsumerWidget {
   static String _fmtQty(Object? qty) {
     final d = double.tryParse('$qty') ?? 0;
     return d == d.roundToDouble() ? '${d.round()}' : '$d';
+  }
+}
+
+/// 批次卡片内的单条功课行:名称 + 数量单位 + 独立操作菜单。
+class _LogItemRow extends StatelessWidget {
+  const _LogItemRow({
+    required this.typeName,
+    required this.qty,
+    required this.unit,
+    required this.canEdit,
+    required this.canDelete,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onReport,
+  });
+
+  final String typeName;
+  final String qty;
+  final String unit;
+  final bool canEdit;
+  final bool canDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 2, 4, 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text('$typeName · $qty $unit',
+                style: Theme.of(context).textTheme.bodyLarge),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (v) {
+              if (v == 'edit') onEdit();
+              if (v == 'delete') onDelete();
+              if (v == 'report') onReport();
+            },
+            itemBuilder: (context) => [
+              if (canEdit) PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+              if (canDelete) PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+              if (!canEdit) PopupMenuItem(value: 'report', child: Text(l10n.reportAction)),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -329,7 +329,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             : (existing['webex_url'] as String? ?? ''));
     var typeId = existing?['event_type_id'] as String? ?? types.first['id'] as String;
     var weekly = existing == null
-        ? true
+        ? false // 默认不重复(单次活动);需要每周循环由管理员手动开启
         : (existing['recurrence_rule'] as String?)?.isNotEmpty == true;
     var when = existing == null
         ? DateTime.now().add(const Duration(days: 1))
