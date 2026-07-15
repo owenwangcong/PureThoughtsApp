@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
@@ -60,7 +61,7 @@ class GroupLogsScreen extends ConsumerWidget {
       ref.invalidate(groupLogsProvider(groupId));
       messenger.showSnackBar(SnackBar(content: Text(l10n.saved)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 
@@ -84,7 +85,7 @@ class GroupLogsScreen extends ConsumerWidget {
           .rpc('delete_practice_log', params: {'p_log_id': logId});
       ref.invalidate(groupLogsProvider(groupId));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 

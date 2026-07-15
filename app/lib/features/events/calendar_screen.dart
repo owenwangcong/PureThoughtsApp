@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/error_text.dart';
 import '../../core/channels.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
@@ -449,7 +450,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
       _invalidateAll();
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.authFailed}$e')));
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
   }
 }

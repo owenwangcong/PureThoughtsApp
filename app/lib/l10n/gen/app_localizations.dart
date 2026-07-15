@@ -1357,6 +1357,78 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'願以此功德,莊嚴佛淨土。\n上報四重恩,下濟三途苦。\n若有見聞者,悉發菩提心。\n盡此一報身,同生極樂國。'**
   String get dedicationText;
+
+  /// No description provided for @errNetwork.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'網絡連接失敗,請檢查網絡後重試'**
+  String get errNetwork;
+
+  /// No description provided for @errGeneric.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'操作失敗,請稍後再試'**
+  String get errGeneric;
+
+  /// No description provided for @errAuthInvalidCredentials.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用戶名或密碼錯誤'**
+  String get errAuthInvalidCredentials;
+
+  /// No description provided for @errAuthAlreadyRegistered.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'該帳號已被註冊,請直接登入'**
+  String get errAuthAlreadyRegistered;
+
+  /// No description provided for @errAuthWeakPassword.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'密碼至少 6 位'**
+  String get errAuthWeakPassword;
+
+  /// No description provided for @errAuthNotActivated.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'帳號尚未啟用,請聯繫管理員'**
+  String get errAuthNotActivated;
+
+  /// No description provided for @errAuthRateLimited.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'操作過於頻繁,請稍後再試'**
+  String get errAuthRateLimited;
+
+  /// No description provided for @errAuthSignupDisabled.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'暫未開放註冊'**
+  String get errAuthSignupDisabled;
+
+  /// No description provided for @errAuthBanned.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'帳號已被停用,請聯繫管理員'**
+  String get errAuthBanned;
+
+  /// No description provided for @errNoPermission.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'沒有權限執行此操作'**
+  String get errNoPermission;
+
+  /// No description provided for @errDuplicate.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'資料重複,請勿重複提交'**
+  String get errDuplicate;
+
+  /// No description provided for @errSessionExpired.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'登入已過期,請重新登入'**
+  String get errSessionExpired;
 }
 
 class _AppLocalizationsDelegate
