@@ -1,0 +1,12 @@
+# 启动图生成配置(母版见 design/branding/,修改流程见其 README)
+# 重新生成:dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#F6F1E4"
+  color_dark: "#15130E"
+  image: assets/branding/splash_logo.png
+  image_dark: assets/branding/splash_logo_dark.png
+  android_12:
+    color: "#F6F1E4"
+    color_dark: "#15130E"
+    image: assets/branding/splash_logo_a12.png
+    image_dark: assets/branding/splash_logo_a12_dark.png
