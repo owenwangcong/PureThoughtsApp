@@ -24,6 +24,32 @@ Map<String, double> latestBatch(
   return out;
 }
 
+/// 把报数记录按「同一次提交」分组一起显示。
+///
+/// 同一批 = 同一报数人(reporter_id)+ 同一对象(subject_user_id / subject_name)
+/// + 同一 created_at。客户端一次提交是单条多行 insert,同批 created_at(事务时间)
+/// 完全相等;两次独立提交是不同事务,created_at 微秒级都不同,不会误合并。
+/// 入参需已按 created_at 降序(同批相邻);返回批次列表,批次与批内均保持原顺序。
+List<List<Map<String, dynamic>>> groupByBatch(List<Map<String, dynamic>> logs) {
+  final batches = <List<Map<String, dynamic>>>[];
+  String? currentKey;
+  for (final r in logs) {
+    final key = [
+      r['reporter_id'],
+      r['subject_user_id'],
+      r['subject_name'],
+      r['created_at'],
+    ].join('|');
+    if (batches.isEmpty || key != currentKey) {
+      batches.add([r]);
+      currentKey = key;
+    } else {
+      batches.last.add(r);
+    }
+  }
+  return batches;
+}
+
 /// 「常用功课」:该群最近自报的功课去重(保持最近优先顺序),最多 [limit] 个。
 List<String> frequentTypeIds(
   List<Map<String, dynamic>> recentSelfLogs,

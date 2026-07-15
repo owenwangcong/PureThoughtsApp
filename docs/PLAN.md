@@ -15,7 +15,7 @@
 | **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | 🔄 进行中 | 5/8(P2.1/2.2 ⛔ 待 E3/E4/E5;P2.7 部分依赖 E6) | — |
 | **P3** | 视频 + 在线经本 | 🔄 进行中 | 2/3(余 P3.3 大陆降级,依赖 E6 实测) | — |
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
-| **P5** | 打磨 + 正式上架 | 🔄 进行中 | 4/6(P5.3 打磨可做;P5.4 待 E1/E13) | — |
+| **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | ⏸ 待定 | 0/3 | — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
@@ -132,6 +132,7 @@
 - [x] **P5.2** Realtime 群统计(S)— migration 0009 将 practice_logs 加入 Realtime 发布;群统计页订阅本群变更实时刷新(RLS 保证只收到有权限的行)。验收 ✅ 2026-07-09。
 - [x] **P5.5** 品牌图片资源(S,2026-07-12 用户需求)—「金蓮」标志(莲花+护念一点+水面涟漪,古铜金系呼应 app_theme):应用图标(iOS 全尺寸 + Android legacy/自适应/Android 13 单色主题图标,flutter_launcher_icons)+ 原生启动图(明暗两版 + Android 12 规格,flutter_native_splash)+ App 内运行时 logo(assets/images/logo_mark[_dark].png);SVG 母版与再生成脚本在 `design/branding/`(PNG 均为生成物,勿手改,流程见其 README);另存两款备选(線描禪圓/墨金)。验收 ✅ 2026-07-12:analyze 无 issue + Flutter 40/40。注:商店 1024 图即 icon.png;iOS 18 深色/着色图标待上架时在 Xcode 侧配置(备选墨金版可直接用)。
 - [x] **P5.6** 错误提示中文化(S,2026-07-13 用户反馈"很多错误信息是英文的")— 新增 `core/error_text.dart` 统一入口 `errText(l10n, e)`:把 Supabase `AuthException`(优先 GoTrue 结构化 `code`,回退 message 关键字)/ `PostgrestException`(23505/42501/PGRST301 等)/ 网络类(Socket/Timeout)映射为简繁本地化文案,未知异常兜底 `errGeneric` 中文而非透传英文原文;替换全部 14 处 `'${l10n.authFailed}$e'` 透传点与 auth 登录页 `e.message`/`e.toString()`;新增 12 个 `err*` l10n 键(zh_Hant/zh_Hans/zh)。验收 ✅ 2026-07-13:errText 11 项单测 + analyze 0 issue + Flutter 51/51。
+- [x] **P5.7** 报数记录分组显示 + 活动默认不重复(S,2026-07-13 用户需求,PRD v0.5.10)— (1) 报数记录按「同一次提交」分组:群报数记录页 + 个人统计历史明细,同批(同报数人+同对象+同 `created_at`)多条功课合为一张卡片一起显示,改/删/举报仍按单条 log 生效;新增 `groupByBatch` 纯函数(4 项单测)。(2) 新建活动「每週重複」开关默认关闭(原默认开启),单次活动为主。验收 ✅ 2026-07-13:analyze 0 issue + Flutter 44/44。
 - [ ] **P5.3** 性能与包体(M)— 冷启动、长列表、包体积;大字号下的布局回归。
 - [ ] **P5.4** 正式上架(M)— App Store(海外区,**不上中国区**,PRD §14.4)+ Google Play 材料与审核;App Privacy 如实填报;**官网 APK 下载页**(大陆 Android 分发,依赖 E2 官网域名)。*P2 完成即可启动首次提审,不必等 P5。*
 

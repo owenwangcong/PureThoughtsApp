@@ -33,6 +33,50 @@ void main() {
     });
   });
 
+  group('分组显示 groupByBatch', () {
+    Map<String, dynamic> row(String reporter, String type, String createdAt,
+            {String? subjectUser, String? subjectName}) =>
+        {
+          'reporter_id': reporter,
+          'subject_user_id': subjectUser,
+          'subject_name': subjectName,
+          'created_at': createdAt,
+          'practice_type_id': type,
+        };
+
+    test('同 created_at + 同报数人对象 → 合为一批', () {
+      final logs = [
+        row('u1', 'jing', '2026-07-07T10:00:00.111Z'),
+        row('u1', 'zhou', '2026-07-07T10:00:00.111Z'),
+        row('u1', 'zuo', '2026-07-06T09:00:00.222Z'),
+      ];
+      final batches = groupByBatch(logs);
+      expect(batches.length, 2);
+      expect(batches[0].length, 2); // 同一次提交两条
+      expect(batches[1].length, 1);
+    });
+
+    test('created_at 不同不合并(两次独立提交)', () {
+      final logs = [
+        row('u1', 'jing', '2026-07-07T10:00:00.111Z'),
+        row('u1', 'jing', '2026-07-07T10:00:00.222Z'),
+      ];
+      expect(groupByBatch(logs).length, 2);
+    });
+
+    test('同 created_at 但对象不同不合并(自己 vs 代报)', () {
+      final logs = [
+        row('u1', 'jing', '2026-07-07T10:00:00.111Z'),
+        row('u1', 'jing', '2026-07-07T10:00:00.111Z', subjectName: '张三'),
+      ];
+      expect(groupByBatch(logs).length, 2);
+    });
+
+    test('空列表返回空', () {
+      expect(groupByBatch([]), isEmpty);
+    });
+  });
+
   group('常用功课 frequentTypeIds', () {
     test('去重保持最近优先,限制数量', () {
       final logs = [

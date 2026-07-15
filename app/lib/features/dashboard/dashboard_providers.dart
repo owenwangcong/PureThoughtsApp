@@ -49,7 +49,8 @@ final myLogsOnDateProvider = FutureProvider.family<List<Map<String, dynamic>>, S
   if (user == null) return const [];
   return Supabase.instance.client
       .from('practice_logs')
-      .select('group_id, practice_type_id, quantity, unit, note, subject_user_id, reporter_id')
+      .select(
+          'group_id, practice_type_id, quantity, unit, note, subject_user_id, subject_name, reporter_id, created_at')
       .eq('local_date', date)
       .isFilter('subject_name', null)
       .or('reporter_id.eq.${user.id},subject_user_id.eq.${user.id}')

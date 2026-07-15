@@ -8,6 +8,7 @@ import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../vows/vows_providers.dart';
+import '../logs/batch_utils.dart';
 import 'dashboard_providers.dart';
 
 String _fmtNum(Object? n) {
@@ -246,14 +247,32 @@ class _HistoryList extends ConsumerWidget {
               child: Text(l10n.emptyList),
             )
           : Column(
+              // 同一次提交的报数分组一起显示(PRD v0.5.10)
               children: [
-                for (final r in list)
-                  ListTile(
-                    dense: true,
-                    title: Text(nameOf(r['practice_type_id'] as String)),
-                    subtitle: r['note'] != null ? Text(r['note'] as String) : null,
-                    trailing: Text(
-                      '${_fmtNum(r['quantity'])} ${unitLabel(l10n, r['unit'] as String)}',
+                for (final batch in groupByBatch(list))
+                  Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final r in batch)
+                          ListTile(
+                            dense: true,
+                            title: Text(nameOf(r['practice_type_id'] as String)),
+                            trailing: Text(
+                              '${_fmtNum(r['quantity'])} ${unitLabel(l10n, r['unit'] as String)}',
+                            ),
+                          ),
+                        if (batch.first['note'] != null)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                            child: Text(
+                              batch.first['note'] as String,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
               ],
