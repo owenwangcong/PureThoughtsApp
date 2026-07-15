@@ -192,6 +192,21 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.notifications_active_outlined,
+                        label: l10n.mrTitle,
+                        onTap: () => context.push('/tools/mindfulness'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // 占位:保持磁贴与上方两列同宽
+                    const Expanded(child: SizedBox()),
+                  ],
+                ),
               ],
             ),
           ),
