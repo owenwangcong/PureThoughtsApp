@@ -5,6 +5,13 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!-- 正念提醒本地通知(P2.8,PRD §9.3):Android 13+ 运行时通知权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- 重启后由插件的 BootReceiver 恢复已注册的按周提醒 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- 震动;电池优化豁免引导(用非精确闹钟,故不申请 SCHEDULE_EXACT_ALARM,规避 Play 审核与耗电) -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <application
         android:label="善护念"
         android:name="${applicationName}"

@@ -19,6 +19,8 @@ import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
 import 'features/notifications/notifications_screen.dart';
+import 'features/reminders/mindfulness_screen.dart';
+import 'features/reminders/reminder_help_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/tools/counter_screen.dart';
 import 'features/tools/timer_screen.dart';
@@ -90,6 +92,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/tools/timer', builder: (context, state) => const TimerScreen()),
       GoRoute(path: '/tools/counter', builder: (context, state) => const CounterScreen()),
+      GoRoute(
+          path: '/tools/mindfulness',
+          builder: (context, state) => const MindfulnessScreen()),
+      GoRoute(
+          path: '/tools/mindfulness/help',
+          builder: (context, state) => const ReminderHelpScreen()),
       GoRoute(
           path: '/admin/reports',
           builder: (context, state) => const AdminReportsScreen()),

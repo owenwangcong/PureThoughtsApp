@@ -9,6 +9,7 @@ import 'core/env.dart';
 import 'core/prefs.dart';
 import 'core/settings.dart';
 import 'core/theme/app_theme.dart';
+import 'features/reminders/reminder_scheduler.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'router.dart';
 
@@ -26,6 +27,10 @@ Future<void> main() async {
     supabaseKey = Env.prodSupabaseAnonKey;
   }
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseKey);
+
+  // 正念提醒本地通知基建(P2.8):初始化时区与插件;已注册的按周通知由 OS 持有,
+  // 无需每次启动重排。失败不致命(内部已 try 包裹)。
+  await ReminderScheduler.instance.init();
 
   final app = ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],

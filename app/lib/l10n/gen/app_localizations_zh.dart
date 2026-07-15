@@ -676,6 +676,150 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errSessionExpired => '登入已過期,請重新登入';
+
+  @override
+  String get mrTitle => '正念提醒';
+
+  @override
+  String get mrEnable => '開啟正念提醒';
+
+  @override
+  String get mrEnableHint => '在設定的時段內定時響磬,提醒回到當下';
+
+  @override
+  String get mrWeekdays => '提醒日';
+
+  @override
+  String get mrDay1 => '一';
+
+  @override
+  String get mrDay2 => '二';
+
+  @override
+  String get mrDay3 => '三';
+
+  @override
+  String get mrDay4 => '四';
+
+  @override
+  String get mrDay5 => '五';
+
+  @override
+  String get mrDay6 => '六';
+
+  @override
+  String get mrDay7 => '日';
+
+  @override
+  String get mrStart => '開始時間';
+
+  @override
+  String get mrEnd => '結束時間';
+
+  @override
+  String get mrWindowInvalid => '結束時間需晚於開始時間';
+
+  @override
+  String get mrInterval => '間隔';
+
+  @override
+  String get mrSound => '提示音';
+
+  @override
+  String get mrSoundBell => '磬聲';
+
+  @override
+  String get mrSoundSilent => '靜音';
+
+  @override
+  String get mrVibrate => '震動';
+
+  @override
+  String get mrPreviewSound => '試聽';
+
+  @override
+  String get mrMessage => '提醒文案';
+
+  @override
+  String get mrMessageDefault => '該正念了 · 回到當下';
+
+  @override
+  String get mrMessageHint => '留空則用預設文案';
+
+  @override
+  String mrCountSummary(int daily, int total) {
+    return '每天 $daily 次 · 本週共 $total 次';
+  }
+
+  @override
+  String mrIosCapWarning(int cap, int total) {
+    return 'iOS 最多 $cap 條通知,目前 $total 條會被截斷;請增大間隔或縮短時段';
+  }
+
+  @override
+  String get mrTest => '立即測試';
+
+  @override
+  String get mrTestSent => '測試通知已發送';
+
+  @override
+  String get mrHelp => '讓提醒準時響起';
+
+  @override
+  String get mrHelpSubtitle => 'iOS 與 Android 設定指引';
+
+  @override
+  String get mrPermDenied => '通知權限未開啟,提醒無法響起';
+
+  @override
+  String get mrGrant => '去開啟';
+
+  @override
+  String get mrRespectSilent => '手機靜音或勿擾時不會出聲,僅顯示橫幅(尊重系統設定)';
+
+  @override
+  String get mrHelpIntro => '提醒靠系統在預定時刻觸發。請按下面步驟放行,確保 App 關閉或息屏時也能響。';
+
+  @override
+  String get mrSelfCheck => '響鈴自檢';
+
+  @override
+  String get mrSelfCheckHint => '點一下發一條測試通知,看是否真的響了。';
+
+  @override
+  String get mrHelpIosTitle => 'iOS 設定';
+
+  @override
+  String get mrHelpIosStep1 =>
+      '允許通知:首次開啟會彈窗;若曾拒絕,前往「設定 > 善護念 > 通知」開啟允許通知、聲音、鎖屏顯示。';
+
+  @override
+  String get mrHelpIosStep2 => '靜音/勿擾:處於靜音檔或勿擾時不會出聲(系統限制,非故障);需要出聲請退出靜音。';
+
+  @override
+  String get mrHelpIosStep3 => '專注模式:若開啟了工作/睡眠等專注,可能攔截通知,請把善護念加入允許清單。';
+
+  @override
+  String get mrHelpAndroidTitle => 'Android 設定';
+
+  @override
+  String get mrHelpAndroidStep1 => '允許通知:在系統彈窗或「應用資訊 > 通知」中允許。';
+
+  @override
+  String get mrHelpAndroidStep2 => '電池不受限:關閉對本 App 的電池最佳化,否則後台可能被限制。';
+
+  @override
+  String get mrHelpAndroidStep3 => '勿擾說明:系統勿擾時不會出聲,僅顯示橫幅。';
+
+  @override
+  String get mrHelpOemTitle => '國產手機額外設定(小米/華為/OPPO/vivo 等)';
+
+  @override
+  String get mrHelpOemBody =>
+      '這些手機預設會清理後台,可能延遲或漏掉提醒。請手動開啟:自啟動/自動啟動、允許後台活動(不受限制)、鎖定在最近任務、允許後台彈通知。即便全部放行,個別機型仍可能延遲——這是系統限制,非本 App 故障。';
+
+  @override
+  String get mrOpenSettings => '去應用設定';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1350,6 +1494,150 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get errSessionExpired => '登录已过期,请重新登录';
+
+  @override
+  String get mrTitle => '正念提醒';
+
+  @override
+  String get mrEnable => '开启正念提醒';
+
+  @override
+  String get mrEnableHint => '在设定的时段内定时响磬,提醒回到当下';
+
+  @override
+  String get mrWeekdays => '提醒日';
+
+  @override
+  String get mrDay1 => '一';
+
+  @override
+  String get mrDay2 => '二';
+
+  @override
+  String get mrDay3 => '三';
+
+  @override
+  String get mrDay4 => '四';
+
+  @override
+  String get mrDay5 => '五';
+
+  @override
+  String get mrDay6 => '六';
+
+  @override
+  String get mrDay7 => '日';
+
+  @override
+  String get mrStart => '开始时间';
+
+  @override
+  String get mrEnd => '结束时间';
+
+  @override
+  String get mrWindowInvalid => '结束时间需晚于开始时间';
+
+  @override
+  String get mrInterval => '间隔';
+
+  @override
+  String get mrSound => '提示音';
+
+  @override
+  String get mrSoundBell => '磬声';
+
+  @override
+  String get mrSoundSilent => '静音';
+
+  @override
+  String get mrVibrate => '震动';
+
+  @override
+  String get mrPreviewSound => '试听';
+
+  @override
+  String get mrMessage => '提醒文案';
+
+  @override
+  String get mrMessageDefault => '该正念了 · 回到当下';
+
+  @override
+  String get mrMessageHint => '留空则用默认文案';
+
+  @override
+  String mrCountSummary(int daily, int total) {
+    return '每天 $daily 次 · 本周共 $total 次';
+  }
+
+  @override
+  String mrIosCapWarning(int cap, int total) {
+    return 'iOS 最多 $cap 条通知,当前 $total 条会被截断;请增大间隔或缩短时段';
+  }
+
+  @override
+  String get mrTest => '立即测试';
+
+  @override
+  String get mrTestSent => '测试通知已发送';
+
+  @override
+  String get mrHelp => '让提醒准时响起';
+
+  @override
+  String get mrHelpSubtitle => 'iOS 与 Android 设置指引';
+
+  @override
+  String get mrPermDenied => '通知权限未开启,提醒无法响起';
+
+  @override
+  String get mrGrant => '去开启';
+
+  @override
+  String get mrRespectSilent => '手机静音或勿扰时不会出声,仅显示横幅(尊重系统设置)';
+
+  @override
+  String get mrHelpIntro => '提醒靠系统在预定时刻触发。请按下面步骤放行,确保 App 关闭或息屏时也能响。';
+
+  @override
+  String get mrSelfCheck => '响铃自检';
+
+  @override
+  String get mrSelfCheckHint => '点一下发一条测试通知,看是否真的响了。';
+
+  @override
+  String get mrHelpIosTitle => 'iOS 设置';
+
+  @override
+  String get mrHelpIosStep1 =>
+      '允许通知:首次开启会弹窗;若曾拒绝,前往「设置 > 善护念 > 通知」开启允许通知、声音、锁屏显示。';
+
+  @override
+  String get mrHelpIosStep2 => '静音/勿扰:处于静音档或勿扰时不会出声(系统限制,非故障);需要出声请退出静音。';
+
+  @override
+  String get mrHelpIosStep3 => '专注模式:若开启了工作/睡眠等专注,可能拦截通知,请把善护念加入允许列表。';
+
+  @override
+  String get mrHelpAndroidTitle => 'Android 设置';
+
+  @override
+  String get mrHelpAndroidStep1 => '允许通知:在系统弹窗或「应用信息 > 通知」中允许。';
+
+  @override
+  String get mrHelpAndroidStep2 => '电池不受限:关闭对本 App 的电池优化,否则后台可能被限制。';
+
+  @override
+  String get mrHelpAndroidStep3 => '勿扰说明:系统勿扰时不会出声,仅显示横幅。';
+
+  @override
+  String get mrHelpOemTitle => '国产手机额外设置(小米/华为/OPPO/vivo 等)';
+
+  @override
+  String get mrHelpOemBody =>
+      '这些手机默认会清理后台,可能延迟或漏掉提醒。请手动开启:自启动/自动启动、允许后台活动(不受限制)、锁定在最近任务、允许后台弹通知。即便全部放行,个别机型仍可能延迟——这是系统限制,非本 App 故障。';
+
+  @override
+  String get mrOpenSettings => '去应用设置';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2024,4 +2312,148 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get errSessionExpired => '登入已過期,請重新登入';
+
+  @override
+  String get mrTitle => '正念提醒';
+
+  @override
+  String get mrEnable => '開啟正念提醒';
+
+  @override
+  String get mrEnableHint => '在設定的時段內定時響磬,提醒回到當下';
+
+  @override
+  String get mrWeekdays => '提醒日';
+
+  @override
+  String get mrDay1 => '一';
+
+  @override
+  String get mrDay2 => '二';
+
+  @override
+  String get mrDay3 => '三';
+
+  @override
+  String get mrDay4 => '四';
+
+  @override
+  String get mrDay5 => '五';
+
+  @override
+  String get mrDay6 => '六';
+
+  @override
+  String get mrDay7 => '日';
+
+  @override
+  String get mrStart => '開始時間';
+
+  @override
+  String get mrEnd => '結束時間';
+
+  @override
+  String get mrWindowInvalid => '結束時間需晚於開始時間';
+
+  @override
+  String get mrInterval => '間隔';
+
+  @override
+  String get mrSound => '提示音';
+
+  @override
+  String get mrSoundBell => '磬聲';
+
+  @override
+  String get mrSoundSilent => '靜音';
+
+  @override
+  String get mrVibrate => '震動';
+
+  @override
+  String get mrPreviewSound => '試聽';
+
+  @override
+  String get mrMessage => '提醒文案';
+
+  @override
+  String get mrMessageDefault => '該正念了 · 回到當下';
+
+  @override
+  String get mrMessageHint => '留空則用預設文案';
+
+  @override
+  String mrCountSummary(int daily, int total) {
+    return '每天 $daily 次 · 本週共 $total 次';
+  }
+
+  @override
+  String mrIosCapWarning(int cap, int total) {
+    return 'iOS 最多 $cap 條通知,目前 $total 條會被截斷;請增大間隔或縮短時段';
+  }
+
+  @override
+  String get mrTest => '立即測試';
+
+  @override
+  String get mrTestSent => '測試通知已發送';
+
+  @override
+  String get mrHelp => '讓提醒準時響起';
+
+  @override
+  String get mrHelpSubtitle => 'iOS 與 Android 設定指引';
+
+  @override
+  String get mrPermDenied => '通知權限未開啟,提醒無法響起';
+
+  @override
+  String get mrGrant => '去開啟';
+
+  @override
+  String get mrRespectSilent => '手機靜音或勿擾時不會出聲,僅顯示橫幅(尊重系統設定)';
+
+  @override
+  String get mrHelpIntro => '提醒靠系統在預定時刻觸發。請按下面步驟放行,確保 App 關閉或息屏時也能響。';
+
+  @override
+  String get mrSelfCheck => '響鈴自檢';
+
+  @override
+  String get mrSelfCheckHint => '點一下發一條測試通知,看是否真的響了。';
+
+  @override
+  String get mrHelpIosTitle => 'iOS 設定';
+
+  @override
+  String get mrHelpIosStep1 =>
+      '允許通知:首次開啟會彈窗;若曾拒絕,前往「設定 > 善護念 > 通知」開啟允許通知、聲音、鎖屏顯示。';
+
+  @override
+  String get mrHelpIosStep2 => '靜音/勿擾:處於靜音檔或勿擾時不會出聲(系統限制,非故障);需要出聲請退出靜音。';
+
+  @override
+  String get mrHelpIosStep3 => '專注模式:若開啟了工作/睡眠等專注,可能攔截通知,請把善護念加入允許清單。';
+
+  @override
+  String get mrHelpAndroidTitle => 'Android 設定';
+
+  @override
+  String get mrHelpAndroidStep1 => '允許通知:在系統彈窗或「應用資訊 > 通知」中允許。';
+
+  @override
+  String get mrHelpAndroidStep2 => '電池不受限:關閉對本 App 的電池最佳化,否則後台可能被限制。';
+
+  @override
+  String get mrHelpAndroidStep3 => '勿擾說明:系統勿擾時不會出聲,僅顯示橫幅。';
+
+  @override
+  String get mrHelpOemTitle => '國產手機額外設定(小米/華為/OPPO/vivo 等)';
+
+  @override
+  String get mrHelpOemBody =>
+      '這些手機預設會清理後台,可能延遲或漏掉提醒。請手動開啟:自啟動/自動啟動、允許後台活動(不受限制)、鎖定在最近任務、允許後台彈通知。即便全部放行,個別機型仍可能延遲——這是系統限制,非本 App 故障。';
+
+  @override
+  String get mrOpenSettings => '去應用設定';
 }

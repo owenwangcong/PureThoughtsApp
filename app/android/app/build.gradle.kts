@@ -22,6 +22,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // flutter_local_notifications v20 的定时通知依赖 java.time,须开启核心库脱糖(P2.8)
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -63,4 +65,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // 核心库脱糖运行时(flutter_local_notifications v20 要求 ≥ 2.1.4)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
