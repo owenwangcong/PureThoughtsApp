@@ -95,4 +95,58 @@ void main() {
       expect(occ, isEmpty);
     });
   });
+
+  group('日历格子图标 dayMarkerIconKeys', () {
+    // 三种类型 → 三种图标 key
+    final typeById = <String, Map<String, dynamic>>{
+      'meditate': {'id': 'meditate', 'icon': 'self_improvement'},
+      'talk': {'id': 'talk', 'icon': 'record_voice_over'},
+      'noicon': {'id': 'noicon'}, // 缺 icon → 回退 event
+    };
+
+    Occurrence occ(String typeId, {bool cancelled = false}) => Occurrence(
+          event: {'id': 'e', 'event_type_id': typeId},
+          startAt: DateTime(2026, 7, 11, 9),
+          dateKey: '2026-07-11',
+          cancelled: cancelled,
+        );
+
+    test('单场 → 一个对应图标', () {
+      expect(dayMarkerIconKeys([occ('meditate')], typeById), ['self_improvement']);
+    });
+
+    test('同类型多场 → 去重成一个', () {
+      expect(
+        dayMarkerIconKeys([occ('meditate'), occ('meditate')], typeById),
+        ['self_improvement'],
+      );
+    });
+
+    test('不同类型 → 保序多个图标', () {
+      expect(
+        dayMarkerIconKeys([occ('meditate'), occ('talk')], typeById),
+        ['self_improvement', 'record_voice_over'],
+      );
+    });
+
+    test('已取消的场次跳过', () {
+      expect(
+        dayMarkerIconKeys([occ('meditate', cancelled: true), occ('talk')], typeById),
+        ['record_voice_over'],
+      );
+    });
+
+    test('类型缺图标 → 回退 event', () {
+      expect(dayMarkerIconKeys([occ('noicon')], typeById), ['event']);
+    });
+
+    test('超过上限截断', () {
+      final many = [occ('meditate'), occ('talk'), occ('noicon')];
+      expect(dayMarkerIconKeys(many, typeById, max: 2).length, 2);
+    });
+
+    test('无场次 → 空', () {
+      expect(dayMarkerIconKeys(const [], typeById), isEmpty);
+    });
+  });
 }

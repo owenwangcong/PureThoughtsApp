@@ -111,7 +111,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               eventLoader: (day) => byDay[dateKeyOf(day)] ?? const [],
               startingDayOfWeek: StartingDayOfWeek.monday,
               availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-              calendarStyle: const CalendarStyle(markersMaxCount: 4),
+              calendarBuilders: CalendarBuilders<Occurrence>(
+                // 格子标记:用活动类型图标代替圆点(PRD §5)
+                markerBuilder: (context, day, occs) {
+                  final keys = dayMarkerIconKeys(occs, _typeById);
+                  if (keys.isEmpty) return null;
+                  // 单场活动的日子放大些更醒目;多场则缩小以并排容纳
+                  final size = keys.length == 1 ? 16.0 : 13.0;
+                  final color = Theme.of(context).colorScheme.primary;
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final k in keys)
+                            Icon(eventIcon(k), size: size, color: color),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
               onDaySelected: (sel, foc) => setState(() {
                 _selected = sel;
                 _focused = foc;
