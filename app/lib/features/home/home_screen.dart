@@ -192,21 +192,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _BigTile(
-                        icon: Icons.notifications_active_outlined,
-                        label: l10n.mrTitle,
-                        onTap: () => context.push('/tools/mindfulness'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // 占位:保持磁贴与上方两列同宽
-                    const Expanded(child: SizedBox()),
-                  ],
-                ),
+                // 正念提醒(P2.8)入口暂时下架:功能代码与路由 /tools/mindfulness 保留,
+                // 首页不放入口 ⇒ 用户无法开启,不会排程。恢复时把此处磁贴加回即可。
+                // 下架原因见 docs/design/mindfulness-reminders.md §17(非精确闹钟约 1 小时漂移待定)。
               ],
             ),
           ),
