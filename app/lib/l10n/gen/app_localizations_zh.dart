@@ -820,6 +820,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mrOpenSettings => '去應用設定';
+
+  @override
+  String get qaTitle => '往期問答';
+
+  @override
+  String get qaEntryTitle => '往期問答檢索';
+
+  @override
+  String get qaEntrySubtitle => '搜尋歷次講法問答片段';
+
+  @override
+  String get qaSearchHint => '搜尋關鍵詞(2 字以上)';
+
+  @override
+  String get qaTooShort => '請輸入 2 個字以上';
+
+  @override
+  String qaResultCount(int n) {
+    return '共 $n 條';
+  }
+
+  @override
+  String get qaEmpty => '未找到相關內容';
+
+  @override
+  String get qaEmptyHint => '試試其他關鍵詞,或清除標籤篩選';
+
+  @override
+  String get qaBackToList => '返回列表';
+
+  @override
+  String get qaTagsAdd => '標籤';
+
+  @override
+  String get qaTagPickerTitle => '選擇標籤';
+
+  @override
+  String get qaTagPickerHint => '搜尋標籤';
+
+  @override
+  String get qaTagPickerOr => '選多個標籤時,符合任一即顯示';
+
+  @override
+  String qaTagPickerDone(int n) {
+    return '完成($n)';
+  }
+
+  @override
+  String get qaOpenExternal => '用 YouTube App 開啟';
+
+  @override
+  String qaFromVideo(String title) {
+    return '出自「$title」';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1638,6 +1692,60 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get mrOpenSettings => '去应用设置';
+
+  @override
+  String get qaTitle => '往期问答';
+
+  @override
+  String get qaEntryTitle => '往期问答检索';
+
+  @override
+  String get qaEntrySubtitle => '搜索历次讲法问答片段';
+
+  @override
+  String get qaSearchHint => '搜索关键词(2 字以上)';
+
+  @override
+  String get qaTooShort => '请输入 2 个字以上';
+
+  @override
+  String qaResultCount(int n) {
+    return '共 $n 条';
+  }
+
+  @override
+  String get qaEmpty => '未找到相关内容';
+
+  @override
+  String get qaEmptyHint => '试试其他关键词,或清除标签筛选';
+
+  @override
+  String get qaBackToList => '返回列表';
+
+  @override
+  String get qaTagsAdd => '标签';
+
+  @override
+  String get qaTagPickerTitle => '选择标签';
+
+  @override
+  String get qaTagPickerHint => '搜索标签';
+
+  @override
+  String get qaTagPickerOr => '选多个标签时,符合任一即显示';
+
+  @override
+  String qaTagPickerDone(int n) {
+    return '完成($n)';
+  }
+
+  @override
+  String get qaOpenExternal => '用 YouTube App 打开';
+
+  @override
+  String qaFromVideo(String title) {
+    return '出自「$title」';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2456,4 +2564,58 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get mrOpenSettings => '去應用設定';
+
+  @override
+  String get qaTitle => '往期問答';
+
+  @override
+  String get qaEntryTitle => '往期問答檢索';
+
+  @override
+  String get qaEntrySubtitle => '搜尋歷次講法問答片段';
+
+  @override
+  String get qaSearchHint => '搜尋關鍵詞(2 字以上)';
+
+  @override
+  String get qaTooShort => '請輸入 2 個字以上';
+
+  @override
+  String qaResultCount(int n) {
+    return '共 $n 條';
+  }
+
+  @override
+  String get qaEmpty => '未找到相關內容';
+
+  @override
+  String get qaEmptyHint => '試試其他關鍵詞,或清除標籤篩選';
+
+  @override
+  String get qaBackToList => '返回列表';
+
+  @override
+  String get qaTagsAdd => '標籤';
+
+  @override
+  String get qaTagPickerTitle => '選擇標籤';
+
+  @override
+  String get qaTagPickerHint => '搜尋標籤';
+
+  @override
+  String get qaTagPickerOr => '選多個標籤時,符合任一即顯示';
+
+  @override
+  String qaTagPickerDone(int n) {
+    return '完成($n)';
+  }
+
+  @override
+  String get qaOpenExternal => '用 YouTube App 開啟';
+
+  @override
+  String qaFromVideo(String title) {
+    return '出自「$title」';
+  }
 }

@@ -1705,6 +1705,102 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'去應用設定'**
   String get mrOpenSettings;
+
+  /// No description provided for @qaTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'往期問答'**
+  String get qaTitle;
+
+  /// No description provided for @qaEntryTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'往期問答檢索'**
+  String get qaEntryTitle;
+
+  /// No description provided for @qaEntrySubtitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'搜尋歷次講法問答片段'**
+  String get qaEntrySubtitle;
+
+  /// No description provided for @qaSearchHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'搜尋關鍵詞(2 字以上)'**
+  String get qaSearchHint;
+
+  /// No description provided for @qaTooShort.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'請輸入 2 個字以上'**
+  String get qaTooShort;
+
+  /// No description provided for @qaResultCount.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共 {n} 條'**
+  String qaResultCount(int n);
+
+  /// No description provided for @qaEmpty.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'未找到相關內容'**
+  String get qaEmpty;
+
+  /// No description provided for @qaEmptyHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'試試其他關鍵詞,或清除標籤篩選'**
+  String get qaEmptyHint;
+
+  /// No description provided for @qaBackToList.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'返回列表'**
+  String get qaBackToList;
+
+  /// No description provided for @qaTagsAdd.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'標籤'**
+  String get qaTagsAdd;
+
+  /// No description provided for @qaTagPickerTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇標籤'**
+  String get qaTagPickerTitle;
+
+  /// No description provided for @qaTagPickerHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'搜尋標籤'**
+  String get qaTagPickerHint;
+
+  /// No description provided for @qaTagPickerOr.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選多個標籤時,符合任一即顯示'**
+  String get qaTagPickerOr;
+
+  /// No description provided for @qaTagPickerDone.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'完成({n})'**
+  String qaTagPickerDone(int n);
+
+  /// No description provided for @qaOpenExternal.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用 YouTube App 開啟'**
+  String get qaOpenExternal;
+
+  /// No description provided for @qaFromVideo.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'出自「{title}」'**
+  String qaFromVideo(String title);
 }
 
 class _AppLocalizationsDelegate

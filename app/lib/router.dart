@@ -19,6 +19,10 @@ import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
 import 'features/notifications/notifications_screen.dart';
+import 'features/qa/qa_detail_screen.dart';
+import 'features/qa/qa_models.dart';
+import 'features/qa/qa_search_screen.dart';
+import 'features/qa/qa_tag_picker_screen.dart';
 import 'features/reminders/mindfulness_screen.dart';
 import 'features/reminders/reminder_help_screen.dart';
 import 'features/settings/settings_screen.dart';
@@ -76,8 +80,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/live', builder: (context, state) => const LiveScreen()),
       GoRoute(
         path: '/watch/:vid',
+        builder: (context, state) => VideoPlayerScreen(
+          videoId: state.pathParameters['vid']!,
+          startSeconds: int.tryParse(state.uri.queryParameters['t'] ?? ''),
+        ),
+      ),
+      // 往期问答检索(PRD §6;匿名可用)
+      GoRoute(path: '/qa', builder: (context, state) => const QaSearchScreen()),
+      GoRoute(
+        path: '/qa/tags',
+        builder: (context, state) => QaTagPickerScreen(
+          initial: (state.extra as List<String>?) ?? const [],
+        ),
+      ),
+      GoRoute(
+        path: '/qa/detail',
         builder: (context, state) =>
-            VideoPlayerScreen(videoId: state.pathParameters['vid']!),
+            QaDetailScreen(segment: state.extra as QaSegment?),
       ),
       GoRoute(
         path: '/webview',

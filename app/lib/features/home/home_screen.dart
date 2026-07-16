@@ -103,6 +103,19 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
+                    // 往期問答紧邻直播(同属视频内容);匿名可用
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.forum_outlined,
+                        label: l10n.qaTitle,
+                        onTap: () => context.push('/qa'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
                     Expanded(
                       child: _BigTile(
                         icon: Icons.menu_book_outlined,
@@ -118,11 +131,7 @@ class HomeScreen extends ConsumerWidget {
                         ).toString()),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
+                    const SizedBox(width: 12),
                     Expanded(
                       child: _BigTile(
                         icon: Icons.groups,
@@ -131,7 +140,11 @@ class HomeScreen extends ConsumerWidget {
                             _guard(context, ref, () => context.push('/groups')),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
                     Expanded(
                       child: _BigTile(
                         icon: Icons.calendar_month,
@@ -139,6 +152,9 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () => context.push('/calendar'),
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    // 末位单格:占位保持与上方等宽
+                    const Expanded(child: SizedBox()),
                   ],
                 ),
               ],

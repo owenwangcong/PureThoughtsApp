@@ -5,6 +5,8 @@ import 'package:pure_thoughts/core/prefs.dart';
 import 'package:pure_thoughts/core/theme/app_theme.dart';
 import 'package:pure_thoughts/features/auth/auth_screen.dart';
 import 'package:pure_thoughts/features/onboarding/onboarding_screen.dart';
+import 'package:pure_thoughts/features/qa/qa_detail_screen.dart';
+import 'package:pure_thoughts/features/qa/qa_models.dart';
 import 'package:pure_thoughts/l10n/gen/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -68,6 +70,27 @@ void main() {
       // 切到注册
       await tester.tap(find.byType(TextButton).first);
       await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    // 问答详情:传固定片段(build 不触网),验长摘要 + 标签在大字号下不溢出
+    testWidgets('问答详情 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      const seg = QaSegment(
+        id: 1,
+        qaTitle: '转境、转性与转度的区别',
+        videoTitle: '2026年1月10日 讲法直播问答',
+        summary: '问题:修行中提到"转境、转性、转度"…\n回答:\n1. 转境:心不随境转;\n'
+            '2. 转性:见性起用;\n3. 转度:自度度他。此段摘要用于验证大字号下的换行与滚动。',
+        timestampUrl: 'https://www.youtube.com/watch?v=o3dBw8Su_oA&t=239s',
+        startTime: '00:03:59',
+        durationSeconds: 696,
+        tags: ['唯识', '三性', '转依', '修行次第'],
+      );
+      await pumpScreen(tester, const QaDetailScreen(segment: seg), locale);
       expect(tester.takeException(), isNull);
     });
   }

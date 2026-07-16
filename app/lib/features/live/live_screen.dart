@@ -150,6 +150,20 @@ class LiveScreen extends ConsumerWidget {
               ),
             ),
 
+            // ---- 往期问答检索入口 ----
+            SectionHeader(l10n.qaTitle,
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, 4)),
+            Card(
+              margin: EdgeInsets.zero,
+              child: ListTile(
+                leading: const Icon(Icons.forum_outlined),
+                title: Text(l10n.qaEntryTitle),
+                subtitle: Text(l10n.qaEntrySubtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/qa'),
+              ),
+            ),
+
             // ---- 往期回看 ----
             replays.maybeWhen(
               data: (list) => list.isEmpty

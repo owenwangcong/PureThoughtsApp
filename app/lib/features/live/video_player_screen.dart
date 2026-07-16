@@ -9,13 +9,17 @@ import 'web_view_screen.dart';
 /// watch 网页无嵌入限制,直播/回看皆可播,全屏按钮自带。
 /// 注:受 YouTube ToS 限制不做后台/息屏播放(PRD §8)。
 class VideoPlayerScreen extends StatelessWidget {
-  const VideoPlayerScreen({super.key, required this.videoId});
+  const VideoPlayerScreen({super.key, required this.videoId, this.startSeconds});
 
   final String videoId;
 
+  /// 起播秒数(往期问答 timestamp_url 的 ?t=;直播/回看不传)。
+  final int? startSeconds;
+
   @override
   Widget build(BuildContext context) {
-    final url = 'https://m.youtube.com/watch?v=$videoId';
+    final url = 'https://m.youtube.com/watch?v=$videoId'
+        '${startSeconds != null ? '&t=${startSeconds}s' : ''}';
     return WebViewScreen(url: url, title: 'YouTube', externalUrl: url);
   }
 }

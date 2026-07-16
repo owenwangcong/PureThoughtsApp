@@ -267,5 +267,21 @@
   "mrHelpAndroidStep3": "勿扰说明:系统勿扰时不会出声,仅显示横幅。",
   "mrHelpOemTitle": "国产手机额外设置(小米/华为/OPPO/vivo 等)",
   "mrHelpOemBody": "这些手机默认会清理后台,可能延迟或漏掉提醒。请手动开启:自启动/自动启动、允许后台活动(不受限制)、锁定在最近任务、允许后台弹通知。即便全部放行,个别机型仍可能延迟——这是系统限制,非本 App 故障。",
-  "mrOpenSettings": "去应用设置"
+  "mrOpenSettings": "去应用设置",
+  "qaTitle": "往期问答",
+  "qaEntryTitle": "往期问答检索",
+  "qaEntrySubtitle": "搜索历次讲法问答片段",
+  "qaSearchHint": "搜索关键词(2 字以上)",
+  "qaTooShort": "请输入 2 个字以上",
+  "qaResultCount": "共 {n} 条",
+  "qaEmpty": "未找到相关内容",
+  "qaEmptyHint": "试试其他关键词,或清除标签筛选",
+  "qaBackToList": "返回列表",
+  "qaTagsAdd": "标签",
+  "qaTagPickerTitle": "选择标签",
+  "qaTagPickerHint": "搜索标签",
+  "qaTagPickerOr": "选多个标签时,符合任一即显示",
+  "qaTagPickerDone": "完成({n})",
+  "qaOpenExternal": "用 YouTube App 打开",
+  "qaFromVideo": "出自「{title}」"
 }

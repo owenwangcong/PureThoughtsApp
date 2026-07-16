@@ -267,5 +267,21 @@
   "mrHelpAndroidStep3": "勿擾說明:系統勿擾時不會出聲,僅顯示橫幅。",
   "mrHelpOemTitle": "國產手機額外設定(小米/華為/OPPO/vivo 等)",
   "mrHelpOemBody": "這些手機預設會清理後台,可能延遲或漏掉提醒。請手動開啟:自啟動/自動啟動、允許後台活動(不受限制)、鎖定在最近任務、允許後台彈通知。即便全部放行,個別機型仍可能延遲——這是系統限制,非本 App 故障。",
-  "mrOpenSettings": "去應用設定"
+  "mrOpenSettings": "去應用設定",
+  "qaTitle": "往期問答",
+  "qaEntryTitle": "往期問答檢索",
+  "qaEntrySubtitle": "搜尋歷次講法問答片段",
+  "qaSearchHint": "搜尋關鍵詞(2 字以上)",
+  "qaTooShort": "請輸入 2 個字以上",
+  "qaResultCount": "共 {n} 條",
+  "qaEmpty": "未找到相關內容",
+  "qaEmptyHint": "試試其他關鍵詞,或清除標籤篩選",
+  "qaBackToList": "返回列表",
+  "qaTagsAdd": "標籤",
+  "qaTagPickerTitle": "選擇標籤",
+  "qaTagPickerHint": "搜尋標籤",
+  "qaTagPickerOr": "選多個標籤時,符合任一即顯示",
+  "qaTagPickerDone": "完成({n})",
+  "qaOpenExternal": "用 YouTube App 開啟",
+  "qaFromVideo": "出自「{title}」"
 }
