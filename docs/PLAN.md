@@ -58,7 +58,7 @@
 - [x] **P0.1** 机房选址 ✅ 2026-07-11:**ap-southeast-1 新加坡**——与现有 pure-thoughts.com 服务器同区,该服务器多年服务同一批用户(含大陆),可达性有实践背书,免去三区对比实测;大陆网络正式复核保留在 E6(上线前 P2.7/P3.3 一并做)。
 - [ ] **P0.2** 部署自托管 Supabase(M)— 官方 Docker Compose;自有域名 + TLS;**只暴露 Kong 443**,Postgres/Studio 不上公网(Studio 走白名单)。验收:HTTPS 可达,anon key 能查公开表。
 - [ ] **P0.3** Auth 配置(M)— **用户名+密码注册登录**(PRD v0.5.9:免邮箱验证,生产 `ENABLE_EMAIL_AUTOCONFIRM=true`);SMTP(E5)降级为重置密码/邮件兜底用,非注册阻塞;Google/Apple 登录移出 MVP。验收:纯用户名与真实邮箱两种形式均能注册并立即登录;填了恢复邮箱的账号能收到重置邮件。
-- [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。
+- [ ] **P0.4** 备份链路(M)— 每日全量 + WAL 归档至异地对象存储;**完成一次恢复演练**。验收:从备份恢复出功能完整的实例。⚠️ P0 硬门槛,不可跳过。**补(2026-07-16):Storage 对象(`event-files` PDF 等)也须纳入异地备份,不只 Postgres**(PRD v0.5.12 起 Storage 承载活动 PDF)。
 - [ ] **P0.5** 监控告警(S)— Uptime 监控 + 磁盘/CPU 告警。验收:模拟宕机能收到告警。
 - [x] **P0.6** Flutter 工程骨架(M)— `app/`(应用 ID `com.aeonlectron.purethoughts`,2026-07-12 由 com.purethoughts 改名对齐 App Store Connect 注册,iOS+Android):Riverpod 3 + go_router + supabase_flutter 2.15 + gen-l10n(zh_Hant 默认/zh_Hans/zh 回退)+ 全局字号缩放(0.8–2.0 与系统叠乘)+ sentry(DSN 为空不启用)+ dart-define 环境配置(默认本地栈)。验收 ✅ 2026-07-07:冒烟测试匿名读到 5 条全局功课清单、报数表被拒;`analyze` 0 issue;单测 4/4;debug APK 构建通过。注:真机/模拟器跑通放在 P1.1 随 Auth 界面一起验证;Android 模拟器连本地栈用 `10.0.2.2:54321`。
 - [x] **P0.7** 数据库 schema v1(L)— 16 表 + 枚举 + RLS + 6 个 RPC(join_group / delete_practice_log / 转让 / 重置码 / 取码 / vow_progress)+ 3 视图 + 触发器(自动 profile / 建群 / unit 快照 / proxy_names 记忆 / 代报通知 / 更新守卫),`supabase/migrations/20260707000001_init_schema.sql`;pgTAP 测试 31 项 `supabase/tests/rls.test.sql`。验收 ✅ 2026-07-07:`db reset` 一键通过,`test db` 31/31。要点:软删走 delete_practice_log() RPC(PG 会用 SELECT 策略校验 UPDATE 新行);join_code 独立表 + RPC 防遍历。
@@ -100,6 +100,12 @@
 - [x] **P2.3** 通知中心(M)— 首页铃铛红点(未读数)、通知列表(按类型渲染本地化文案:代报/公告/通用)、进入即标记已读;migration 0006 补 P1.4 遗留的「公告更新→群通知」触发器。验收 ✅ 2026-07-07:pgTAP 45/45(公告通知可见性 2 项),e2e 公告→通知→已读。**大陆 Android 的唯一通道,刚需**。
 - [x] **P2.4b** 日历增强(M,2026-07-09 用户需求,PRD v0.5.7)— **未來活動列表**(90 天内前 10 场);事件类型改动态表 `event_types`(migration 0008:靜坐/共修/講法/禪七/其它默认 + 图标键,管理员增删改,被引用类型只能停用);管理员**编辑/删除整个活动**(原有新增/取消单次保留);**任何活动变更 DB 触发器自动全员通知**(新增/更新/删除/单次取消/改期,通知中心分动作渲染、点击进日历);同日多活动共存显示(标记上限 4)。验收 ✅ 2026-07-09:pgTAP 49/49(变更通知 2 项)。
   - **月视图标记补齐**(2026-07-16):兑现 PRD §5「不同类型在日历中显示不同图标」——格子上以活动**类型图标**代替圆点(`CalendarBuilders.markerBuilder` + 纯函数 `dayMarkerIconKeys`:去重、保序、跳过已取消、上限 3;单场 16px、多场 13px)。真机验证(周三=靜坐图标 / 周日=共修图标)+ `occurrence_utils_test` 补 8 例。analyze 0 issue、Flutter 97/97。
+- [ ] **P2.4c** 活动时间表与相关资料(L,2026-07-16 用户需求,PRD v0.5.12,详细设计 `docs/design/event-agenda.md`)— 管理员给活动加**时间表**(第几天+起讫+活动+可选自由网址,支持跨天)与**相关资料**(App 内上传 PDF → Supabase Storage `event-files` 公开桶);用户查看 + **整张时间表分享/复制**转发 Line/微信;PDF 大陆可达(走 api.pure-thoughts.com)。四点定案见设计 §1。子任务:
+  - [ ] **P2.4c-1** migration + RLS + Storage bucket(`event_agenda_items`/`event_attachments` 两表 + `event-files` 桶 20MB/仅 PDF + storage.objects 策略 + seed 示例时间表;pgTAP:匿名读、非管理员写拒、桶存在)。
+  - [ ] **P2.4c-2** 用户详情页(`event_detail_screen` 取代现有 bottom sheet:时间表按天分组 + 资料下载区 + YouTube/Webex;`event_detail_models` 含 `renderAgendaText`/`groupAgendaByDay` 纯函数 + 单测)。
+  - [ ] **P2.4c-3** 管理员编辑器(`event_agenda_editor`:时间表行增删改排 + PDF `file_picker` 上传/删除,删附件先删 Storage 对象再删行)。
+  - [ ] **P2.4c-4** 分享 + l10n + 走查(`share_plus` 系统面板 + 复制;三份 ARB 新增键;大字号回归;真机:管理员建表传 PDF → 用户看/下/分享,大陆 PDF 可达随 E6 验)。
+  - 依赖:`share_plus`/`file_picker` 新依赖;**Storage bucket 须先在生产实例建**(P0.2 部署时或本地栈 `db reset` 随 migration 建)。
 - [x] **P2.4** 活动与日历(L)— 活動日曆页(table_calendar 月视图 + 当日活动列表,匿名可浏览,首页 AppBar 入口);客户端展开循环(RRULE 子集:单次 / FREQ=WEEKLY)+ overrides 单次取消/改期;活动详情(内容、YouTube/Webex 外跳);管理员建活动(标题/类型/时间/每周循环/连接)与取消单次;时间按用户本地时区显示;seed 示例周六共修/周三打坐。验收 ✅ 2026-07-08:occurrence 展开 5 项单测(快进不漂移/取消/改期)。**推迟到 P2.1**:pg_cron 展开+排程提醒通知(与推送/免打扰同做);分类订阅开关(推送偏好)。
 - [x] **P2.5** 发愿(M)— 發願页(创建:功课/目标/期限预设 7·21·49·100·365 天/范围跨群或单群;进度卡片 + 剩余天数);达成自动转 completed + 随喜弹层 + 回向偈(通用回向偈占位,正式文案待 E7);到期静默转 expired、无"失败"文案;Dashboard 顶部进行中发愿紧凑进度条;首页入口。验收 ✅ 2026-07-08:e2e 发愿进度口径(=3,不含自由名字/已删)+ RLS 他人不可见。
 - [x] **P2.6** 工具(M)— 工具页(匿名/离线可用,首页 AppBar 入口):**打坐計時**(时长预设、预备铃、中途铃=正念提醒、结束三声磬、屏幕常亮、结束一键转打坐报数);**念珠計數**(全屏点按+震动、整串提示 27/54/108/1080 可选默认 108 重震+磬声、计数本地持久化防误退、清零确认、常亮开关、一键转报数默认念佛);磬声为程序合成资产(真实磬声待 Epic 5 内容方音频)。验收 ✅ 2026-07-08:Flutter 25/25。注:**App 关闭时的 OS 级定时正念提醒**推迟到 P2.1(需本地通知基建 flutter_local_notifications,与推送权限一起做);计时为前台模式(息屏后台计时随 P4 audio_service 基建再评估)。
