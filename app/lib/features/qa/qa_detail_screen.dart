@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -136,10 +138,15 @@ class _Cover extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final vid = seg.videoId;
+    // 以 16:9 为基准,但在大屏/横屏(如平板)限高,
+    // 免得封面占满整屏把摘要挤到折叠线以下(摘要是核心价值,§7.3)。
+    final size = MediaQuery.sizeOf(context);
+    final coverHeight = math.min(size.width * 9 / 16, size.height * 0.4);
     return GestureDetector(
       onTap: onPlay,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
+      child: SizedBox(
+        height: coverHeight,
+        width: double.infinity,
         child: Stack(
           fit: StackFit.expand,
           children: [
