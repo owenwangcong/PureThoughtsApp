@@ -11,4 +11,8 @@ abstract final class Channels {
   /// webappng landing 直链无会话上下文会弹回营销页,不可用。)
   static const webexBrowserJoinUrl = 'https://web.webex.com/join-meeting';
   static const scripturesUrl = 'https://qldazangjing.com/'; // 乾隆大藏經(E9)
+
+  /// 往期问答检索 API 基址(PRD §6:客户端直连,不走 qa-proxy)。
+  /// 换上游只改这一处;日后若需缓存/限流再在此引代理。
+  static const qaApiBase = 'https://www.pure-thoughts.com/api';
 }

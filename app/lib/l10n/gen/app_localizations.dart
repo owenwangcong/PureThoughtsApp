@@ -1429,6 +1429,378 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'登入已過期,請重新登入'**
   String get errSessionExpired;
+
+  /// No description provided for @mrTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'正念提醒'**
+  String get mrTitle;
+
+  /// No description provided for @mrEnable.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'開啟正念提醒'**
+  String get mrEnable;
+
+  /// No description provided for @mrEnableHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'在設定的時段內定時響磬,提醒回到當下'**
+  String get mrEnableHint;
+
+  /// No description provided for @mrWeekdays.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提醒日'**
+  String get mrWeekdays;
+
+  /// No description provided for @mrDay1.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'一'**
+  String get mrDay1;
+
+  /// No description provided for @mrDay2.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'二'**
+  String get mrDay2;
+
+  /// No description provided for @mrDay3.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'三'**
+  String get mrDay3;
+
+  /// No description provided for @mrDay4.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'四'**
+  String get mrDay4;
+
+  /// No description provided for @mrDay5.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'五'**
+  String get mrDay5;
+
+  /// No description provided for @mrDay6.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'六'**
+  String get mrDay6;
+
+  /// No description provided for @mrDay7.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'日'**
+  String get mrDay7;
+
+  /// No description provided for @mrStart.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'開始時間'**
+  String get mrStart;
+
+  /// No description provided for @mrEnd.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'結束時間'**
+  String get mrEnd;
+
+  /// No description provided for @mrWindowInvalid.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'結束時間需晚於開始時間'**
+  String get mrWindowInvalid;
+
+  /// No description provided for @mrInterval.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'間隔'**
+  String get mrInterval;
+
+  /// No description provided for @mrSound.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提示音'**
+  String get mrSound;
+
+  /// No description provided for @mrSoundBell.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'磬聲'**
+  String get mrSoundBell;
+
+  /// No description provided for @mrSoundSilent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'靜音'**
+  String get mrSoundSilent;
+
+  /// No description provided for @mrVibrate.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'震動'**
+  String get mrVibrate;
+
+  /// No description provided for @mrPreviewSound.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'試聽'**
+  String get mrPreviewSound;
+
+  /// No description provided for @mrMessage.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提醒文案'**
+  String get mrMessage;
+
+  /// No description provided for @mrMessageDefault.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'該正念了 · 回到當下'**
+  String get mrMessageDefault;
+
+  /// No description provided for @mrMessageHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'留空則用預設文案'**
+  String get mrMessageHint;
+
+  /// No description provided for @mrCountSummary.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'每天 {daily} 次 · 本週共 {total} 次'**
+  String mrCountSummary(int daily, int total);
+
+  /// No description provided for @mrIosCapWarning.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'iOS 最多 {cap} 條通知,目前 {total} 條會被截斷;請增大間隔或縮短時段'**
+  String mrIosCapWarning(int cap, int total);
+
+  /// No description provided for @mrTest.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'立即測試'**
+  String get mrTest;
+
+  /// No description provided for @mrTestSent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'測試通知已發送'**
+  String get mrTestSent;
+
+  /// No description provided for @mrHelp.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'讓提醒準時響起'**
+  String get mrHelp;
+
+  /// No description provided for @mrHelpSubtitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'iOS 與 Android 設定指引'**
+  String get mrHelpSubtitle;
+
+  /// No description provided for @mrPermDenied.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'通知權限未開啟,提醒無法響起'**
+  String get mrPermDenied;
+
+  /// No description provided for @mrGrant.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'去開啟'**
+  String get mrGrant;
+
+  /// No description provided for @mrRespectSilent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'手機靜音或勿擾時不會出聲,僅顯示橫幅(尊重系統設定)'**
+  String get mrRespectSilent;
+
+  /// No description provided for @mrHelpIntro.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提醒靠系統在預定時刻觸發。請按下面步驟放行,確保 App 關閉或息屏時也能響。'**
+  String get mrHelpIntro;
+
+  /// No description provided for @mrSelfCheck.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'響鈴自檢'**
+  String get mrSelfCheck;
+
+  /// No description provided for @mrSelfCheckHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'點一下發一條測試通知,看是否真的響了。'**
+  String get mrSelfCheckHint;
+
+  /// No description provided for @mrHelpIosTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'iOS 設定'**
+  String get mrHelpIosTitle;
+
+  /// No description provided for @mrHelpIosStep1.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'允許通知:首次開啟會彈窗;若曾拒絕,前往「設定 > 善護念 > 通知」開啟允許通知、聲音、鎖屏顯示。'**
+  String get mrHelpIosStep1;
+
+  /// No description provided for @mrHelpIosStep2.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'靜音/勿擾:處於靜音檔或勿擾時不會出聲(系統限制,非故障);需要出聲請退出靜音。'**
+  String get mrHelpIosStep2;
+
+  /// No description provided for @mrHelpIosStep3.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'專注模式:若開啟了工作/睡眠等專注,可能攔截通知,請把善護念加入允許清單。'**
+  String get mrHelpIosStep3;
+
+  /// No description provided for @mrHelpAndroidTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'Android 設定'**
+  String get mrHelpAndroidTitle;
+
+  /// No description provided for @mrHelpAndroidStep1.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'允許通知:在系統彈窗或「應用資訊 > 通知」中允許。'**
+  String get mrHelpAndroidStep1;
+
+  /// No description provided for @mrHelpAndroidStep2.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'電池不受限:關閉對本 App 的電池最佳化,否則後台可能被限制。'**
+  String get mrHelpAndroidStep2;
+
+  /// No description provided for @mrHelpAndroidStep3.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'勿擾說明:系統勿擾時不會出聲,僅顯示橫幅。'**
+  String get mrHelpAndroidStep3;
+
+  /// No description provided for @mrHelpOemTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'國產手機額外設定(小米/華為/OPPO/vivo 等)'**
+  String get mrHelpOemTitle;
+
+  /// No description provided for @mrHelpOemBody.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'這些手機預設會清理後台,可能延遲或漏掉提醒。請手動開啟:自啟動/自動啟動、允許後台活動(不受限制)、鎖定在最近任務、允許後台彈通知。即便全部放行,個別機型仍可能延遲——這是系統限制,非本 App 故障。'**
+  String get mrHelpOemBody;
+
+  /// No description provided for @mrOpenSettings.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'去應用設定'**
+  String get mrOpenSettings;
+
+  /// No description provided for @qaTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'往期問答'**
+  String get qaTitle;
+
+  /// No description provided for @qaEntryTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'往期問答檢索'**
+  String get qaEntryTitle;
+
+  /// No description provided for @qaEntrySubtitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'搜尋歷次講法問答片段'**
+  String get qaEntrySubtitle;
+
+  /// No description provided for @qaSearchHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'搜尋關鍵詞(2 字以上)'**
+  String get qaSearchHint;
+
+  /// No description provided for @qaTooShort.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'請輸入 2 個字以上'**
+  String get qaTooShort;
+
+  /// No description provided for @qaResultCount.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共 {n} 條'**
+  String qaResultCount(int n);
+
+  /// No description provided for @qaEmpty.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'未找到相關內容'**
+  String get qaEmpty;
+
+  /// No description provided for @qaEmptyHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'試試其他關鍵詞,或清除標籤篩選'**
+  String get qaEmptyHint;
+
+  /// No description provided for @qaBackToList.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'返回列表'**
+  String get qaBackToList;
+
+  /// No description provided for @qaTagsAdd.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'標籤'**
+  String get qaTagsAdd;
+
+  /// No description provided for @qaTagPickerTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇標籤'**
+  String get qaTagPickerTitle;
+
+  /// No description provided for @qaTagPickerHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'搜尋標籤'**
+  String get qaTagPickerHint;
+
+  /// No description provided for @qaTagPickerOr.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選多個標籤時,符合任一即顯示'**
+  String get qaTagPickerOr;
+
+  /// No description provided for @qaTagPickerDone.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'完成({n})'**
+  String qaTagPickerDone(int n);
+
+  /// No description provided for @qaOpenExternal.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'用 YouTube App 開啟'**
+  String get qaOpenExternal;
+
+  /// No description provided for @qaFromVideo.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'出自「{title}」'**
+  String qaFromVideo(String title);
 }
 
 class _AppLocalizationsDelegate

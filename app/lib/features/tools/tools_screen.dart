@@ -36,6 +36,18 @@ class ToolsScreen extends StatelessWidget {
               onTap: () => context.push('/tools/counter'),
             ),
           ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              leading: const Icon(Icons.notifications_active_outlined, size: 40),
+              title: Text(l10n.mrTitle,
+                  style: Theme.of(context).textTheme.titleLarge),
+              subtitle: Text(l10n.mrEnableHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/tools/mindfulness'),
+            ),
+          ),
         ],
       ),
     );
