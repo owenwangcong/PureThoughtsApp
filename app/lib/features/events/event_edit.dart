@@ -26,14 +26,16 @@ String eventTypeName(Map<String, dynamic>? t, Locale locale) => t == null
 
 /// 管理员新增/编辑活动(existing 非空 = 编辑)。
 /// 从日历页与活动详情页共用(P2.4c 抽出,原在 CalendarScreen)。
-Future<void> showEventEditor(BuildContext context, WidgetRef ref,
+/// 成功时返回活动开始的**设备本地时间**(供日历跳到那一天,活动即刻可见——
+/// 否则默认建在明天、时区又可能非本地,提交后当天列表仍空,像"没加上");失败/取消返回 null。
+Future<DateTime?> showEventEditor(BuildContext context, WidgetRef ref,
     {Map<String, dynamic>? existing}) async {
   final l10n = AppLocalizations.of(context);
   final locale = ref.read(localeProvider);
   final types = (ref.read(eventTypesProvider).value ?? const [])
       .where((t) => t['active'] == true || t['id'] == existing?['event_type_id'])
       .toList();
-  if (types.isEmpty) return;
+  if (types.isEmpty) return null;
 
   final title = TextEditingController(text: existing?['title'] as String? ?? '');
   final content =
@@ -60,7 +62,7 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
     try {
       tzName = await ref.read(defaultEventTimezoneProvider.future);
     } catch (_) {} // 离线等取不到时用 Asia/Shanghai
-    if (!context.mounted) return;
+    if (!context.mounted) return null;
   }
   var when = existing == null
       ? DateTime.now().add(const Duration(days: 1))
@@ -193,7 +195,7 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
       ),
     ),
   );
-  if (ok != true || title.text.trim().isEmpty || !context.mounted) return;
+  if (ok != true || title.text.trim().isEmpty || !context.mounted) return null;
 
   final messenger = ScaffoldMessenger.of(context);
   final startAtUtc = tz.TZDateTime(locationOf(tzName), when.year, when.month,
@@ -223,7 +225,10 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
           .eq('id', existing['id'] as String);
     }
     invalidateEvents(ref);
+    messenger.showSnackBar(SnackBar(content: Text(l10n.saved)));
+    return startAtUtc.toLocal(); // 设备本地开始时间,供日历跳到该日
   } catch (e) {
     messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
   }
+  return null;
 }

@@ -101,7 +101,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
-              onPressed: () => showEventEditor(context, ref),
+              onPressed: () async {
+                final startAt = await showEventEditor(context, ref);
+                // 新建成功 → 日历跳到活动那一天,当日列表立刻可见
+                // (默认建在明天、时区可能非本地,不跳的话像"没加上")
+                if (startAt != null && mounted) {
+                  setState(() {
+                    _selected = startAt;
+                    _focused = startAt;
+                  });
+                }
+              },
               child: const Icon(Icons.add),
             )
           : null,
