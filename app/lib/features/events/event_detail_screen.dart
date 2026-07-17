@@ -412,28 +412,41 @@ class _AgendaView extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 时间列:随字号缩放的固定宽(跨行对齐);默认字号比原 96 窄,
-                  // 把宽度让给活动内容列,尽量不换行;大字号下等比放宽,时间自身也不折行
+                  // 时间列:随字号缩放的 90 逻辑宽——正常字号恰好单行(HH:mm–HH:mm),
+                  // 跨行对齐;比原 96 略窄 + 链接按钮窄屏降级,把宽度尽量让给活动内容列
                   SizedBox(
-                    width: MediaQuery.textScalerOf(context).scale(80),
+                    width: MediaQuery.textScalerOf(context).scale(90),
                     child: Text(it.timeRange, style: theme.textTheme.bodyMedium),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   Expanded(child: Text(it.activity)),
                   if (it.linkUrl != null)
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          minimumSize: const Size(0, 32),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: Text(it.linkLabel?.isNotEmpty == true
-                          ? it.linkLabel!
-                          : defaultLinkLabel),
-                      onPressed: () => launchUrl(Uri.parse(it.linkUrl!),
-                          mode: LaunchMode.externalApplication),
-                    ),
+                    // 窄屏(手机)只出图标,把宽度让给活动内容;宽屏保留文字标签
+                    MediaQuery.sizeOf(context).width < 480
+                        ? IconButton(
+                            visualDensity: VisualDensity.compact,
+                            tooltip: it.linkLabel?.isNotEmpty == true
+                                ? it.linkLabel!
+                                : defaultLinkLabel,
+                            icon: Icon(Icons.open_in_new,
+                                size: 18, color: theme.colorScheme.primary),
+                            onPressed: () => launchUrl(Uri.parse(it.linkUrl!),
+                                mode: LaunchMode.externalApplication),
+                          )
+                        : TextButton.icon(
+                            style: TextButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                minimumSize: const Size(0, 32),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact),
+                            icon: const Icon(Icons.open_in_new, size: 16),
+                            label: Text(it.linkLabel?.isNotEmpty == true
+                                ? it.linkLabel!
+                                : defaultLinkLabel),
+                            onPressed: () => launchUrl(Uri.parse(it.linkUrl!),
+                                mode: LaunchMode.externalApplication),
+                          ),
                 ],
               ),
             ),
