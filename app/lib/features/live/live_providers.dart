@@ -29,6 +29,25 @@ final currentLiveProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   return rows.isEmpty ? null : rows.first;
 });
 
+/// 首页「直播中」角标用:轻量读 `live_streams`(有进行中的 youtube 直播即 true)。
+/// 与打开直播页的 [currentLiveProvider] 分离——**不触发 YouTube 探测、不建通知**,
+/// 只反映 live-probe(生产由 pg_cron 每 5 分钟调用)已写入表的当前状态;
+/// 失败/超时按"无直播"处理,不打扰。
+final hasLiveNowProvider = FutureProvider<bool>((ref) async {
+  try {
+    final rows = await Supabase.instance.client
+        .from('live_streams')
+        .select('id')
+        .eq('platform', 'youtube')
+        .isFilter('ended_at', null)
+        .limit(1)
+        .timeout(const Duration(seconds: 8));
+    return rows.isNotEmpty;
+  } catch (_) {
+    return false;
+  }
+});
+
 /// 往期回看(media_items 驱动,管理员维护)
 final replayVideosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   return Supabase.instance.client

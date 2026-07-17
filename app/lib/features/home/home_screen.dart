@@ -10,6 +10,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../dashboard/quick_report_section.dart';
 import '../groups/groups_providers.dart';
+import '../live/live_providers.dart';
 import '../logs/offline_queue.dart';
 import '../notifications/notifications_providers.dart';
 
@@ -32,6 +33,8 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(currentUserProvider);
+    // 直播中角标(轻量读表,无副作用;缺省 false)
+    final liveNow = ref.watch(hasLiveNowProvider).value ?? false;
     // 离线报数自动补传(每会话一次,P5.1)
     if (user != null) scheduleOfflineFlush(context, ref);
 
@@ -99,6 +102,7 @@ class HomeScreen extends ConsumerWidget {
                       child: _BigTile(
                         icon: Icons.live_tv,
                         label: l10n.liveTitle,
+                        badgeLabel: liveNow ? l10n.liveNow : null,
                         onTap: () => context.push('/live'),
                       ),
                     ),
@@ -276,12 +280,16 @@ class _BigTile extends ConsumerWidget {
     required this.label,
     required this.onTap,
     this.emphasis = _TileEmphasis.surface,
+    this.badgeLabel,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final _TileEmphasis emphasis;
+
+  /// 非空时在图标右上角显示红底白字角标(如直播中的「直播中」)
+  final String? badgeLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -302,9 +310,16 @@ class _BigTile extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon,
-                  size: 30,
-                  color: emphasis == _TileEmphasis.surface ? scheme.primary : fg),
+              Badge(
+                isLabelVisible: badgeLabel != null,
+                label: Text(badgeLabel ?? ''),
+                backgroundColor: const Color(0xFFD32F2F),
+                textColor: Colors.white,
+                child: Icon(icon,
+                    size: 30,
+                    color:
+                        emphasis == _TileEmphasis.surface ? scheme.primary : fg),
+              ),
               const SizedBox(height: 6),
               Text(
                 label,
