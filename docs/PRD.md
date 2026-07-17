@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.13(首页直播角标:有直播时首页「直播」图标显红底白字「直播中」) · 来源:`initial.md` + 十二轮需求澄清
+> 版本:v0.5.14(品牌徽记:托手莲花+祥云圆环,更新 App 图标/启动屏/运行时 logo) · 来源:`initial.md` + 十二轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -246,6 +246,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 ## 11. 非功能需求 (NFR)
 
 - **视觉基调**(v0.5.4 定案,参照官网):**宣纸暖白底 + 古铜金主色(#8A6D3B 系)+ 深棕文字**,沉静典雅;Material 3 双主题(浅色/深色/跟随系统,用户可切换),**深色不用纯黑**、金色降饱和;8pt 网格、宽松留白、正文行高 1.5;按钮三级层级(filled/tonal·outlined/text),触控目标 ≥48pt;加载用骨架屏、空态给引导文案与动作,不用裸转圈。
+- **品牌标志**(v0.5.14 定案,母版 `docs/images/`、生成流程 `design/branding/`):正式徽记为**「托手莲花 + 祥云圆环」古铜金**(浅版宣纸暖白底 `logo (2).jpg`、深版墨黑底 `logo (1).jpg`);App 图标、启动屏、App 内运行时 logo 一律用此徽记(图标底为宣纸暖白 `#F6F1E4`,Android 自适应 + iOS + Android 12 启动圆形遮罩已适配)。替换了早期通用金蓮占位标。
 - **多语言**:UI 维护 `zh_Hant` / `zh_Hans` 两套文案;用户可切换,默认繁体;偏好存云端 + 本地。
 - **可访问性**:用户**自定义字号**(全局文字缩放),布局需自适应大字号;高对比、简洁层级;首次启动引导页(选语言 → 选字号 → 选地区)。
 - **隐私 / 安全**:Postgres **RLS** 全表启用(见 §12.3);匿名用户仅能读公开内容表;客户端只用 `anon key`,管理操作走 Edge Function(`service_role` 仅存在于服务端)。
