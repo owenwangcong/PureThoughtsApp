@@ -123,12 +123,34 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 firstDay: DateTime.now().subtract(const Duration(days: 365)),
                 lastDay: DateTime.now().add(const Duration(days: 365)),
                 focusedDay: _focused,
-                rowHeight: 56, // 容纳日号 + 农历副标签 + 底部活动图标
+                rowHeight: 62, // 容纳日号 + 农历副标签 + 底部活动图标
+                daysOfWeekHeight: 30,
                 selectedDayPredicate: (d) => isSameDay(d, _selected),
                 eventLoader: (day) => byDay[dateKeyOf(day)] ?? const [],
                 startingDayOfWeek: StartingDayOfWeek.monday,
                 availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+                // 卡片式格子(2026-07-17 用户选定 B 方案):邻月日期不显示,减少杂讯
+                calendarStyle: const CalendarStyle(outsideDaysVisible: false),
+                // 星期表头:浅底色条 + 周末区分色
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 calendarBuilders: CalendarBuilders<Occurrence>(
+                  dowBuilder: (context, day) => Center(
+                    child: Text(
+                      DateFormat.EEEEE(
+                              Localizations.localeOf(context).toString())
+                          .format(day),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: _weekendColor(context, day.weekday) ??
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                   // 日格:日号 + 农历/节日短名副标签 + 十斋日角点(PRD v0.5.15 §5.2)
                   defaultBuilder: (context, day, _) =>
                       _dayCell(context, day, infoOf(day), hans: hans),
@@ -136,8 +158,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       _dayCell(context, day, infoOf(day), hans: hans, today: true),
                   selectedBuilder: (context, day, _) => _dayCell(
                       context, day, infoOf(day), hans: hans, selected: true),
-                  outsideBuilder: (context, day, _) => _dayCell(
-                      context, day, infoOf(day), hans: hans, outside: true),
                   // 格子标记:用活动类型图标代替圆点(PRD §5)
                   markerBuilder: (context, day, occs) {
                     final keys = dayMarkerIconKeys(occs, _typeById);
@@ -169,6 +189,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   _focused = foc;
                 }),
                 onPageChanged: (foc) => setState(() => _focused = foc),
+              ),
+            ),
+
+            // 图例:金字=节日 · 金点=十斋日 · 图标=活动(2026-07-17 用户选定)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+              child: Wrap(
+                spacing: 14,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(l10n.legendFestival,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      )),
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(l10n.almanacZhaiTen, style: _legendStyle(context)),
+                  ]),
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.event, size: 14,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(l10n.legendEvent, style: _legendStyle(context)),
+                  ]),
+                ],
               ),
             ),
             const Divider(),
@@ -250,13 +306,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  /// 日格:日号 + 副标签(平日=农历,节日=金色短名)+ 十斋日角点。
-  /// 副标签用 FittedBox 收缩,配合外层 1.3 倍缩放上限,大字号下不破格。
+  /// 周末区分色(纸质日历惯例,2026-07-17 用户选定):周日暗红棕、周六青灰;
+  /// 深色主题取亮化变体。工作日返回 null(用默认色)。
+  Color? _weekendColor(BuildContext context, int weekday) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return switch (weekday) {
+      DateTime.sunday => dark ? const Color(0xFFE5A899) : const Color(0xFF9A4A3B),
+      DateTime.saturday =>
+        dark ? const Color(0xFFA9C7C4) : const Color(0xFF4E6E6A),
+      _ => null,
+    };
+  }
+
+  TextStyle _legendStyle(BuildContext context) => TextStyle(
+        fontSize: 12,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      );
+
+  /// 日格(卡片式,2026-07-17 用户选定 B 方案):浅底色瓷砖分隔天与天;
+  /// 今日=淡金填充+粗体,选中=深金实心;周末日号用区分色;
+  /// 副标签(平日=农历,节日=金色短名)+ 十斋日角点。
+  /// 内容整体 FittedBox 收缩,配合外层 1.3 倍缩放上限,大字号下不破格。
   Widget _dayCell(BuildContext context, DateTime day, AlmanacDayInfo? info,
-      {bool hans = false,
-      bool today = false,
-      bool selected = false,
-      bool outside = false}) {
+      {bool hans = false, bool today = false, bool selected = false}) {
     final scheme = Theme.of(context).colorScheme;
     final festival = info != null && info.festivals.isNotEmpty;
     final sub = info == null
@@ -265,24 +337,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             ? info.festivals.first.shortName(hans: hans)
             : lunarCellLabel(info.lunarMonth, info.lunarDay, info.isLeapMonth,
                 hans: hans);
-    final muted = Theme.of(context).disabledColor;
     final numColor = selected
         ? scheme.onPrimary
-        : outside
-            ? muted
-            : scheme.onSurface;
+        : today
+            ? scheme.onPrimaryContainer
+            : _weekendColor(context, day.weekday) ?? scheme.onSurface;
     final subColor = selected
         ? scheme.onPrimary
-        : outside
-            ? muted
-            : festival
-                ? scheme.primary
+        : festival
+            ? scheme.primary
+            : today
+                ? scheme.onPrimaryContainer
                 : scheme.onSurfaceVariant;
     return Container(
-      margin: const EdgeInsets.all(2),
+      margin: const EdgeInsets.all(1.5), // 瓷砖间 3px 空隙
       decoration: BoxDecoration(
-        color: selected ? scheme.primary : null,
-        border: today && !selected ? Border.all(color: scheme.primary) : null,
+        color: selected
+            ? scheme.primary
+            : today
+                ? scheme.primaryContainer
+                : scheme.surfaceContainer,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Stack(

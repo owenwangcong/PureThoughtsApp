@@ -358,5 +358,7 @@
   "defaultEventTimezone": "預設活動時區",
   "tzPickerTitle": "選擇時區",
   "tzSearchHint": "輸入城市或時區名稱搜尋",
+  "legendFestival": "節日",
+  "legendEvent": "活動",
   "tzMore": "其他時區…"
 }
