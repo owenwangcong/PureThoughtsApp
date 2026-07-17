@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/error_text.dart';
-import '../../core/channels.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
-import '../live/webex.dart';
+import 'event_detail_models.dart';
+import 'event_edit.dart';
 import 'event_icons.dart';
 import 'events_providers.dart';
 import 'occurrence_utils.dart';
@@ -93,7 +90,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
-              onPressed: () => _editEvent(),
+              onPressed: () => showEventEditor(context, ref),
               child: const Icon(Icons.add),
             )
           : null,
@@ -111,7 +108,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               eventLoader: (day) => byDay[dateKeyOf(day)] ?? const [],
               startingDayOfWeek: StartingDayOfWeek.monday,
               availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-              calendarStyle: const CalendarStyle(markersMaxCount: 4),
+              calendarBuilders: CalendarBuilders<Occurrence>(
+                // 格子标记:用活动类型图标代替圆点(PRD §5)
+                markerBuilder: (context, day, occs) {
+                  final keys = dayMarkerIconKeys(occs, _typeById);
+                  if (keys.isEmpty) return null;
+                  // 单场活动的日子放大些更醒目;多场则缩小以并排容纳
+                  final size = keys.length == 1 ? 16.0 : 13.0;
+                  final color = Theme.of(context).colorScheme.primary;
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final k in keys)
+                            Icon(eventIcon(k), size: size, color: color),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
               onDaySelected: (sel, foc) => setState(() {
                 _selected = sel;
                 _focused = foc;
@@ -125,13 +144,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Center(child: Text(l10n.emptyList)),
               )
             else
-              for (final o in dayList) _occurrenceTile(context, o, isAdmin),
+              for (final o in dayList) _occurrenceTile(context, o),
 
             // ---- 未來活動 ----
             if (upcoming.isNotEmpty) ...[
               SectionHeader(l10n.upcomingTitle),
               for (final o in upcoming)
-                _occurrenceTile(context, o, isAdmin, showDate: true),
+                _occurrenceTile(context, o, showDate: true),
             ],
           ],
         ),
@@ -139,7 +158,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Widget _occurrenceTile(BuildContext context, Occurrence o, bool isAdmin,
+  Widget _occurrenceTile(BuildContext context, Occurrence o,
       {bool showDate = false}) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeProvider);
@@ -148,6 +167,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ? DateFormat('MM-dd (E) HH:mm', Localizations.localeOf(context).toString())
             .format(o.startAt)
         : DateFormat('HH:mm').format(o.startAt);
+    // 内含资源标记:有时间表 / PDF 资料 / 链接时,在列表项上各挂一个小图标,
+    // 让用户不点开也知道里面有内容(PRD v0.5.12)。
+    final flags = EventResourceFlags.fromEvent(o.event);
+    final muted = o.cancelled
+        ? Theme.of(context).disabledColor
+        : Theme.of(context).colorScheme.onSurfaceVariant;
     return ListTile(
       leading: Icon(
         eventIcon(t?['icon'] as String?),
@@ -166,291 +191,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       subtitle: Text(
         '${_typeName(t, locale)} · ${o.cancelled ? l10n.eventCancelled : time}',
       ),
-      onTap: () => _showDetail(context, o, isAdmin),
-    );
-  }
-
-  void _showDetail(BuildContext context, Occurrence o, bool isAdmin) {
-    final l10n = AppLocalizations.of(context);
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(o.event['title'] as String,
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 4),
-              Text(
-                DateFormat('yyyy-MM-dd HH:mm').format(o.startAt) +
-                    (o.event['duration_minutes'] != null
-                        ? ' · ${o.event['duration_minutes']} ${l10n.unitMinute}'
-                        : ''),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              if (o.event['content'] != null) ...[
-                const SizedBox(height: 12),
-                Text(o.event['content'] as String),
-              ],
-              const SizedBox(height: 16),
-              if (o.event['youtube_url'] != null)
-                FilledButton.icon(
-                  icon: const Icon(Icons.play_circle_outline),
-                  label: const Text('YouTube'),
-                  onPressed: () {
-                    final url = o.event['youtube_url'] as String;
-                    final id = RegExp(r'(?:v=|youtu\.be/|/live/)([\w-]{11})')
-                        .firstMatch(url)
-                        ?.group(1);
-                    context.push(id != null
-                        ? '/watch/$id'
-                        : Uri(path: '/webview', queryParameters: {
-                            'url': url,
-                            'title': 'YouTube',
-                          }).toString());
-                  },
-                ),
-              if (o.event['webex_url'] != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.tonalIcon(
-                        icon: const Icon(Icons.videocam_outlined),
-                        label: const Text('Webex'),
-                        onPressed: () => openWebexInApp(context, ref,
-                            url: o.event['webex_url'] as String),
-                      ),
-                    ),
-                    // 永远保留 Webex App 选项(用户定案)
-                    IconButton(
-                      tooltip: l10n.webexOpenApp,
-                      icon: const Icon(Icons.exit_to_app),
-                      onPressed: () => launchUrl(
-                          Uri.parse(o.event['webex_url'] as String),
-                          mode: LaunchMode.externalApplication),
-                    ),
-                  ],
-                ),
-              ],
-              if (isAdmin) ...[
-                const Divider(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(sheetContext);
-                          _editEvent(existing: o.event);
-                        },
-                        child: Text(l10n.editEvent),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (!o.cancelled)
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () async {
-                            await Supabase.instance.client
-                                .from('event_overrides')
-                                .upsert({
-                              'event_id': o.event['id'],
-                              'occurrence_date': o.dateKey,
-                              'patch': {'cancelled': true},
-                            }, onConflict: 'event_id,occurrence_date');
-                            _invalidateAll();
-                            if (sheetContext.mounted) Navigator.pop(sheetContext);
-                          },
-                          child: Text(l10n.cancelOccurrence),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  style: TextButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.error),
-                  onPressed: () async {
-                    final ok = await showDialog<bool>(
-                      context: context,
-                      builder: (dctx) => AlertDialog(
-                        content: Text(l10n.confirmDeleteEvent),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(dctx, false),
-                              child: Text(l10n.cancel)),
-                          FilledButton(
-                              onPressed: () => Navigator.pop(dctx, true),
-                              child: Text(l10n.submit)),
-                        ],
-                      ),
-                    );
-                    if (ok != true) return;
-                    await Supabase.instance.client
-                        .from('events')
-                        .delete()
-                        .eq('id', o.event['id'] as String);
-                    _invalidateAll();
-                    if (sheetContext.mounted) Navigator.pop(sheetContext);
-                  },
-                  child: Text(l10n.deleteEvent),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 管理员新增/编辑活动(existing 非空 = 编辑)
-  Future<void> _editEvent({Map<String, dynamic>? existing}) async {
-    final l10n = AppLocalizations.of(context);
-    final locale = ref.read(localeProvider);
-    final types = (ref.read(eventTypesProvider).value ?? const [])
-        .where((t) =>
-            t['active'] == true || t['id'] == existing?['event_type_id'])
-        .toList();
-    if (types.isEmpty) return;
-
-    final title = TextEditingController(text: existing?['title'] as String? ?? '');
-    final content =
-        TextEditingController(text: existing?['content'] as String? ?? '');
-    final youtube = TextEditingController(
-        text: existing == null
-            ? Channels.youtubeLiveUrl
-            : (existing['youtube_url'] as String? ?? ''));
-    final webex = TextEditingController(
-        text: existing == null
-            ? Channels.webexJoinUrl
-            : (existing['webex_url'] as String? ?? ''));
-    var typeId = existing?['event_type_id'] as String? ?? types.first['id'] as String;
-    var weekly = existing == null
-        ? false // 默认不重复(单次活动);需要每周循环由管理员手动开启
-        : (existing['recurrence_rule'] as String?)?.isNotEmpty == true;
-    var when = existing == null
-        ? DateTime.now().add(const Duration(days: 1))
-        : DateTime.parse(existing['start_at'] as String).toLocal();
-    final duration = existing?['duration_minutes'] as int? ?? 90;
-
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(existing == null ? l10n.createEvent : l10n.editEvent),
-          content: SingleChildScrollView(
-            child: Column(
+      trailing: flags.any
+          ? Row(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: title,
-                  decoration: InputDecoration(labelText: l10n.eventTitleLabel),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: typeId,
-                  decoration: InputDecoration(labelText: l10n.categoryTitle),
-                  items: [
-                    for (final t in types)
-                      DropdownMenuItem(
-                        value: t['id'] as String,
-                        child: Row(
-                          children: [
-                            Icon(eventIcon(t['icon'] as String?), size: 20),
-                            const SizedBox(width: 8),
-                            Text(_typeName(t, locale)),
-                          ],
-                        ),
-                      ),
-                  ],
-                  onChanged: (v) => setState(() => typeId = v!),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.schedule),
-                  label: Text(DateFormat('yyyy-MM-dd HH:mm').format(when)),
-                  onPressed: () async {
-                    final d = await showDatePicker(
-                      context: context,
-                      initialDate: when,
-                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (d == null || !context.mounted) return;
-                    final t = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.fromDateTime(when));
-                    if (t == null) return;
-                    setState(() =>
-                        when = DateTime(d.year, d.month, d.day, t.hour, t.minute));
-                  },
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.weeklyRepeat),
-                  value: weekly,
-                  onChanged: (v) => setState(() => weekly = v),
-                ),
-                TextField(
-                  controller: youtube,
-                  decoration: const InputDecoration(labelText: 'YouTube URL'),
-                ),
-                TextField(
-                  controller: webex,
-                  decoration: const InputDecoration(labelText: 'Webex URL'),
-                ),
-                TextField(
-                  controller: content,
-                  maxLines: 2,
-                  decoration: InputDecoration(labelText: l10n.noteLabel),
-                ),
+                if (flags.agenda)
+                  _resIcon(Icons.schedule, l10n.eventAgendaTitle, muted),
+                if (flags.attachment)
+                  _resIcon(Icons.picture_as_pdf_outlined,
+                      l10n.eventAttachmentsTitle, muted),
+                if (flags.link) _resIcon(Icons.link, 'YouTube / Webex', muted),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(l10n.cancel)),
-            FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(l10n.submit)),
-          ],
-        ),
-      ),
+            )
+          : null,
+      onTap: () => context.push('/calendar/event', extra: o),
     );
-    if (ok != true || title.text.trim().isEmpty || !mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    final payload = {
-      'title': title.text.trim(),
-      'event_type_id': typeId,
-      'start_at': when.toUtc().toIso8601String(),
-      'duration_minutes': duration,
-      'recurrence_rule': weekly ? 'FREQ=WEEKLY' : null,
-      'youtube_url': youtube.text.trim().isEmpty ? null : youtube.text.trim(),
-      'webex_url': webex.text.trim().isEmpty ? null : webex.text.trim(),
-      'content': content.text.trim().isEmpty ? null : content.text.trim(),
-    };
-    try {
-      if (existing == null) {
-        await Supabase.instance.client.from('events').insert({
-          ...payload,
-          'created_by': Supabase.instance.client.auth.currentUser!.id,
-        });
-      } else {
-        await Supabase.instance.client
-            .from('events')
-            .update(payload)
-            .eq('id', existing['id'] as String);
-      }
-      _invalidateAll();
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
-    }
   }
+
+  Widget _resIcon(IconData icon, String tooltip, Color color) => Padding(
+        padding: const EdgeInsets.only(left: 6),
+        child: Tooltip(
+          message: tooltip,
+          child: Icon(icon, size: 18, color: color),
+        ),
+      );
 }

@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.11(讲法问答检索定稿:客户端直连上游 API、后端简繁双字形、取消 `qa-proxy`) · 来源:`initial.md` + 十二轮需求澄清
+> 版本:v0.5.12(活动时间表 + 相关资料:管理员维护、用户查看、整张可分享;PDF 走 Supabase Storage) · 来源:`initial.md` + 十二轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -136,6 +136,12 @@
 - **日历视图**:所有活动可在日历查看;**未来事件列表**(v0.5.7:日历下方按时间列出即将到来的活动);同一天多种活动共存并全部显示。
 - **事件类型**(v0.5.7 定案):动态表 `event_types`,默认 **靜坐 / 共修 / 講法 / 禪七 / 其它**;**管理员可增删改类型**(名称简繁 + 图标 + 启用状态,图标从预置图标集选择);不同类型在日历中显示不同图标;被活动引用的类型不可删、只能停用。
 - **管理员活动管理**(v0.5.7):新增 / 编辑 / 删除整个活动(含循环全部场次)/ 取消单次;**任何活动变更自动生成全员通知**(新增/更新/删除/单次取消,App 内通知中心即时可见,推送接通后同链路升级)。**新建活动默认不重复**(v0.5.10:「每週重複」开关默认关闭,单次活动为主;需要每周循环时管理员手动开启)。
+- **活动时间表与相关资料**(v0.5.12 定案,详细设计见 [`design/event-agenda.md`](design/event-agenda.md)):管理员可给活动补一份**时间表**(几点到几点做什么,**支持跨多天**如禪七)与**相关资料**;用户可看、可**整张时间表分享/复制**转发 Line/微信。
+  - **时间表**:结构化行(第几天 + 起讫时间 + 活动),每行可选填一个**自由网址**(如读经行链接到经文网页);归属活动本身,循环活动各场次共用;时间为现场墙钟时间原样显示、不做时区换算。
+  - **相关资料**:管理员**在 App 内上传 PDF**(如经本)供用户下载 —— 存 **Supabase Storage**(`event-files` bucket,公开可读、仅管理员可写);走自有域名 `api.pure-thoughts.com`,**大陆可达**(相对 YouTube 的关键优势)。另沿用活动级 YouTube/Webex 链接。
+  - **分享**:整张时间表渲染为纯文本(含各行链接、PDF 公开 URL、YouTube),经系统分享面板发 Line/微信,或复制到剪贴板;转发后大陆用户点 Storage 链接可下 PDF。
+  - **日历列表标记**:活动若含**时间表 / PDF / 链接**,在日历列表项(当日列表与未来活动列表)上分别挂对应小图标(时钟 / PDF / 链接),用户不点开即知里面有内容。
+  - 均**管理员维护、用户只读**(匿名可看);改时间表/资料不额外发全员通知。
 - **分类订阅**:用户可按类型开关推送。
 - **免打扰时段**:默认 22:00–07:00(用户本地时区)不发系统推送,顺延到时段结束后发;活动开始前的实时通知(如"共修连接")不受限;用户可在设置中调整或关闭。
 
@@ -262,7 +268,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | **Edge Functions** | 推送、邮件、账号删除、问答 API 代理(见 12.4) |
 | **pg_cron + pg_net** | 循环活动实例生成、通知排程、触发推送函数 |
 | **Realtime** | (v0.2+)群 Dashboard 总量实时刷新;MVP 先下拉刷新 |
-| **Storage** | 头像 / 群头像(可选);**念诵音频不放 Storage**(已定走内容方 HTTPS endpoint) |
+| **Storage** | **活动 PDF / 经本**(v0.5.12:`event-files` bucket,公开读、管理员写,大陆可达);头像 / 群头像(可选);**念诵音频不放 Storage**(已定走内容方 HTTPS endpoint)。注:音频与 PDF 口径不同——音频量大且内容方已有 CDN 走外部 endpoint;PDF 需管理员在 App 内直传、量小,故用 Storage |
 | **Database Webhooks** | `notifications` 表 insert → 触发 `push-dispatch` |
 
 ### 12.2 数据模型(Postgres)
@@ -278,6 +284,8 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `vows` | id, user_id, group_id(**nullable=全部群**), practice_type_id, target_qty, start_date, end_date, **status(active/completed/expired/abandoned)** |
 | `events` | id, title, type, start_at(timestamptz), duration, recurrence_rule(RRULE), webex_url, youtube_url, content, created_by |
 | `event_overrides` | event_id, occurrence_date, patch(改期/改内容/取消) |
+| **`event_agenda_items`**(v0.5.12) | id, event_id(FK cascade), day_index(第几天,≥1), start_time/end_time(time,墙钟), activity, link_url/link_label(自由网址,可空), sort_order —— 活动时间表行;匿名可读、仅管理员写 |
+| **`event_attachments`**(v0.5.12) | id, event_id(FK cascade), title, storage_path(`event-files` 桶内 key), size_bytes, content_type, sort_order —— 相关资料 PDF;删行前先删 Storage 对象(级联不清对象) |
 | `media_items` | id, title_hant/hans, kind(audio/video), source(youtube/https), url, size, category, sort_order, active |
 | `scriptures` | id, title, web_url, sort_order |
 | `push_tokens` | user_id, token, platform(apns/fcm), **fcm_failed(bool,邮件兜底标记)**, updated_at |
@@ -299,7 +307,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `proxy_names` | 本群 approved 成员可读、可 insert(报数时自动记入);删除限添加者 / 群主 |
 | `vows` | 仅本人读写 |
 | `practice_types` | 全局项所有人可读;群自定义项限本群成员读、群主写 |
-| `events` / `media_items` / `scriptures` | **anon 可读**(匿名浏览),仅管理员写 |
+| `events` / `event_agenda_items` / `event_attachments` / `media_items` / `scriptures` | **anon 可读**(匿名浏览),仅管理员写(v0.5.12:两活动子表 + `event-files` Storage 桶同口径,`storage.objects` 公开读、`is_app_admin()` 写) |
 | `notifications` | scope 命中者可读;仅服务端(service_role)写 |
 | `reports` | 举报人可 insert / 读自己的;管理员全权 |
 | `user_blocks` | 仅本人读写 |

@@ -94,6 +94,13 @@ insert into public.events (title, event_type_id, start_at, duration_minutes, rec
    '2026-07-08 12:00:00+00', 60, 'FREQ=WEEKLY',
    null, '線上靜坐共修', '00000000-0000-4000-8000-000000000001');
 
+-- 示例时间表(P2.4c):週六共修单日流程 + 一条带经文链接的读经行
+insert into public.event_agenda_items (event_id, day_index, start_time, end_time, activity, link_url, link_label, sort_order) values
+  ((select id from public.events where title = '週六共修'), 1, '09:00', '09:30', '灑淨', null, null, 10),
+  ((select id from public.events where title = '週六共修'), 1, '09:30', '11:00', '誦地藏經',
+   'https://qldazangjing.com/', '經文', 20),
+  ((select id from public.events where title = '週六共修'), 1, '11:00', '11:30', '迴向', null, null, 30);
+
 -- 示例报数(local_date/unit 由触发器补全;含自由名字代报 → proxy_names 自动生成)
 insert into public.practice_logs (group_id, reporter_id, practice_type_id, quantity) values
   ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000003',

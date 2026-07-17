@@ -7,7 +7,10 @@ import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/dashboard/group_stats_screen.dart';
 import 'features/events/calendar_screen.dart';
+import 'features/events/event_agenda_editor.dart';
+import 'features/events/event_detail_screen.dart';
 import 'features/events/event_types_screen.dart';
+import 'features/events/occurrence_utils.dart';
 import 'features/dashboard/my_dashboard_screen.dart';
 import 'features/groups/group_detail_screen.dart';
 import 'features/groups/groups_screen.dart';
@@ -77,6 +80,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/calendar/types',
           builder: (context, state) => const EventTypesScreen()),
+      // 活动详情整页(取代 bottom sheet;经 extra 传 Occurrence)
+      GoRoute(
+        path: '/calendar/event',
+        builder: (context, state) =>
+            EventDetailScreen(occ: state.extra as Occurrence?),
+      ),
+      // 管理员编辑时间表/资料(经 extra 传 event map)
+      GoRoute(
+        path: '/calendar/event/agenda',
+        builder: (context, state) =>
+            EventAgendaEditorScreen(event: state.extra as Map<String, dynamic>?),
+      ),
       GoRoute(path: '/live', builder: (context, state) => const LiveScreen()),
       GoRoute(
         path: '/watch/:vid',

@@ -24,6 +24,27 @@ class Occurrence {
 String dateKeyOf(DateTime local) =>
     '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')}';
 
+/// 某天多场活动 → 去重后的类型「图标 key」列表,保序、最多 [max] 个。
+/// 用于月视图格子上以类型图标代替圆点(PRD §5「不同类型在日历中显示不同图标」)。
+/// - 跳过已取消的场次(不在格子上宣告);
+/// - 同类型只取一个图标;类型缺图标时回退 `'event'`。
+List<String> dayMarkerIconKeys(
+  Iterable<Occurrence> occurrences,
+  Map<String, Map<String, dynamic>> typeById, {
+  int max = 3,
+}) {
+  final out = <String>[];
+  final seen = <String>{};
+  for (final o in occurrences) {
+    if (o.cancelled) continue;
+    final key =
+        (typeById[o.event['event_type_id']]?['icon'] as String?) ?? 'event';
+    if (seen.add(key)) out.add(key);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 /// 展开 [rangeStart, rangeEnd](本地日期,含端点)内的全部活动发生
 List<Occurrence> expandOccurrences({
   required List<Map<String, dynamic>> events,
