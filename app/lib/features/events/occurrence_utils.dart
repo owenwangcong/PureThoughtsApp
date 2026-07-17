@@ -1,6 +1,15 @@
 // 活动重复展开的纯逻辑(PRD §5:循环模板 + 单次修改),独立成文件便于单测。
 // v1 支持 RRULE 子集:null(单次)/ FREQ=WEEKLY(每周,按 start_at 的星期几)。
 // override patch 支持:{"cancelled": true} / {"start_at": "<ISO>"}(单次改期)。
+//
+// v0.5.15 时区改造:每周循环在**活动时区**(events.timezone)做日历算术展开,
+// 跨夏令时保持活动当地墙钟时间不变(修复原「+7×24h」在 DST 切换后漂移 1 小时);
+// 存量活动默认 Asia/Shanghai(无 DST),行为与旧实现完全一致。
+// override 键(dateKey)= 发生日在**活动时区**的日期,全球用户一致。
+
+import 'package:timezone/timezone.dart' as tz;
+
+import '../../core/timezones.dart';
 
 class Occurrence {
   const Occurrence({
@@ -12,10 +21,10 @@ class Occurrence {
 
   final Map<String, dynamic> event;
 
-  /// 本次发生的本地开始时间(已应用改期 override)
+  /// 本次发生的开始时间,已换算到**设备本地时区**显示(已应用改期 override)
   final DateTime startAt;
 
-  /// override 键(原定发生日的本地日期,yyyy-MM-dd)
+  /// override 键(原定发生日在**活动时区**的日期,yyyy-MM-dd,全球一致)
   final String dateKey;
 
   final bool cancelled;
@@ -62,25 +71,32 @@ List<Occurrence> expandOccurrences({
       .add(const Duration(days: 1));
   final start = DateTime(rangeStart.year, rangeStart.month, rangeStart.day);
 
+  ensureTimeZonesInitialized();
   for (final e in events) {
-    final first = DateTime.parse(e['start_at'] as String).toLocal();
+    final loc = locationOf(e['timezone'] as String? ?? 'Asia/Shanghai');
+    final first =
+        tz.TZDateTime.from(DateTime.parse(e['start_at'] as String), loc);
     final rule = e['recurrence_rule'] as String?;
 
-    Iterable<DateTime> starts;
+    Iterable<tz.TZDateTime> starts;
     if (rule == null || rule.isEmpty) {
       starts = [first];
     } else if (rule.toUpperCase().contains('FREQ=WEEKLY')) {
-      // 从首次发生起,每 7 天一次,直到范围结束
+      // 在活动时区按「+7 个日历日」逐周生成(墙钟不变);按序号生成避免累计漂移
       starts = () sync* {
-        var t = first;
-        // 快进到范围附近,避免逐周遍历多年
-        if (t.isBefore(start)) {
-          final weeks = start.difference(t).inDays ~/ 7;
-          t = t.add(Duration(days: weeks * 7));
+        var i = 0;
+        final firstLocal = first.toLocal();
+        if (firstLocal.isBefore(start)) {
+          // 快进到范围附近(留 2 周余量),避免逐周遍历多年
+          i = start.difference(firstLocal).inDays ~/ 7 - 2;
+          if (i < 0) i = 0;
         }
-        while (t.isBefore(endExclusive)) {
+        while (true) {
+          final t = tz.TZDateTime(loc, first.year, first.month,
+              first.day + 7 * i, first.hour, first.minute);
+          if (!t.toLocal().isBefore(endExclusive)) break;
           yield t;
-          t = t.add(const Duration(days: 7));
+          i++;
         }
       }();
     } else {
@@ -88,14 +104,15 @@ List<Occurrence> expandOccurrences({
     }
 
     for (final s in starts) {
-      if (s.isBefore(start) || !s.isBefore(endExclusive)) continue;
-      final key = dateKeyOf(s);
+      final local = s.toLocal(); // 设备本地时间(显示与范围过滤口径)
+      if (local.isBefore(start) || !local.isBefore(endExclusive)) continue;
+      final key = dateKeyOf(s); // TZDateTime 的日期分量 = 活动时区日期
       final patch = patchOf['${e['id']}|$key'];
       final cancelled = patch?['cancelled'] == true;
       final movedTo = patch?['start_at'] as String?;
       out.add(Occurrence(
         event: e,
-        startAt: movedTo != null ? DateTime.parse(movedTo).toLocal() : s,
+        startAt: movedTo != null ? DateTime.parse(movedTo).toLocal() : local,
         dateKey: key,
         cancelled: cancelled,
       ));

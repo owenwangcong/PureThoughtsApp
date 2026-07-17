@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.14(品牌徽记:托手莲花+祥云圆环,更新 App 图标/启动屏/运行时 logo) · 来源:`initial.md` + 十二轮需求澄清
+> 版本:v0.5.15(佛教日曆:纪念日/节日/十斋日 + 离线 50 年农历数据 + 活动显式时区,详见 §5.2 与 [`design/buddhist-calendar.md`](design/buddhist-calendar.md)) · 来源:`initial.md` + 十二轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -132,7 +132,7 @@
 
 - **循环模板 + 单次修改**:周六共修、周三打坐等按循环规则自动生成,单次可改时间/内容/取消。
 - **通知类型**:周六共修预告(提前一天)、周六当天 Webex/YouTube 连接、周三打坐提醒、讲法/共修/法会预告。
-- **跨时区**:全球用户 → 活动时间以 `timestamptz` 存储,**按用户本地时区显示**。
+- **跨时区**(v0.5.15 增强):活动时间以 `timestamptz` 存储,**按用户设备时区显示**;**管理员建/编辑活动时显式选择活动时区**(IANA 名,存 `events.timezone`,墙钟时间按该时区转 UTC),**默认时区管理员可配**(`app_settings.default_event_timezone`,初始 Asia/Shanghai);每周循环在**活动时区**做日历算术展开(跨夏令时保持当地墙钟不变);活动详情页当地时间与设备时间不同时加注「活動當地時間」。
 - **日历视图**:所有活动可在日历查看;**未来事件列表**(v0.5.7:日历下方按时间列出即将到来的活动);同一天多种活动共存并全部显示。
 - **事件类型**(v0.5.7 定案):动态表 `event_types`,默认 **靜坐 / 共修 / 講法 / 禪七 / 其它**;**管理员可增删改类型**(名称简繁 + 图标 + 启用状态,图标从预置图标集选择);不同类型在日历中显示不同图标;被活动引用的类型不可删、只能停用。
 - **管理员活动管理**(v0.5.7):新增 / 编辑 / 删除整个活动(含循环全部场次)/ 取消单次;**任何活动变更自动生成全员通知**(新增/更新/删除/单次取消,App 内通知中心即时可见,推送接通后同链路升级)。**新建活动默认不重复**(v0.5.10:「每週重複」开关默认关闭,单次活动为主;需要每周循环时管理员手动开启)。
@@ -143,6 +143,15 @@
   - **日历列表标记**:活动若含**时间表 / PDF / 链接**,在日历列表项(当日列表与未来活动列表)上分别挂对应小图标(时钟 / PDF / 链接),用户不点开即知里面有内容。
   - 均**管理员维护、用户只读**(匿名可看);改时间表/资料不额外发全员通知。
 - **分类订阅**:用户可按类型开关推送。
+
+### 5.2 佛教日曆(纪念日 / 节日 / 十斋日,v0.5.15 新增,详细设计见 [`design/buddhist-calendar.md`](design/buddhist-calendar.md))
+
+- **日历叠加佛历层**:月视图每格显示**农历副标签**(初一显示月名);佛教节日显示金色短名、十斋日有标记;选中日在活动列表上方显示**当日佛历卡**(农历全称 + 节日全名 + 十斋日)。
+- **节日范围**:精选 24 条主要佛菩萨纪念日(佛诞/成道/涅槃/观音三日/弥陀/地藏/腊八/佛欢喜日等,重大节日标 ★)+ **十斋日**(农历每月初一、初八、十四、十五、十八、廿三、廿四、廿八、廿九、三十;小月无三十);清单为生成器配置,内容方可审改(改后重新生成 + 发版)。
+- **数据来源(离线)**:`tools/almanac/` 生成器(6tail 官方 lunar Dart 库)一次性预生成 **2026–2075 共 50 年**逐日农历 + 节日 + 十斋日数据:客户端打包为资产文件(每年一个 JSON,**完全离线可读、匿名可见**),服务端同源生成 `almanac_days` 表(仅特殊日)供通知排程——**单一生成器保证两端口径一致**,客户端零农历运行时依赖。
+- **时区语义**:农历日按中国时间(UTC+8)定义、映射为公历日期后**全球同一天显示**(全天性质,不随时区平移)。
+- **首页横幅**:当天为节日/十斋日时,首页顶部(登录/未登录一致)显示莲花横幅「今日 · 農曆四月初八 · 釋迦牟尼佛聖誕(浴佛節)」,点击进日历;非特殊日不占位。
+- **通知**:pg_cron 每日(UTC+8 零点后)生成全员通知(`type=almanac`,payload 携带简繁名/kind,幂等):节日与十斋日**当天**各一条,★ 重大节日**提前一天**加预告;通知中心即时可见,推送(P2.1)接通后同链路自动升级;设置页「佛教節日提醒 / 十齋日提醒」两开关默认开、可分别关闭。
 - **免打扰时段**:默认 22:00–07:00(用户本地时区)不发系统推送,顺延到时段结束后发;活动开始前的实时通知(如"共修连接")不受限;用户可在设置中调整或关闭。
 
 ### 5.1 推送策略(重要:约 1/3 用户在中国大陆)
@@ -284,7 +293,9 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `practice_logs` | id, group_id, reporter_id, subject_user_id(nullable), subject_name(nullable), practice_type_id, quantity, unit, note, created_at, **local_date(按报数人时区的自然日,统计口径)**, **updated_at**, **deleted_at(软删)** |
 | **`proxy_names`** | id, group_id, name, created_by, use_count, last_used_at —— 代报自由名字的群共享名单;唯一约束 (group_id, name);报数时自动 upsert |
 | `vows` | id, user_id, group_id(**nullable=全部群**), practice_type_id, target_qty, start_date, end_date, **status(active/completed/expired/abandoned)** |
-| `events` | id, title, type, start_at(timestamptz), duration, recurrence_rule(RRULE), webex_url, youtube_url, content, created_by |
+| `events` | id, title, type, start_at(timestamptz), duration, recurrence_rule(RRULE), **timezone(IANA 名,v0.5.15,循环展开与当地时间标注用)**, webex_url, youtube_url, content, created_by |
+| **`almanac_days`**(v0.5.15) | solar_date(PK), lunar_month/day, is_leap_month, festival_ids[], names_hant[]/names_hans[], is_zhai_ten, has_major —— 佛历特殊日(由 `tools/almanac/` 生成器产出,仅供通知排程;客户端用同源资产文件) |
+| **`app_settings`**(v0.5.15) | key(PK), value —— 全局键值配置;首个键 `default_event_timezone`(建活动默认时区) |
 | `event_overrides` | event_id, occurrence_date, patch(改期/改内容/取消) |
 | **`event_agenda_items`**(v0.5.12) | id, event_id(FK cascade), day_index(第几天,≥1), start_time/end_time(time,墙钟), activity, link_url/link_label(自由网址,可空), sort_order —— 活动时间表行;匿名可读、仅管理员写 |
 | **`event_attachments`**(v0.5.12) | id, event_id(FK cascade), title, storage_path(`event-files` 桶内 key), size_bytes, content_type, sort_order —— 相关资料 PDF;删行前先删 Storage 对象(级联不清对象) |
@@ -310,6 +321,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `vows` | 仅本人读写 |
 | `practice_types` | 全局项所有人可读;群自定义项限本群成员读、群主写 |
 | `events` / `event_agenda_items` / `event_attachments` / `media_items` / `scriptures` | **anon 可读**(匿名浏览),仅管理员写(v0.5.12:两活动子表 + `event-files` Storage 桶同口径,`storage.objects` 公开读、`is_app_admin()` 写) |
+| `almanac_days` / `app_settings` | **anon 可读**;`almanac_days` 无人可写(仅 migration/service),`app_settings` 仅 `is_app_admin()` 可写(v0.5.15) |
 | `notifications` | scope 命中者可读;仅服务端(service_role)写 |
 | `reports` | 举报人可 insert / 读自己的;管理员全权 |
 | `user_blocks` | 仅本人读写 |
@@ -324,7 +336,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 
 > ~~`qa-proxy`~~ **已取消**(v0.5.11):上游问答 API 完全公开、无认证、CORS 全开,「隐藏上游地址 / 统一鉴权」两个立项理由均不成立;客户端直连(§6)。
 
-**pg_cron**:每日滚动展开未来 14 天活动 occurrence(应用 `event_overrides`)→ 生成 `notifications`(scheduled_at = 规则时间,如提前一天)→ 到点由 cron 触发 `push-dispatch` 投递。
+**pg_cron**:每日滚动展开未来 14 天活动 occurrence(应用 `event_overrides`)→ 生成 `notifications`(scheduled_at = 规则时间,如提前一天)→ 到点由 cron 触发 `push-dispatch` 投递。**佛历通知**(v0.5.15):每日 16:05 UTC(= UTC+8 次日 00:05)执行 `generate_almanac_notifications()`,按 `almanac_days` 生成当日节日/十斋日 + 次日重大节日预告的全员通知(幂等,重跑不重复)。
 
 ### 12.5 自托管部署要点(v0.5 新增)
 

@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/settings.dart';
+import '../../core/timezones.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
@@ -56,6 +58,18 @@ class EventDetailScreen extends ConsumerWidget {
     final whenText = dur != null ? '$when · $dur ${l10n.unitMinute}' : when;
     final firstDayDate = DateTime(o.startAt.year, o.startAt.month, o.startAt.day);
 
+    // 活动当地时间加注(PRD v0.5.15 §5):活动时区的墙钟与设备显示不同才显示
+    final tzName = o.event['timezone'] as String? ?? 'Asia/Shanghai';
+    final evLocal = tz.TZDateTime.from(o.startAt, locationOf(tzName));
+    final sameWall = evLocal.day == o.startAt.day &&
+        evLocal.hour == o.startAt.hour &&
+        evLocal.minute == o.startAt.minute;
+    final localTimeNote = sameWall
+        ? null
+        : '${l10n.eventLocalTime}:'
+            '${DateFormat('MM-dd HH:mm').format(DateTime(evLocal.year, evLocal.month, evLocal.day, evLocal.hour, evLocal.minute))}'
+            '(${tzLabel(tzName, hans: hans)})';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(o.event['title'] as String),
@@ -89,6 +103,12 @@ class EventDetailScreen extends ConsumerWidget {
                   o.cancelled ? '$whenText · ${l10n.eventCancelled}' : whenText,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
+                if (localTimeNote != null)
+                  Text(
+                    localTimeNote,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
                 if (o.event['content'] != null) ...[
                   const SizedBox(height: 12),
                   Text(o.event['content'] as String),

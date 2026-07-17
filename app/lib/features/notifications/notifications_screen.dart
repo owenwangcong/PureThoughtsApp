@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/almanac/lunar_format.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
@@ -38,7 +39,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeProvider);
-    final notifications = ref.watch(myNotificationsProvider);
+    final notifications = ref.watch(visibleNotificationsProvider);
     final types = ref.watch(allPracticeTypesMapProvider).value ?? const {};
     final groupNames = <String, String>{
       for (final m in ref.watch(myGroupsProvider).value ?? const [])
@@ -70,6 +71,24 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             _ => l10n.actOccChanged,
           };
           return (l10n.notifEventChanged, '$word · ${payload['title'] ?? ''}');
+        case 'almanac':
+          // 佛历通知(PRD v0.5.15 §5.2):payload 携带简繁名与农历数字,客户端渲染
+          final hans = locale.scriptCode == 'Hans';
+          final names = ((hans ? payload['names_hans'] : payload['names_hant'])
+                      as List?)
+                  ?.cast<String>() ??
+              const <String>[];
+          final lunar = lunarFullText(
+            (payload['lunar_month'] as num?)?.toInt() ?? 1,
+            (payload['lunar_day'] as num?)?.toInt() ?? 1,
+            payload['is_leap_month'] == true,
+            hans: hans,
+          );
+          return switch (payload['kind']) {
+            'zhai' => (l10n.notifAlmanacZhai, lunar),
+            'festival_eve' => (l10n.notifAlmanacEve, '${names.join('、')} · $lunar'),
+            _ => (l10n.notifAlmanacFestival, '${names.join('、')} · $lunar'),
+          };
         default:
           return (
             (n['title'] as String?)?.isNotEmpty == true ? n['title'] as String : n['type'] as String,
@@ -106,6 +125,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       'announcement' => Icons.campaign_outlined,
                       'live_started' => Icons.live_tv,
                       'event_changed' => Icons.event_note,
+                      'almanac' => Icons.spa_outlined,
                       _ => Icons.notifications_outlined,
                     },
                     color: unread ? Theme.of(context).colorScheme.primary : null,
@@ -113,6 +133,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   onTap: switch (n['type']) {
                     'live_started' => () => context.push('/live'),
                     'event_changed' => () => context.push('/calendar'),
+                    'almanac' => () => context.push('/calendar'),
                     _ => null,
                   },
                   title: Text(

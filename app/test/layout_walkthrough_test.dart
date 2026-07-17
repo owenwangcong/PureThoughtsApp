@@ -5,6 +5,7 @@ import 'package:pure_thoughts/core/prefs.dart';
 import 'package:pure_thoughts/core/theme/app_theme.dart';
 import 'package:pure_thoughts/features/auth/auth_providers.dart';
 import 'package:pure_thoughts/features/auth/auth_screen.dart';
+import 'package:pure_thoughts/features/events/calendar_screen.dart';
 import 'package:pure_thoughts/features/events/event_agenda_editor.dart';
 import 'package:pure_thoughts/features/events/event_detail_models.dart';
 import 'package:pure_thoughts/features/events/event_detail_screen.dart';
@@ -157,6 +158,27 @@ void main() {
         overrides: [
           agendaItemsProvider('ev-test').overrideWith((ref) => _demoAgenda),
           attachmentsProvider('ev-test').overrideWith((ref) => _demoAtts),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 活動日曆:佛历格子(农历副标签/节日短名/斋日角点)+ 当日佛历卡,
+    // 大字号下不溢出(格内文字有 1.3 倍缩放上限 + FittedBox;P2.9)
+    testWidgets('活動日曆佛历格子 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      await pumpScreen(
+        tester,
+        const CalendarScreen(),
+        locale,
+        overrides: [
+          myProfileProvider.overrideWith((ref) => null),
+          eventsProvider.overrideWith((ref) async => []),
+          eventOverridesProvider.overrideWith((ref) async => []),
+          eventTypesProvider.overrideWith((ref) async => []),
         ],
       );
       expect(tester.takeException(), isNull);

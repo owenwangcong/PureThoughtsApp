@@ -344,5 +344,22 @@
   "agendaEnd": "結束時間(選填)",
   "agendaActivity": "活動內容",
   "agendaLinkUrl": "連結網址(選填)",
-  "agendaLinkLabel": "連結文字(選填)"
+  "agendaLinkLabel": "連結文字(選填)",
+  "almanacToday": "今日",
+  "almanacZhaiTen": "十齋日",
+  "notifAlmanacFestival": "今日佛教節日",
+  "notifAlmanacEve": "明日佛教節日",
+  "notifAlmanacZhai": "今日十齋日",
+  "almanacSection": "佛曆提醒",
+  "almanacFestivalToggle": "佛教節日提醒",
+  "almanacZhaiToggle": "十齋日提醒",
+  "eventTimezoneLabel": "時區",
+  "eventLocalTime": "活動當地時間",
+  "defaultEventTimezone": "預設活動時區",
+  "tzPickerTitle": "選擇時區",
+  "tzSearchHint": "輸入城市或時區名稱搜尋",
+  "noEventsThisDay": "沒有活動",
+  "legendFestival": "節日",
+  "legendEvent": "活動",
+  "tzMore": "其他時區…"
 }

@@ -1927,6 +1927,108 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'連結文字(選填)'**
   String get agendaLinkLabel;
+
+  /// No description provided for @almanacToday.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日'**
+  String get almanacToday;
+
+  /// No description provided for @almanacZhaiTen.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'十齋日'**
+  String get almanacZhaiTen;
+
+  /// No description provided for @notifAlmanacFestival.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日佛教節日'**
+  String get notifAlmanacFestival;
+
+  /// No description provided for @notifAlmanacEve.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'明日佛教節日'**
+  String get notifAlmanacEve;
+
+  /// No description provided for @notifAlmanacZhai.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日十齋日'**
+  String get notifAlmanacZhai;
+
+  /// No description provided for @almanacSection.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'佛曆提醒'**
+  String get almanacSection;
+
+  /// No description provided for @almanacFestivalToggle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'佛教節日提醒'**
+  String get almanacFestivalToggle;
+
+  /// No description provided for @almanacZhaiToggle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'十齋日提醒'**
+  String get almanacZhaiToggle;
+
+  /// No description provided for @eventTimezoneLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'時區'**
+  String get eventTimezoneLabel;
+
+  /// No description provided for @eventLocalTime.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動當地時間'**
+  String get eventLocalTime;
+
+  /// No description provided for @defaultEventTimezone.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'預設活動時區'**
+  String get defaultEventTimezone;
+
+  /// No description provided for @tzPickerTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'選擇時區'**
+  String get tzPickerTitle;
+
+  /// No description provided for @tzSearchHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'輸入城市或時區名稱搜尋'**
+  String get tzSearchHint;
+
+  /// No description provided for @noEventsThisDay.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'沒有活動'**
+  String get noEventsThisDay;
+
+  /// No description provided for @legendFestival.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'節日'**
+  String get legendFestival;
+
+  /// No description provided for @legendEvent.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動'**
+  String get legendEvent;
+
+  /// No description provided for @tzMore.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'其他時區…'**
+  String get tzMore;
 }
 
 class _AppLocalizationsDelegate

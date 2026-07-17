@@ -304,5 +304,22 @@
   "agendaEnd": "结束时间(选填)",
   "agendaActivity": "活动内容",
   "agendaLinkUrl": "链接网址(选填)",
-  "agendaLinkLabel": "链接文字(选填)"
+  "agendaLinkLabel": "链接文字(选填)",
+  "almanacToday": "今日",
+  "almanacZhaiTen": "十斋日",
+  "notifAlmanacFestival": "今日佛教节日",
+  "notifAlmanacEve": "明日佛教节日",
+  "notifAlmanacZhai": "今日十斋日",
+  "almanacSection": "佛历提醒",
+  "almanacFestivalToggle": "佛教节日提醒",
+  "almanacZhaiToggle": "十斋日提醒",
+  "eventTimezoneLabel": "时区",
+  "eventLocalTime": "活动当地时间",
+  "defaultEventTimezone": "预设活动时区",
+  "tzPickerTitle": "选择时区",
+  "tzSearchHint": "输入城市或时区名称搜索",
+  "noEventsThisDay": "没有活动",
+  "legendFestival": "节日",
+  "legendEvent": "活动",
+  "tzMore": "其他时区…"
 }

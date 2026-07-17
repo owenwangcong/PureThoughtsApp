@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/channels.dart';
 import '../../core/error_text.dart';
 import '../../core/settings.dart';
+import '../../core/timezones.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'event_icons.dart';
 import 'events_providers.dart';
@@ -49,10 +51,27 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
   var weekly = existing == null
       ? false
       : (existing['recurrence_rule'] as String?)?.isNotEmpty == true;
+
+  // 活动时区(PRD v0.5.15 §5):编辑回显原时区;新建取管理员配置的默认值。
+  // `when` 是该时区下的墙钟时间(无时区含义),提交时按 tzName 换算成 UTC。
+  ensureTimeZonesInitialized();
+  var tzName = existing?['timezone'] as String? ?? 'Asia/Shanghai';
+  if (existing == null) {
+    try {
+      tzName = await ref.read(defaultEventTimezoneProvider.future);
+    } catch (_) {} // 离线等取不到时用 Asia/Shanghai
+    if (!context.mounted) return;
+  }
   var when = existing == null
       ? DateTime.now().add(const Duration(days: 1))
-      : DateTime.parse(existing['start_at'] as String).toLocal();
+      : () {
+          final t = tz.TZDateTime.from(
+              DateTime.parse(existing['start_at'] as String),
+              locationOf(tzName));
+          return DateTime(t.year, t.month, t.day, t.hour, t.minute);
+        }();
   final duration = existing?['duration_minutes'] as int? ?? 90;
+  final hansLabel = locale.scriptCode == 'Hans';
 
   final ok = await showDialog<bool>(
     context: context,
@@ -108,6 +127,18 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
                       when = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                 },
               ),
+              const SizedBox(height: 4),
+              // 时区:上面选的是该时区的墙钟时间;换时区保持墙钟不变
+              OutlinedButton.icon(
+                icon: const Icon(Icons.public),
+                label: Text(
+                    '${l10n.eventTimezoneLabel}:${tzLabel(tzName, hans: hansLabel)}'),
+                onPressed: () async {
+                  final picked = await showTimezonePicker(context,
+                      hans: hansLabel, current: tzName);
+                  if (picked != null) setState(() => tzName = picked);
+                },
+              ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.weeklyRepeat),
@@ -144,10 +175,14 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
   if (ok != true || title.text.trim().isEmpty || !context.mounted) return;
 
   final messenger = ScaffoldMessenger.of(context);
+  final startAtUtc = tz.TZDateTime(locationOf(tzName), when.year, when.month,
+          when.day, when.hour, when.minute)
+      .toUtc();
   final payload = {
     'title': title.text.trim(),
     'event_type_id': typeId,
-    'start_at': when.toUtc().toIso8601String(),
+    'start_at': startAtUtc.toIso8601String(),
+    'timezone': tzName,
     'duration_minutes': duration,
     'recurrence_rule': weekly ? 'FREQ=WEEKLY' : null,
     'youtube_url': youtube.text.trim().isEmpty ? null : youtube.text.trim(),
