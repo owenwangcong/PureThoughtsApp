@@ -1,0 +1,12 @@
+{
+  "name": "almanac-gen",
+  "private": true,
+  "version": "1.0.0",
+  "description": "佛历数据生成器:2026-2075 逐日农历 + 精选佛教节日 + 十斋日 → App 资产 JSON + Supabase 数据 migration(设计见 docs/design/buddhist-calendar.md)",
+  "scripts": {
+    "generate": "node generate.cjs"
+  },
+  "dependencies": {
+    "lunar-javascript": "^1.7.3"
+  }
+}
