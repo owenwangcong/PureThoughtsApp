@@ -8,7 +8,7 @@ final eventsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   return Supabase.instance.client
       .from('events')
       .select(
-          'id, title, event_type_id, start_at, duration_minutes, recurrence_rule, webex_url, youtube_url, content, event_agenda_items(count), event_attachments(count)')
+          'id, title, event_type_id, start_at, duration_minutes, recurrence_rule, timezone, webex_url, youtube_url, content, event_agenda_items(count), event_attachments(count)')
       .order('start_at', ascending: true);
 });
 
@@ -18,6 +18,16 @@ final eventTypesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) asyn
       .from('event_types')
       .select('id, name_hant, name_hans, icon, sort_order, active')
       .order('sort_order', ascending: true);
+});
+
+/// 新建活动的默认时区(app_settings,管理员可在设置页改;PRD v0.5.15 §5)
+final defaultEventTimezoneProvider = FutureProvider<String>((ref) async {
+  final row = await Supabase.instance.client
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'default_event_timezone')
+      .maybeSingle();
+  return (row?['value'] as String?) ?? 'Asia/Shanghai';
 });
 
 /// 单次修改(改期/取消)

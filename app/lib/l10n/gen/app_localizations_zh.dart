@@ -937,6 +937,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get agendaLinkLabel => '連結文字(選填)';
+
+  @override
+  String get almanacToday => '今日';
+
+  @override
+  String get almanacZhaiTen => '十齋日';
+
+  @override
+  String get notifAlmanacFestival => '今日佛教節日';
+
+  @override
+  String get notifAlmanacEve => '明日佛教節日';
+
+  @override
+  String get notifAlmanacZhai => '今日十齋日';
+
+  @override
+  String get almanacSection => '佛曆提醒';
+
+  @override
+  String get almanacFestivalToggle => '佛教節日提醒';
+
+  @override
+  String get almanacZhaiToggle => '十齋日提醒';
+
+  @override
+  String get eventTimezoneLabel => '時區';
+
+  @override
+  String get eventLocalTime => '活動當地時間';
+
+  @override
+  String get defaultEventTimezone => '預設活動時區';
+
+  @override
+  String get tzPickerTitle => '選擇時區';
+
+  @override
+  String get tzSearchHint => '輸入城市或時區名稱搜尋';
+
+  @override
+  String get tzMore => '其他時區…';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1872,6 +1914,48 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get agendaLinkLabel => '链接文字(选填)';
+
+  @override
+  String get almanacToday => '今日';
+
+  @override
+  String get almanacZhaiTen => '十斋日';
+
+  @override
+  String get notifAlmanacFestival => '今日佛教节日';
+
+  @override
+  String get notifAlmanacEve => '明日佛教节日';
+
+  @override
+  String get notifAlmanacZhai => '今日十斋日';
+
+  @override
+  String get almanacSection => '佛历提醒';
+
+  @override
+  String get almanacFestivalToggle => '佛教节日提醒';
+
+  @override
+  String get almanacZhaiToggle => '十斋日提醒';
+
+  @override
+  String get eventTimezoneLabel => '时区';
+
+  @override
+  String get eventLocalTime => '活动当地时间';
+
+  @override
+  String get defaultEventTimezone => '预设活动时区';
+
+  @override
+  String get tzPickerTitle => '选择时区';
+
+  @override
+  String get tzSearchHint => '输入城市或时区名称搜索';
+
+  @override
+  String get tzMore => '其他时区…';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2807,4 +2891,46 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get agendaLinkLabel => '連結文字(選填)';
+
+  @override
+  String get almanacToday => '今日';
+
+  @override
+  String get almanacZhaiTen => '十齋日';
+
+  @override
+  String get notifAlmanacFestival => '今日佛教節日';
+
+  @override
+  String get notifAlmanacEve => '明日佛教節日';
+
+  @override
+  String get notifAlmanacZhai => '今日十齋日';
+
+  @override
+  String get almanacSection => '佛曆提醒';
+
+  @override
+  String get almanacFestivalToggle => '佛教節日提醒';
+
+  @override
+  String get almanacZhaiToggle => '十齋日提醒';
+
+  @override
+  String get eventTimezoneLabel => '時區';
+
+  @override
+  String get eventLocalTime => '活動當地時間';
+
+  @override
+  String get defaultEventTimezone => '預設活動時區';
+
+  @override
+  String get tzPickerTitle => '選擇時區';
+
+  @override
+  String get tzSearchHint => '輸入城市或時區名稱搜尋';
+
+  @override
+  String get tzMore => '其他時區…';
 }

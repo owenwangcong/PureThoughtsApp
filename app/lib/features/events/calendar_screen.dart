@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../core/almanac/almanac.dart';
+import '../../core/almanac/lunar_format.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -67,6 +69,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final selected = _selected ?? DateTime.now();
     final dayList = byDay[dateKeyOf(selected)] ?? const [];
 
+    // 佛历层(PRD v0.5.15 §5.2):当前月可能溢出到相邻年,三年数据都备着(懒加载+缓存)
+    final hans = ref.watch(localeProvider).scriptCode == 'Hans';
+    final almanacYears = {
+      for (final y in {_focused.year - 1, _focused.year, _focused.year + 1})
+        y: ref.watch(almanacYearProvider(y)).value,
+    };
+    AlmanacDayInfo? infoOf(DateTime d) => almanacYears[d.year]?.infoFor(d);
+    final selectedInfo = infoOf(selected);
+
     // 未來活動:自今日起 90 天内的前 10 场(不含已取消)
     final now = DateTime.now();
     final upcoming = expandOccurrences(
@@ -99,45 +110,126 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 96),
           children: [
-            TableCalendar<Occurrence>(
-              locale: Localizations.localeOf(context).toString(),
-              firstDay: DateTime.now().subtract(const Duration(days: 365)),
-              lastDay: DateTime.now().add(const Duration(days: 365)),
-              focusedDay: _focused,
-              selectedDayPredicate: (d) => isSameDay(d, _selected),
-              eventLoader: (day) => byDay[dateKeyOf(day)] ?? const [],
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-              calendarBuilders: CalendarBuilders<Occurrence>(
-                // 格子标记:用活动类型图标代替圆点(PRD §5)
-                markerBuilder: (context, day, occs) {
-                  final keys = dayMarkerIconKeys(occs, _typeById);
-                  if (keys.isEmpty) return null;
-                  // 单场活动的日子放大些更醒目;多场则缩小以并排容纳
-                  final size = keys.length == 1 ? 16.0 : 13.0;
-                  final color = Theme.of(context).colorScheme.primary;
-                  return Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (final k in keys)
-                            Icon(eventIcon(k), size: size, color: color),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+            // 日历格子有农历副标签,给格子内文字设缩放上限,超大字号下不破格
+            // (下方列表与佛历卡不受限,仍完整跟随用户字号)
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: MediaQuery.of(context)
+                    .textScaler
+                    .clamp(maxScaleFactor: 1.3),
               ),
-              onDaySelected: (sel, foc) => setState(() {
-                _selected = sel;
-                _focused = foc;
-              }),
-              onPageChanged: (foc) => setState(() => _focused = foc),
+              child: TableCalendar<Occurrence>(
+                locale: Localizations.localeOf(context).toString(),
+                firstDay: DateTime.now().subtract(const Duration(days: 365)),
+                lastDay: DateTime.now().add(const Duration(days: 365)),
+                focusedDay: _focused,
+                rowHeight: 56, // 容纳日号 + 农历副标签 + 底部活动图标
+                selectedDayPredicate: (d) => isSameDay(d, _selected),
+                eventLoader: (day) => byDay[dateKeyOf(day)] ?? const [],
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+                calendarBuilders: CalendarBuilders<Occurrence>(
+                  // 日格:日号 + 农历/节日短名副标签 + 十斋日角点(PRD v0.5.15 §5.2)
+                  defaultBuilder: (context, day, _) =>
+                      _dayCell(context, day, infoOf(day), hans: hans),
+                  todayBuilder: (context, day, _) =>
+                      _dayCell(context, day, infoOf(day), hans: hans, today: true),
+                  selectedBuilder: (context, day, _) => _dayCell(
+                      context, day, infoOf(day), hans: hans, selected: true),
+                  outsideBuilder: (context, day, _) => _dayCell(
+                      context, day, infoOf(day), hans: hans, outside: true),
+                  // 格子标记:用活动类型图标代替圆点(PRD §5)
+                  markerBuilder: (context, day, occs) {
+                    final keys = dayMarkerIconKeys(occs, _typeById);
+                    if (keys.isEmpty) return null;
+                    // 单场活动的日子放大些更醒目;多场则缩小以并排容纳
+                    final size = keys.length == 1 ? 16.0 : 13.0;
+                    final scheme = Theme.of(context).colorScheme;
+                    // 选中格底色为主色,图标转反色以保持可见
+                    final color = isSameDay(day, _selected)
+                        ? scheme.onPrimary
+                        : scheme.primary;
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (final k in keys)
+                              Icon(eventIcon(k), size: size, color: color),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                onDaySelected: (sel, foc) => setState(() {
+                  _selected = sel;
+                  _focused = foc;
+                }),
+                onPageChanged: (foc) => setState(() => _focused = foc),
+              ),
             ),
             const Divider(),
+
+            // ---- 当日佛历(农历 + 节日 + 十斋日;PRD v0.5.15 §5.2) ----
+            if (selectedInfo != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: selectedInfo.isSpecial
+                    ? Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.spa_outlined,
+                                  color: Theme.of(context).colorScheme.primary),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      lunarFullText(
+                                          selectedInfo.lunarMonth,
+                                          selectedInfo.lunarDay,
+                                          selectedInfo.isLeapMonth,
+                                          hans: hans),
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    Text(
+                                      [
+                                        for (final f in selectedInfo.festivals)
+                                          f.name(hans: hans),
+                                        if (selectedInfo.isZhaiTen)
+                                          l10n.almanacZhaiTen,
+                                      ].join('、'),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Text(
+                        lunarFullText(selectedInfo.lunarMonth,
+                            selectedInfo.lunarDay, selectedInfo.isLeapMonth,
+                            hans: hans),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
+              ),
             if (dayList.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -154,6 +246,82 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  /// 日格:日号 + 副标签(平日=农历,节日=金色短名)+ 十斋日角点。
+  /// 副标签用 FittedBox 收缩,配合外层 1.3 倍缩放上限,大字号下不破格。
+  Widget _dayCell(BuildContext context, DateTime day, AlmanacDayInfo? info,
+      {bool hans = false,
+      bool today = false,
+      bool selected = false,
+      bool outside = false}) {
+    final scheme = Theme.of(context).colorScheme;
+    final festival = info != null && info.festivals.isNotEmpty;
+    final sub = info == null
+        ? null
+        : festival
+            ? info.festivals.first.shortName(hans: hans)
+            : lunarCellLabel(info.lunarMonth, info.lunarDay, info.isLeapMonth,
+                hans: hans);
+    final muted = Theme.of(context).disabledColor;
+    final numColor = selected
+        ? scheme.onPrimary
+        : outside
+            ? muted
+            : scheme.onSurface;
+    final subColor = selected
+        ? scheme.onPrimary
+        : outside
+            ? muted
+            : festival
+                ? scheme.primary
+                : scheme.onSurfaceVariant;
+    return Container(
+      margin: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: selected ? scheme.primary : null,
+        border: today && !selected ? Border.all(color: scheme.primary) : null,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Stack(
+        children: [
+          Center(
+            // 整体 scaleDown:无论字号多大,格子内容都收缩适配、绝不溢出
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${day.day}',
+                      style: TextStyle(
+                        color: numColor,
+                        fontWeight: today || selected ? FontWeight.bold : null,
+                      )),
+                  if (sub != null)
+                    Text(sub,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 10, color: subColor)),
+                  const SizedBox(height: 6), // 底部活动图标 marker 的呼吸空间
+                ],
+              ),
+            ),
+          ),
+          if (info?.isZhaiTen == true)
+            Positioned(
+              top: 4,
+              right: 6,
+              child: Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? scheme.onPrimary : scheme.primary,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

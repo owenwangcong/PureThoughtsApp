@@ -8,9 +8,11 @@ import '../../core/error_text.dart';
 import '../../core/env.dart';
 import '../../core/prefs.dart';
 import '../../core/settings.dart';
+import '../../core/timezones.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../auth/profile_sync.dart';
+import '../events/events_providers.dart';
 
 /// 设置页:显示名(登录后)、语言、字号、地区、登出。
 /// 偏好改动即时生效并本地持久化;登录态下同步云端 profiles(PRD §11)。
@@ -229,6 +231,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const Divider(height: 32),
 
+          // ---- 佛历提醒(PRD v0.5.15 §5.2:两类分别可关,默认开) ----
+          Text(l10n.almanacSection, style: Theme.of(context).textTheme.titleMedium),
+          SwitchListTile(
+            title: Text(l10n.almanacFestivalToggle),
+            value: ref.watch(almanacFestivalNotifyProvider),
+            onChanged: (v) =>
+                ref.read(almanacFestivalNotifyProvider.notifier).set(v),
+          ),
+          SwitchListTile(
+            title: Text(l10n.almanacZhaiToggle),
+            value: ref.watch(almanacZhaiNotifyProvider),
+            onChanged: (v) =>
+                ref.read(almanacZhaiNotifyProvider.notifier).set(v),
+          ),
+
+          const Divider(height: 32),
+
           // ---- 隐私与合规 ----
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
@@ -236,13 +255,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/privacy'),
           ),
-          if (profile.value?['is_app_admin'] == true)
+          if (profile.value?['is_app_admin'] == true) ...[
             ListTile(
               leading: const Icon(Icons.flag_outlined),
               title: Text(l10n.adminReports),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/admin/reports'),
             ),
+            // 管理员:新建活动的默认时区(app_settings,PRD v0.5.15 §5)
+            ListTile(
+              leading: const Icon(Icons.public),
+              title: Text(l10n.defaultEventTimezone),
+              subtitle: Text(tzLabel(
+                ref.watch(defaultEventTimezoneProvider).value ?? 'Asia/Shanghai',
+                hans: locale.scriptCode == 'Hans',
+              )),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _editDefaultTimezone(context),
+            ),
+          ],
 
           // ---- 开发环境切换(仅 debug 构建;release 编译期剔除,文案不入 l10n) ----
           if (kDebugMode) ...[
@@ -282,6 +313,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  /// 管理员改「新建活动默认时区」:选择器 → upsert app_settings(RLS 限管理员)
+  Future<void> _editDefaultTimezone(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final hans = ref.read(localeProvider).scriptCode == 'Hans';
+    final current = ref.read(defaultEventTimezoneProvider).value;
+    final picked =
+        await showTimezonePicker(context, hans: hans, current: current);
+    if (picked == null || picked == current) return;
+    try {
+      await Supabase.instance.client.from('app_settings').upsert({
+        'key': 'default_event_timezone',
+        'value': picked,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+      ref.invalidate(defaultEventTimezoneProvider);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.saved)));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
+    }
   }
 
   /// 账号删除(PRD §10.1,上架硬需求):二次确认 → Edge Function →

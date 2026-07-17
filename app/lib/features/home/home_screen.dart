@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/almanac/almanac.dart';
 import '../../core/channels.dart';
 import '../../core/prefs.dart';
 import '../../core/settings.dart';
@@ -61,6 +62,9 @@ class HomeScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
+          // ---- 今日佛历横幅:节日/十斋日当天可见,平日不占位(PRD v0.5.15 §5.2) ----
+          const _AlmanacBanner(),
+
           // ---- 日課:最高频动作,大色块强调 ----
           SectionHeader(l10n.sectionDaily),
           Padding(
@@ -353,6 +357,68 @@ class _NotificationBell extends ConsumerWidget {
         isLabelVisible: unread > 0,
         label: Text('$unread'),
         child: const Icon(Icons.notifications_outlined),
+      ),
+    );
+  }
+}
+
+/// 今日佛历横幅(PRD v0.5.15 §5.2):当天为佛教节日或十斋日时显示,
+/// 点击进日历;数据来自离线资产,匿名/离线均可用;平日返回空不占位。
+class _AlmanacBanner extends ConsumerWidget {
+  const _AlmanacBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final hans = ref.watch(localeProvider).scriptCode == 'Hans';
+    final lines = almanacBannerLines(
+      ref.watch(todayAlmanacProvider),
+      hans: hans,
+      todayWord: l10n.almanacToday,
+      zhaiLabel: l10n.almanacZhaiTen,
+    );
+    if (lines == null) return const SizedBox.shrink();
+
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Card(
+        color: scheme.secondaryContainer,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => context.push('/calendar'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(Icons.spa_outlined, color: scheme.primary, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(lines.$1,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: scheme.onSecondaryContainer)),
+                      Text(
+                        lines.$2,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                                color: scheme.onSecondaryContainer,
+                                fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: scheme.onSecondaryContainer),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

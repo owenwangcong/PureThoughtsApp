@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/settings.dart';
 import '../auth/auth_providers.dart';
 
 /// 我的通知(RLS 按 scope 命中:all / user=我 / group=我所在群),
@@ -20,9 +21,28 @@ final myNotificationsProvider =
 bool isUnread(Map<String, dynamic> n) =>
     (n['notification_reads'] as List?)?.isEmpty ?? true;
 
-/// 未读数(首页红点)
+/// 单条佛历通知是否按用户开关显示(PRD v0.5.15:节日/十斋日两开关,默认开)
+bool almanacNotificationVisible(
+    Map<String, dynamic> n, bool showFestival, bool showZhai) {
+  if (n['type'] != 'almanac') return true;
+  final kind = (n['payload'] as Map?)?['kind'];
+  return kind == 'zhai' ? showZhai : showFestival;
+}
+
+/// 按用户偏好过滤后的通知列表(通知中心与红点统一用它)
+final visibleNotificationsProvider =
+    Provider<AsyncValue<List<Map<String, dynamic>>>>((ref) {
+  final showFestival = ref.watch(almanacFestivalNotifyProvider);
+  final showZhai = ref.watch(almanacZhaiNotifyProvider);
+  return ref.watch(myNotificationsProvider).whenData((list) => [
+        for (final n in list)
+          if (almanacNotificationVisible(n, showFestival, showZhai)) n,
+      ]);
+});
+
+/// 未读数(首页红点;不含被开关隐藏的佛历通知)
 final unreadCountProvider = Provider<int>((ref) {
-  final list = ref.watch(myNotificationsProvider).value ?? const [];
+  final list = ref.watch(visibleNotificationsProvider).value ?? const [];
   return list.where(isUnread).length;
 });
 

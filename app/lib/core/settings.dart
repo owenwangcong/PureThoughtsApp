@@ -15,6 +15,8 @@ abstract final class PrefKeys {
   static const themeMode = 'theme_mode'; // system | light | dark
   static const debugEnv = 'debug_env'; // 'local' | 'prod'(仅 debug 版环境切换器)
   static const mindfulnessSchedule = 'mindfulness_schedule'; // 正念提醒配置 JSON(P2.8,本地不入云)
+  static const almanacFestivalNotify = 'almanac_festival_notify'; // 佛教节日提醒(P2.9,默认开)
+  static const almanacZhaiNotify = 'almanac_zhai_notify'; // 十斋日提醒(P2.9,默认开)
 }
 
 /// 外观:跟随系统 / 浅色 / 深色(PRD v0.5.4 §11 双主题)
@@ -88,6 +90,38 @@ class RegionController extends Notifier<String> {
 }
 
 final regionProvider = NotifierProvider<RegionController, String>(RegionController.new);
+
+/// 佛教节日提醒开关(PRD v0.5.15 §5.2,默认开;关闭后通知中心隐藏该类并不计红点)
+class AlmanacFestivalNotifyController extends Notifier<bool> {
+  @override
+  bool build() =>
+      ref.watch(sharedPrefsProvider).getBool(PrefKeys.almanacFestivalNotify) ?? true;
+
+  void set(bool on) {
+    state = on;
+    ref.read(sharedPrefsProvider).setBool(PrefKeys.almanacFestivalNotify, on);
+  }
+}
+
+final almanacFestivalNotifyProvider =
+    NotifierProvider<AlmanacFestivalNotifyController, bool>(
+        AlmanacFestivalNotifyController.new);
+
+/// 十斋日提醒开关(同上;十斋日每月约 10 天,不想被提醒的用户可单独关)
+class AlmanacZhaiNotifyController extends Notifier<bool> {
+  @override
+  bool build() =>
+      ref.watch(sharedPrefsProvider).getBool(PrefKeys.almanacZhaiNotify) ?? true;
+
+  void set(bool on) {
+    state = on;
+    ref.read(sharedPrefsProvider).setBool(PrefKeys.almanacZhaiNotify, on);
+  }
+}
+
+final almanacZhaiNotifyProvider =
+    NotifierProvider<AlmanacZhaiNotifyController, bool>(
+        AlmanacZhaiNotifyController.new);
 
 /// 首启引导是否完成(语言 → 字号 → 地区,PRD §11)
 class OnboardingDoneController extends Notifier<bool> {
