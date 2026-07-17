@@ -17,6 +17,10 @@
 		<string>用於在 Webex 會議中開啟視訊</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>用於在 Webex 會議中發言</string>
+		<!-- file_picker 插件引用照片庫 API,Apple 强制要求用途说明(ITMS-90683);
+		     本 App 仅用其选取 PDF(管理员上传活动资料),不主动读取相簿 -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>當您選擇檔案上傳(如活動資料)時,可能需要存取您的照片圖庫</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
