@@ -160,7 +160,7 @@
 
 ### P6 · 后续(⏸ 待外部输入,不排期)
 
-- [ ] **P6.1** 讲法问答检索 — E12 已到位,**设计定稿** `docs/design/qa-search.md`(2026-07-15,PRD v0.5.11 §6)。
+- [ ] **P6.1** 讲法问答检索 — E12 已到位,**设计定稿** `docs/design/qa-search.md`(2026-07-15,PRD v0.5.11 §6)。**⏸ 入口已下架(2026-07-17 用户决定)**:E14 简繁改造未就绪、搜索对繁体用户不可用,首页宫格与直播页两处入口暂时移除(共修组回到 2×2:直播/經本/群組/日曆);功能代码/路由/l10n 完整保留,E14 完成后还原两处入口即恢复。
   用户六点定案:客户端**直连**上游(取消 `qa-proxy`,PRD §12.4 已划掉)· 后端做**简繁双字形归一**(E14)· 详情页**播放器为主** · 标签**可搜索选择器** · 入口 = **首页九宫格加一格 + 直播页** · 匿名可用。
   - [ ] **P6.1.1** 后端简繁双字形改造(E14,不在本仓库)— 规格见设计文档 §4。验收:`?query=禅修` 与 `?query=禪修` 返回同一批 7 条;`/tags` 无简繁重复项;`?script=hant` 返回正文无简体字。**提示词已交付用户,待后端方执行。**
   - [x] **P6.1.2** 客户端列表页 + 详情页(M)— ✅ 2026-07-16:`features/qa/`(qa_models/qa_api/qa_providers/qa_search_screen/qa_detail_screen);`http: ^1.2.0` + `Channels.qaApiBase`(直连);无限滚动(per_page 20、has_next 驱动、触底前 400px 追加、失败回退页码)、400ms 防抖、短词保护(<2 字非回车不搜)、参数 clamp 防 422、`script` 随 `localeProvider`、语言切换重搜;详情页 16:9 封面(hqdefault + errorBuilder 降级色块)+ 大播放按钮 → 扩展 `/watch/:vid?t=` 带时间戳,摘要 `SelectableText` 全文永远渲染;状态走 `async_states.dart`(SkeletonList/ErrorRetry/EmptyState);422 detail 数组不外泄。验收 ✅:`qa_api_test`(13)+`qa_search_test`(5)全绿、analyze 0 issue、Flutter 85/85。要点:Notifier `build()` 内不能改 state,首拉延到 `Future.microtask`。⛔ 搜索对繁体用户可用性仍依赖 P6.1.1(`script` 对老后端是未知参数、FastAPI 静默忽略,客户端先行不 422)。

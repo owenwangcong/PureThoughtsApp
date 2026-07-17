@@ -150,19 +150,8 @@ class LiveScreen extends ConsumerWidget {
               ),
             ),
 
-            // ---- 往期问答检索入口 ----
-            SectionHeader(l10n.qaTitle,
-                padding: const EdgeInsets.fromLTRB(0, 20, 0, 4)),
-            Card(
-              margin: EdgeInsets.zero,
-              child: ListTile(
-                leading: const Icon(Icons.forum_outlined),
-                title: Text(l10n.qaEntryTitle),
-                subtitle: Text(l10n.qaEntrySubtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/qa'),
-              ),
-            ),
+            // 往期问答入口已下架(2026-07-17 用户决定:E14 简繁改造未就绪,
+            // 暂不开放;功能代码/路由/l10n 完整保留,恢复时还原此处入口卡)
 
             // ---- 往期回看 ----
             replays.maybeWhen(
