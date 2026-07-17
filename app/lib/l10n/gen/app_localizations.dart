@@ -1801,6 +1801,132 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'出自「{title}」'**
   String qaFromVideo(String title);
+
+  /// No description provided for @eventShare.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'分享'**
+  String get eventShare;
+
+  /// No description provided for @eventAgendaTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'時間表'**
+  String get eventAgendaTitle;
+
+  /// No description provided for @eventAttachmentsTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'相關資料'**
+  String get eventAttachmentsTitle;
+
+  /// No description provided for @eventCopy.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'複製'**
+  String get eventCopy;
+
+  /// No description provided for @eventCopied.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已複製時間表'**
+  String get eventCopied;
+
+  /// No description provided for @eventLinkLabelDefault.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'查看'**
+  String get eventLinkLabelDefault;
+
+  /// No description provided for @eventAdminTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'管理員'**
+  String get eventAdminTitle;
+
+  /// No description provided for @eventEditAgenda.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'編輯時間表/資料'**
+  String get eventEditAgenda;
+
+  /// No description provided for @eventAddAgendaRow.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'新增一行'**
+  String get eventAddAgendaRow;
+
+  /// No description provided for @eventUploadPdf.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'上傳 PDF'**
+  String get eventUploadPdf;
+
+  /// No description provided for @eventUploading.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'上傳中…'**
+  String get eventUploading;
+
+  /// No description provided for @eventNoAgenda.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'尚未安排時間表,點「新增一行」開始'**
+  String get eventNoAgenda;
+
+  /// No description provided for @eventAttachmentName.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'資料名稱'**
+  String get eventAttachmentName;
+
+  /// No description provided for @eventAgendaSaved.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'時間表已儲存'**
+  String get eventAgendaSaved;
+
+  /// No description provided for @confirmDeleteAttachment.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確定刪除此資料?檔案將從伺服器移除。'**
+  String get confirmDeleteAttachment;
+
+  /// No description provided for @agendaDay.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'第幾天'**
+  String get agendaDay;
+
+  /// No description provided for @agendaStart.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'開始時間'**
+  String get agendaStart;
+
+  /// No description provided for @agendaEnd.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'結束時間(選填)'**
+  String get agendaEnd;
+
+  /// No description provided for @agendaActivity.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動內容'**
+  String get agendaActivity;
+
+  /// No description provided for @agendaLinkUrl.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'連結網址(選填)'**
+  String get agendaLinkUrl;
+
+  /// No description provided for @agendaLinkLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'連結文字(選填)'**
+  String get agendaLinkLabel;
 }
 
 class _AppLocalizationsDelegate

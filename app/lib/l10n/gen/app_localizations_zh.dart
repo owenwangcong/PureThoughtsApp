@@ -874,6 +874,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String qaFromVideo(String title) {
     return '出自「$title」';
   }
+
+  @override
+  String get eventShare => '分享';
+
+  @override
+  String get eventAgendaTitle => '時間表';
+
+  @override
+  String get eventAttachmentsTitle => '相關資料';
+
+  @override
+  String get eventCopy => '複製';
+
+  @override
+  String get eventCopied => '已複製時間表';
+
+  @override
+  String get eventLinkLabelDefault => '查看';
+
+  @override
+  String get eventAdminTitle => '管理員';
+
+  @override
+  String get eventEditAgenda => '編輯時間表/資料';
+
+  @override
+  String get eventAddAgendaRow => '新增一行';
+
+  @override
+  String get eventUploadPdf => '上傳 PDF';
+
+  @override
+  String get eventUploading => '上傳中…';
+
+  @override
+  String get eventNoAgenda => '尚未安排時間表,點「新增一行」開始';
+
+  @override
+  String get eventAttachmentName => '資料名稱';
+
+  @override
+  String get eventAgendaSaved => '時間表已儲存';
+
+  @override
+  String get confirmDeleteAttachment => '確定刪除此資料?檔案將從伺服器移除。';
+
+  @override
+  String get agendaDay => '第幾天';
+
+  @override
+  String get agendaStart => '開始時間';
+
+  @override
+  String get agendaEnd => '結束時間(選填)';
+
+  @override
+  String get agendaActivity => '活動內容';
+
+  @override
+  String get agendaLinkUrl => '連結網址(選填)';
+
+  @override
+  String get agendaLinkLabel => '連結文字(選填)';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1746,6 +1809,69 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String qaFromVideo(String title) {
     return '出自「$title」';
   }
+
+  @override
+  String get eventShare => '分享';
+
+  @override
+  String get eventAgendaTitle => '时间表';
+
+  @override
+  String get eventAttachmentsTitle => '相关资料';
+
+  @override
+  String get eventCopy => '复制';
+
+  @override
+  String get eventCopied => '已复制时间表';
+
+  @override
+  String get eventLinkLabelDefault => '查看';
+
+  @override
+  String get eventAdminTitle => '管理员';
+
+  @override
+  String get eventEditAgenda => '编辑时间表/资料';
+
+  @override
+  String get eventAddAgendaRow => '新增一行';
+
+  @override
+  String get eventUploadPdf => '上传 PDF';
+
+  @override
+  String get eventUploading => '上传中…';
+
+  @override
+  String get eventNoAgenda => '尚未安排时间表,点「新增一行」开始';
+
+  @override
+  String get eventAttachmentName => '资料名称';
+
+  @override
+  String get eventAgendaSaved => '时间表已保存';
+
+  @override
+  String get confirmDeleteAttachment => '确定删除此资料?文件将从服务器移除。';
+
+  @override
+  String get agendaDay => '第几天';
+
+  @override
+  String get agendaStart => '开始时间';
+
+  @override
+  String get agendaEnd => '结束时间(选填)';
+
+  @override
+  String get agendaActivity => '活动内容';
+
+  @override
+  String get agendaLinkUrl => '链接网址(选填)';
+
+  @override
+  String get agendaLinkLabel => '链接文字(选填)';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2618,4 +2744,67 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String qaFromVideo(String title) {
     return '出自「$title」';
   }
+
+  @override
+  String get eventShare => '分享';
+
+  @override
+  String get eventAgendaTitle => '時間表';
+
+  @override
+  String get eventAttachmentsTitle => '相關資料';
+
+  @override
+  String get eventCopy => '複製';
+
+  @override
+  String get eventCopied => '已複製時間表';
+
+  @override
+  String get eventLinkLabelDefault => '查看';
+
+  @override
+  String get eventAdminTitle => '管理員';
+
+  @override
+  String get eventEditAgenda => '編輯時間表/資料';
+
+  @override
+  String get eventAddAgendaRow => '新增一行';
+
+  @override
+  String get eventUploadPdf => '上傳 PDF';
+
+  @override
+  String get eventUploading => '上傳中…';
+
+  @override
+  String get eventNoAgenda => '尚未安排時間表,點「新增一行」開始';
+
+  @override
+  String get eventAttachmentName => '資料名稱';
+
+  @override
+  String get eventAgendaSaved => '時間表已儲存';
+
+  @override
+  String get confirmDeleteAttachment => '確定刪除此資料?檔案將從伺服器移除。';
+
+  @override
+  String get agendaDay => '第幾天';
+
+  @override
+  String get agendaStart => '開始時間';
+
+  @override
+  String get agendaEnd => '結束時間(選填)';
+
+  @override
+  String get agendaActivity => '活動內容';
+
+  @override
+  String get agendaLinkUrl => '連結網址(選填)';
+
+  @override
+  String get agendaLinkLabel => '連結文字(選填)';
 }

@@ -140,6 +140,7 @@
   - **时间表**:结构化行(第几天 + 起讫时间 + 活动),每行可选填一个**自由网址**(如读经行链接到经文网页);归属活动本身,循环活动各场次共用;时间为现场墙钟时间原样显示、不做时区换算。
   - **相关资料**:管理员**在 App 内上传 PDF**(如经本)供用户下载 —— 存 **Supabase Storage**(`event-files` bucket,公开可读、仅管理员可写);走自有域名 `api.pure-thoughts.com`,**大陆可达**(相对 YouTube 的关键优势)。另沿用活动级 YouTube/Webex 链接。
   - **分享**:整张时间表渲染为纯文本(含各行链接、PDF 公开 URL、YouTube),经系统分享面板发 Line/微信,或复制到剪贴板;转发后大陆用户点 Storage 链接可下 PDF。
+  - **日历列表标记**:活动若含**时间表 / PDF / 链接**,在日历列表项(当日列表与未来活动列表)上分别挂对应小图标(时钟 / PDF / 链接),用户不点开即知里面有内容。
   - 均**管理员维护、用户只读**(匿名可看);改时间表/资料不额外发全员通知。
 - **分类订阅**:用户可按类型开关推送。
 - **免打扰时段**:默认 22:00–07:00(用户本地时区)不发系统推送,顺延到时段结束后发;活动开始前的实时通知(如"共修连接")不受限;用户可在设置中调整或关闭。
@@ -283,6 +284,8 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `vows` | id, user_id, group_id(**nullable=全部群**), practice_type_id, target_qty, start_date, end_date, **status(active/completed/expired/abandoned)** |
 | `events` | id, title, type, start_at(timestamptz), duration, recurrence_rule(RRULE), webex_url, youtube_url, content, created_by |
 | `event_overrides` | event_id, occurrence_date, patch(改期/改内容/取消) |
+| **`event_agenda_items`**(v0.5.12) | id, event_id(FK cascade), day_index(第几天,≥1), start_time/end_time(time,墙钟), activity, link_url/link_label(自由网址,可空), sort_order —— 活动时间表行;匿名可读、仅管理员写 |
+| **`event_attachments`**(v0.5.12) | id, event_id(FK cascade), title, storage_path(`event-files` 桶内 key), size_bytes, content_type, sort_order —— 相关资料 PDF;删行前先删 Storage 对象(级联不清对象) |
 | `media_items` | id, title_hant/hans, kind(audio/video), source(youtube/https), url, size, category, sort_order, active |
 | `scriptures` | id, title, web_url, sort_order |
 | `push_tokens` | user_id, token, platform(apns/fcm), **fcm_failed(bool,邮件兜底标记)**, updated_at |
@@ -304,7 +307,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `proxy_names` | 本群 approved 成员可读、可 insert(报数时自动记入);删除限添加者 / 群主 |
 | `vows` | 仅本人读写 |
 | `practice_types` | 全局项所有人可读;群自定义项限本群成员读、群主写 |
-| `events` / `media_items` / `scriptures` | **anon 可读**(匿名浏览),仅管理员写 |
+| `events` / `event_agenda_items` / `event_attachments` / `media_items` / `scriptures` | **anon 可读**(匿名浏览),仅管理员写(v0.5.12:两活动子表 + `event-files` Storage 桶同口径,`storage.objects` 公开读、`is_app_admin()` 写) |
 | `notifications` | scope 命中者可读;仅服务端(service_role)写 |
 | `reports` | 举报人可 insert / 读自己的;管理员全权 |
 | `user_blocks` | 仅本人读写 |

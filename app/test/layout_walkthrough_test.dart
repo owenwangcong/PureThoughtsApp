@@ -3,7 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_thoughts/core/prefs.dart';
 import 'package:pure_thoughts/core/theme/app_theme.dart';
+import 'package:pure_thoughts/features/auth/auth_providers.dart';
 import 'package:pure_thoughts/features/auth/auth_screen.dart';
+import 'package:pure_thoughts/features/events/event_agenda_editor.dart';
+import 'package:pure_thoughts/features/events/event_detail_models.dart';
+import 'package:pure_thoughts/features/events/event_detail_screen.dart';
+import 'package:pure_thoughts/features/events/events_providers.dart';
+import 'package:pure_thoughts/features/events/occurrence_utils.dart';
 import 'package:pure_thoughts/features/onboarding/onboarding_screen.dart';
 import 'package:pure_thoughts/features/qa/qa_detail_screen.dart';
 import 'package:pure_thoughts/features/qa/qa_models.dart';
@@ -21,12 +27,16 @@ void main() {
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
   ];
 
-  Future<void> pumpScreen(WidgetTester tester, Widget screen, Locale locale) async {
+  Future<void> pumpScreen(WidgetTester tester, Widget screen, Locale locale,
+      {List<dynamic> overrides = const []}) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          ...overrides,
+        ],
         child: MaterialApp(
           locale: locale,
           supportedLocales: locales,
@@ -93,5 +103,86 @@ void main() {
       await pumpScreen(tester, const QaDetailScreen(segment: seg), locale);
       expect(tester.takeException(), isNull);
     });
+
+    // 活动详情:多日时间表 + PDF 资料 + 管理员操作,大字号下不溢出(build 不触网,provider 覆写)
+    testWidgets('活动详情(时间表/资料)· $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      final event = <String, dynamic>{
+        'id': 'ev-test',
+        'title': '地藏法會',
+        'start_at': DateTime(2026, 8, 1, 9).toUtc().toIso8601String(),
+        'duration_minutes': 90,
+        'content': '一年一度地藏法會,歡迎共修同霑法益。',
+        'youtube_url': 'https://youtube.com/watch?v=abcdef12345',
+        'webex_url': null,
+        'event_type_id': 't1',
+      };
+      final occ = Occurrence(
+        event: event,
+        startAt: DateTime(2026, 8, 1, 9),
+        dateKey: '2026-08-01',
+        cancelled: false,
+      );
+      await pumpScreen(
+        tester,
+        EventDetailScreen(occ: occ),
+        locale,
+        overrides: [
+          myProfileProvider.overrideWith((ref) => {'is_app_admin': true}),
+          agendaItemsProvider('ev-test').overrideWith((ref) => _demoAgenda),
+          attachmentsProvider('ev-test').overrideWith((ref) => _demoAtts),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 管理员时间表编辑器:行列表 + 资料 + 上传按钮,大字号下不溢出
+    testWidgets('时间表编辑器 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      final event = <String, dynamic>{
+        'id': 'ev-test',
+        'title': '禪七',
+        'recurrence_rule': null,
+      };
+      await pumpScreen(
+        tester,
+        EventAgendaEditorScreen(event: event),
+        locale,
+        overrides: [
+          agendaItemsProvider('ev-test').overrideWith((ref) => _demoAgenda),
+          attachmentsProvider('ev-test').overrideWith((ref) => _demoAtts),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
   }
 }
+
+const _demoAgenda = <AgendaItem>[
+  AgendaItem(dayIndex: 1, startTime: '06:00', endTime: '07:00', activity: '早課'),
+  AgendaItem(
+      dayIndex: 1,
+      startTime: '07:00',
+      endTime: '08:30',
+      activity: '誦地藏經',
+      linkUrl: 'https://qldazangjing.com/',
+      linkLabel: '經文'),
+  AgendaItem(dayIndex: 2, startTime: '06:00', activity: '早課'),
+];
+
+const _demoAtts = <EventAttachment>[
+  EventAttachment(
+    id: 'a1',
+    title: '地藏經 經本',
+    storagePath: 'ev-test/x.pdf',
+    publicUrl:
+        'https://api.pure-thoughts.com/storage/v1/object/public/event-files/ev-test/x.pdf',
+    sizeBytes: 1258291,
+  ),
+];

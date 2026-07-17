@@ -323,5 +323,26 @@
         "type": "String"
       }
     }
-  }
+  },
+  "eventShare": "分享",
+  "eventAgendaTitle": "時間表",
+  "eventAttachmentsTitle": "相關資料",
+  "eventCopy": "複製",
+  "eventCopied": "已複製時間表",
+  "eventLinkLabelDefault": "查看",
+  "eventAdminTitle": "管理員",
+  "eventEditAgenda": "編輯時間表/資料",
+  "eventAddAgendaRow": "新增一行",
+  "eventUploadPdf": "上傳 PDF",
+  "eventUploading": "上傳中…",
+  "eventNoAgenda": "尚未安排時間表,點「新增一行」開始",
+  "eventAttachmentName": "資料名稱",
+  "eventAgendaSaved": "時間表已儲存",
+  "confirmDeleteAttachment": "確定刪除此資料?檔案將從伺服器移除。",
+  "agendaDay": "第幾天",
+  "agendaStart": "開始時間",
+  "agendaEnd": "結束時間(選填)",
+  "agendaActivity": "活動內容",
+  "agendaLinkUrl": "連結網址(選填)",
+  "agendaLinkLabel": "連結文字(選填)"
 }

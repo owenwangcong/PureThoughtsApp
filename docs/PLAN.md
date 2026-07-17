@@ -2,7 +2,7 @@
 
 > **本文件是执行计划与进度的唯一事实来源**;需求细节一律以 [`PRD.md`](PRD.md)(v0.5.1)为准,本文只负责"做什么、什么顺序、现在到哪了"。
 > **使用规则见 §8**:开工先看 §1;任务完成即勾选并更新总览;新任务先写进本文再动手。
-> 最后更新:2026-07-15
+> 最后更新:2026-07-16
 
 ---
 
@@ -100,11 +100,12 @@
 - [x] **P2.3** 通知中心(M)— 首页铃铛红点(未读数)、通知列表(按类型渲染本地化文案:代报/公告/通用)、进入即标记已读;migration 0006 补 P1.4 遗留的「公告更新→群通知」触发器。验收 ✅ 2026-07-07:pgTAP 45/45(公告通知可见性 2 项),e2e 公告→通知→已读。**大陆 Android 的唯一通道,刚需**。
 - [x] **P2.4b** 日历增强(M,2026-07-09 用户需求,PRD v0.5.7)— **未來活動列表**(90 天内前 10 场);事件类型改动态表 `event_types`(migration 0008:靜坐/共修/講法/禪七/其它默认 + 图标键,管理员增删改,被引用类型只能停用);管理员**编辑/删除整个活动**(原有新增/取消单次保留);**任何活动变更 DB 触发器自动全员通知**(新增/更新/删除/单次取消/改期,通知中心分动作渲染、点击进日历);同日多活动共存显示(标记上限 4)。验收 ✅ 2026-07-09:pgTAP 49/49(变更通知 2 项)。
   - **月视图标记补齐**(2026-07-16):兑现 PRD §5「不同类型在日历中显示不同图标」——格子上以活动**类型图标**代替圆点(`CalendarBuilders.markerBuilder` + 纯函数 `dayMarkerIconKeys`:去重、保序、跳过已取消、上限 3;单场 16px、多场 13px)。真机验证(周三=靜坐图标 / 周日=共修图标)+ `occurrence_utils_test` 补 8 例。analyze 0 issue、Flutter 97/97。
-- [ ] **P2.4c** 活动时间表与相关资料(L,2026-07-16 用户需求,PRD v0.5.12,详细设计 `docs/design/event-agenda.md`)— 管理员给活动加**时间表**(第几天+起讫+活动+可选自由网址,支持跨天)与**相关资料**(App 内上传 PDF → Supabase Storage `event-files` 公开桶);用户查看 + **整张时间表分享/复制**转发 Line/微信;PDF 大陆可达(走 api.pure-thoughts.com)。四点定案见设计 §1。子任务:
-  - [ ] **P2.4c-1** migration + RLS + Storage bucket(`event_agenda_items`/`event_attachments` 两表 + `event-files` 桶 20MB/仅 PDF + storage.objects 策略 + seed 示例时间表;pgTAP:匿名读、非管理员写拒、桶存在)。
-  - [ ] **P2.4c-2** 用户详情页(`event_detail_screen` 取代现有 bottom sheet:时间表按天分组 + 资料下载区 + YouTube/Webex;`event_detail_models` 含 `renderAgendaText`/`groupAgendaByDay` 纯函数 + 单测)。
-  - [ ] **P2.4c-3** 管理员编辑器(`event_agenda_editor`:时间表行增删改排 + PDF `file_picker` 上传/删除,删附件先删 Storage 对象再删行)。
-  - [ ] **P2.4c-4** 分享 + l10n + 走查(`share_plus` 系统面板 + 复制;三份 ARB 新增键;大字号回归;真机:管理员建表传 PDF → 用户看/下/分享,大陆 PDF 可达随 E6 验)。
+- [ ] **P2.4c** 活动时间表与相关资料(L,2026-07-16 用户需求,PRD v0.5.12,详细设计 `docs/design/event-agenda.md`)— 管理员给活动加**时间表**(第几天+起讫+活动+可选自由网址,支持跨天)与**相关资料**(App 内上传 PDF → Supabase Storage `event-files` 公开桶);用户查看 + **整张时间表分享/复制**转发 Line/微信;PDF 大陆可达(走 api.pure-thoughts.com)。四点定案见设计 §1。**代码完成 2026-07-16**(`flutter analyze` 0 issue、`flutter test` 109、pgTAP 56 全绿);余 ⏳ 真机验证 + 生产 Storage 桶(随 P0.2 建)+ 大陆 PDF 可达(随 E6)。子任务:
+  - [x] **P2.4c-1** migration + RLS + Storage bucket ✅ — `20260716000011_event_agenda.sql`:`event_agenda_items`/`event_attachments` 两表 + `event-files` 桶(20MB/仅 PDF)+ storage.objects 四策略 + seed 示例时间表;pgTAP `event_agenda.test.sql` 7 项(匿名读两表、非管理员写拒、管理员写通过、桶存在且 public)全绿。
+  - [x] **P2.4c-2** 用户详情页 ✅ — `event_detail_screen`(整页取代 bottom sheet:时间表按天分组 + 行内经文链接 + PDF 资料下载区 + YouTube/Webex + 管理员操作);`event_detail_models` 含 `renderAgendaText`/`groupAgendaByDay`/`dayLabel` 纯函数;`agendaItemsProvider`/`attachmentsProvider`;`event_agenda_test.dart` 8 项单测。
+  - [x] **P2.4c-3** 管理员编辑器 ✅ — `event_agenda_editor`(时间表行增删改 + 按天分组、批量「儲存」按时间重排 sort_order;PDF `file_picker` 上传/删除,删附件先删 Storage 对象再删行);`event_edit.dart` 抽出共用 `showEventEditor`(日历 FAB 与详情页共享)。
+  - [x] **P2.4c-5** 日历列表资源标记 ✅(2026-07-16 用户追加)— 活动含时间表/PDF/链接时,日历列表项挂对应小图标(时钟/PDF/链接);`eventsProvider` 用 PostgREST `event_agenda_items(count)`/`event_attachments(count)` 嵌套计数一次取齐(无 N+1),`EventResourceFlags` 派生 + 单测;真机验证图标随内容出现/消失。
+  - [x] **P2.4c-4** 分享 + l10n + 走查 ✅ — `share_plus` 系统面板(`SharePlus.instance.share`)+ 剪贴板复制;三份 ARB 新增 21 键(简繁 × zh 兜底);`layout_walkthrough_test` 加详情页 + 编辑器(简繁 × 2.0 不溢出,10/10)。⏳ **真机**:管理员建表传 PDF → 用户看/下/分享、大陆 PDF 可达(随 E6)待验。
   - 依赖:`share_plus`/`file_picker` 新依赖;**Storage bucket 须先在生产实例建**(P0.2 部署时或本地栈 `db reset` 随 migration 建)。
 - [x] **P2.4** 活动与日历(L)— 活動日曆页(table_calendar 月视图 + 当日活动列表,匿名可浏览,首页 AppBar 入口);客户端展开循环(RRULE 子集:单次 / FREQ=WEEKLY)+ overrides 单次取消/改期;活动详情(内容、YouTube/Webex 外跳);管理员建活动(标题/类型/时间/每周循环/连接)与取消单次;时间按用户本地时区显示;seed 示例周六共修/周三打坐。验收 ✅ 2026-07-08:occurrence 展开 5 项单测(快进不漂移/取消/改期)。**推迟到 P2.1**:pg_cron 展开+排程提醒通知(与推送/免打扰同做);分类订阅开关(推送偏好)。
 - [x] **P2.5** 发愿(M)— 發願页(创建:功课/目标/期限预设 7·21·49·100·365 天/范围跨群或单群;进度卡片 + 剩余天数);达成自动转 completed + 随喜弹层 + 回向偈(通用回向偈占位,正式文案待 E7);到期静默转 expired、无"失败"文案;Dashboard 顶部进行中发愿紧凑进度条;首页入口。验收 ✅ 2026-07-08:e2e 发愿进度口径(=3,不含自由名字/已删)+ RLS 他人不可见。
