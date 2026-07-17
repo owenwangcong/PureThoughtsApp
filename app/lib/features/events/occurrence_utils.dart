@@ -33,6 +33,12 @@ class Occurrence {
 String dateKeyOf(DateTime local) =>
     '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')}';
 
+/// 换算到设备本地时区(经 epoch,走 Dart 原生本地时钟)。
+/// ⚠️ 不能用 TZDateTime.toLocal():它返回的是 timezone 包全局 `tz.local`,
+/// 默认 UTC、依赖启动时 setLocalLocation 成功——初始化失败的设备整个日历会按 UTC 显示。
+DateTime _deviceLocal(DateTime d) =>
+    DateTime.fromMillisecondsSinceEpoch(d.millisecondsSinceEpoch);
+
 /// 某天多场活动 → 去重后的类型「图标 key」列表,保序、最多 [max] 个。
 /// 用于月视图格子上以类型图标代替圆点(PRD §5「不同类型在日历中显示不同图标」)。
 /// - 跳过已取消的场次(不在格子上宣告);
@@ -85,7 +91,7 @@ List<Occurrence> expandOccurrences({
       // 在活动时区按「+7 个日历日」逐周生成(墙钟不变);按序号生成避免累计漂移
       starts = () sync* {
         var i = 0;
-        final firstLocal = first.toLocal();
+        final firstLocal = _deviceLocal(first);
         if (firstLocal.isBefore(start)) {
           // 快进到范围附近(留 2 周余量),避免逐周遍历多年
           i = start.difference(firstLocal).inDays ~/ 7 - 2;
@@ -94,7 +100,7 @@ List<Occurrence> expandOccurrences({
         while (true) {
           final t = tz.TZDateTime(loc, first.year, first.month,
               first.day + 7 * i, first.hour, first.minute);
-          if (!t.toLocal().isBefore(endExclusive)) break;
+          if (!_deviceLocal(t).isBefore(endExclusive)) break;
           yield t;
           i++;
         }
@@ -104,7 +110,7 @@ List<Occurrence> expandOccurrences({
     }
 
     for (final s in starts) {
-      final local = s.toLocal(); // 设备本地时间(显示与范围过滤口径)
+      final local = _deviceLocal(s); // 设备本地时间(显示与范围过滤口径)
       if (local.isBefore(start) || !local.isBefore(endExclusive)) continue;
       final key = dateKeyOf(s); // TZDateTime 的日期分量 = 活动时区日期
       final patch = patchOf['${e['id']}|$key'];

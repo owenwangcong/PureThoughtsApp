@@ -987,6 +987,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get legendEvent => '活動';
 
   @override
+  String get yourLocalTime => '您的時間';
+
+  @override
   String get tzMore => '其他時區…';
 }
 
@@ -1973,6 +1976,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get legendEvent => '活动';
 
   @override
+  String get yourLocalTime => '您的时间';
+
+  @override
   String get tzMore => '其他时区…';
 }
 
@@ -2957,6 +2963,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get legendEvent => '活動';
+
+  @override
+  String get yourLocalTime => '您的時間';
 
   @override
   String get tzMore => '其他時區…';

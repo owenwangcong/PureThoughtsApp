@@ -95,6 +95,22 @@ void main() {
     expect(occ.single.dateKey, '2026-07-11');
   });
 
+  test('startAt 是设备本地时间,不依赖全局 tz.local(回归:默认 UTC 时曾整表按 UTC 显示)', () {
+    // 测试环境从不调 setLocalLocation → tz.local 停留在默认 UTC,
+    // 恰好复现「时区初始化失败的设备」;修复前 startAt.isUtc 为 true。
+    final occ = expandOccurrences(
+      events: [event('2026-07-18T08:29:00Z', 'Asia/Shanghai')],
+      overrides: const [],
+      rangeStart: DateTime(2026, 7, 10),
+      rangeEnd: DateTime(2026, 7, 25),
+    );
+    final o = occ.single;
+    expect(o.startAt.isUtc, false, reason: '必须是设备本地时间,不能回退 UTC');
+    expect(o.startAt.millisecondsSinceEpoch,
+        DateTime.parse('2026-07-18T08:29:00Z').millisecondsSinceEpoch,
+        reason: '换算只改表示,不得改时刻');
+  });
+
   test('dateKey 用活动时区日期:跨日活动全球用户键一致', () {
     // 洛杉矶 2026-07-11 19:00(= 2026-07-12T02:00Z):键应是洛杉矶的 07-11
     final occ = expandOccurrences(

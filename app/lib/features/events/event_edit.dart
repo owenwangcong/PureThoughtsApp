@@ -139,6 +139,27 @@ Future<void> showEventEditor(BuildContext context, WidgetRef ref,
                   if (picked != null) setState(() => tzName = picked);
                 },
               ),
+              // 实时换算:活动时区 ≠ 设备时区时提示落在自己的哪一天几点,
+              // 避免「按设备直觉选时间 → 活动跑到别的日子」的困惑
+              Builder(builder: (context) {
+                final instant = tz.TZDateTime(locationOf(tzName), when.year,
+                    when.month, when.day, when.hour, when.minute);
+                final deviceWall = DateTime.fromMillisecondsSinceEpoch(
+                    instant.millisecondsSinceEpoch);
+                final same = deviceWall.day == when.day &&
+                    deviceWall.hour == when.hour &&
+                    deviceWall.minute == when.minute;
+                if (same) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    '${l10n.yourLocalTime}:'
+                    '${DateFormat('MM-dd HH:mm').format(deviceWall)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+                );
+              }),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.weeklyRepeat),

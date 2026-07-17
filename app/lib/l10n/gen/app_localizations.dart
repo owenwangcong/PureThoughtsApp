@@ -2024,6 +2024,12 @@ abstract class AppLocalizations {
   /// **'活動'**
   String get legendEvent;
 
+  /// No description provided for @yourLocalTime.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'您的時間'**
+  String get yourLocalTime;
+
   /// No description provided for @tzMore.
   ///
   /// In zh_Hant, this message translates to:
