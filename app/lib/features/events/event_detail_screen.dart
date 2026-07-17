@@ -412,15 +412,20 @@ class _AgendaView extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 时间列:随字号缩放的固定宽(跨行对齐);默认字号比原 96 窄,
+                  // 把宽度让给活动内容列,尽量不换行;大字号下等比放宽,时间自身也不折行
                   SizedBox(
-                    width: 96,
+                    width: MediaQuery.textScalerOf(context).scale(80),
                     child: Text(it.timeRange, style: theme.textTheme.bodyMedium),
                   ),
+                  const SizedBox(width: 4),
                   Expanded(child: Text(it.activity)),
                   if (it.linkUrl != null)
                     TextButton.icon(
                       style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           visualDensity: VisualDensity.compact),
                       icon: const Icon(Icons.open_in_new, size: 16),
                       label: Text(it.linkLabel?.isNotEmpty == true
