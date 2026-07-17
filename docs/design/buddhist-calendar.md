@@ -6,6 +6,7 @@
 > 1. 生成器用 **Node + lunar-javascript**(tools/almanac,用户引用的原库)而非 Dart 版——pub 包 `lunar` 声明依赖 Flutter SDK,无法 `dart run` 跑 CLI;算法同源,产物不变。
 > 2. 精选清单实际 **24 条**(§3.3 全表),文中"约 26"为笔误。
 > 3. pgTAP 实测:非管理员 UPDATE `app_settings` 是被 RLS **静默过滤为 0 行**而非 42501(PG 对 UPDATE 用 USING 过滤),测试断言按此修正;INSERT 仍抛 42501。
+> 4. **日历显示优化(2026-07-17 用户选定 B+1+2+3+4+5)**:卡片式格子(`surfaceContainer` 浅底瓷砖 + 3px 空隙区分天与天,未采用网格线方案)、星期表头浅底色条 + 周末区分色(周日暗红棕/周六青灰,深色主题亮化)、今日改淡金填充(primaryContainer)+粗体、日历下加图例行(金字=節日 · 金點=十齋日 · 圖標=活動)、格高 56→62、隐藏邻月日期(`outsideDaysVisible: false`)。
 > 对应 PRD v0.5.15 §5「佛教日曆」与 §5 跨时区补充;PLAN 任务 **P2.9(佛历)/ P2.10(活动时区)**
 > 数据源参考:[6tail lunar 系列库](https://github.com/6tail/lunar-javascript)(官方 Dart 版 pub 包 [`lunar`](https://pub.dev/packages/lunar),含佛历 `Foto`)
 
