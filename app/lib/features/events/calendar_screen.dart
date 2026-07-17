@@ -134,7 +134,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 // 星期表头:浅底色条 + 周末区分色
                 daysOfWeekStyle: DaysOfWeekStyle(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -196,6 +197,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
               child: Wrap(
+                alignment: WrapAlignment.center, // 图例整行居中
                 spacing: 14,
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
@@ -289,7 +291,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             if (dayList.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Center(child: Text(l10n.emptyList)),
+                // 明确说「没有活动」,不用笼统的「暂无资料」(2026-07-17 用户反馈)
+                child: Center(child: Text(l10n.noEventsThisDay)),
               )
             else
               for (final o in dayList) _occurrenceTile(context, o),
@@ -352,11 +355,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Container(
       margin: const EdgeInsets.all(1.5), // 瓷砖间 3px 空隙
       decoration: BoxDecoration(
+        // Highest 档:浅色主题里 surfaceContainer 与宣纸底几乎同色,瓷砖会隐形
         color: selected
             ? scheme.primary
             : today
                 ? scheme.primaryContainer
-                : scheme.surfaceContainer,
+                : scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Stack(

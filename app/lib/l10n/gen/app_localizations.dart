@@ -2006,6 +2006,12 @@ abstract class AppLocalizations {
   /// **'輸入城市或時區名稱搜尋'**
   String get tzSearchHint;
 
+  /// No description provided for @noEventsThisDay.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'沒有活動'**
+  String get noEventsThisDay;
+
   /// No description provided for @legendFestival.
   ///
   /// In zh_Hant, this message translates to:

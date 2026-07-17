@@ -978,6 +978,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tzSearchHint => '輸入城市或時區名稱搜尋';
 
   @override
+  String get noEventsThisDay => '沒有活動';
+
+  @override
   String get legendFestival => '節日';
 
   @override
@@ -1961,6 +1964,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tzSearchHint => '输入城市或时区名称搜索';
 
   @override
+  String get noEventsThisDay => '没有活动';
+
+  @override
   String get legendFestival => '节日';
 
   @override
@@ -2942,6 +2948,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tzSearchHint => '輸入城市或時區名稱搜尋';
+
+  @override
+  String get noEventsThisDay => '沒有活動';
 
   @override
   String get legendFestival => '節日';
