@@ -50,6 +50,18 @@ workflows:
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
       - build/app/outputs/bundle/release/app-release.aab
+    # ---- Google Play 自动发布(免去 Play Console 手动选 bundle → Save → Next)----
+    # 启用前的一次性配置:
+    # 1. Google Cloud Console → IAM → 服务账号 → 新建 → 创建 JSON 密钥;
+    # 2. Play Console → 用户和权限 → 邀请该服务账号邮箱,授予本 App 的「发布到测试轨道」权限;
+    # 3. Codemagic → production 环境变量组新增 GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+    #    (值 = JSON 文件全文,勾选 Secure);
+    # 4. 取消下面注释。此后每次构建自动上传 AAB 并直接发布到 internal 内测轨道。
+    # publishing:
+    #   google_play:
+    #     credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+    #     track: internal
+    #     submit_as_draft: false
 
   # iOS 工作流:待 E3(Apple Developer 账号 + 证书/描述文件)后启用
   # ios-release:
