@@ -6,6 +6,7 @@ import 'package:pure_thoughts/core/theme/app_theme.dart';
 import 'package:pure_thoughts/features/auth/auth_providers.dart';
 import 'package:pure_thoughts/features/auth/auth_screen.dart';
 import 'package:pure_thoughts/features/events/calendar_screen.dart';
+import 'package:pure_thoughts/features/moderation/admin_notify_screen.dart';
 import 'package:pure_thoughts/features/events/event_agenda_editor.dart';
 import 'package:pure_thoughts/features/events/event_detail_models.dart';
 import 'package:pure_thoughts/features/events/event_detail_screen.dart';
@@ -179,6 +180,40 @@ void main() {
           eventsProvider.overrideWith((ref) async => []),
           eventOverridesProvider.overrideWith((ref) async => []),
           eventTypesProvider.overrideWith((ref) async => []),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 管理员發布通知:表单 + 排程/已发送列表,大字号不溢出(P2.11)
+    testWidgets('發布通知(管理員) · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      await pumpScreen(
+        tester,
+        const AdminNotifyScreen(),
+        locale,
+        overrides: [
+          adminGeneralNotificationsProvider.overrideWith((ref) async => [
+                {
+                  'id': 'n1',
+                  'title': '週六共修調整為線上進行,請各位同修留意時間安排',
+                  'body': '因場地整修,本週共修改為 Webex 線上進行。',
+                  'scheduled_at': '2099-01-01T00:00:00Z',
+                  'sent_at': null,
+                  'created_at': '2026-07-18T00:00:00Z',
+                },
+                {
+                  'id': 'n2',
+                  'title': '已發送的公告',
+                  'body': null,
+                  'scheduled_at': null,
+                  'sent_at': '2026-07-18T00:01:00Z',
+                  'created_at': '2026-07-18T00:00:00Z',
+                },
+              ]),
         ],
       );
       expect(tester.takeException(), isNull);

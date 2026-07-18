@@ -14,6 +14,8 @@ final myNotificationsProvider =
       .from('notifications')
       .select(
           'id, scope, target_id, title, body, type, payload, created_at, notification_reads(read_at)')
+      // 定时通知到点前不出现在通知中心(PRD v0.5.16;推送侧由 push-dispatch 同口径把关)
+      .or('scheduled_at.is.null,scheduled_at.lte.${DateTime.now().toUtc().toIso8601String()}')
       .order('created_at', ascending: false)
       .limit(50);
 });

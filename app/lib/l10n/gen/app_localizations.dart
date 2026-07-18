@@ -2030,6 +2030,102 @@ abstract class AppLocalizations {
   /// **'您的時間'**
   String get yourLocalTime;
 
+  /// No description provided for @sectionAdmin.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'管理'**
+  String get sectionAdmin;
+
+  /// No description provided for @publishNotify.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'發布通知'**
+  String get publishNotify;
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'標題'**
+  String get titleLabel;
+
+  /// No description provided for @contentLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'內容(選填)'**
+  String get contentLabel;
+
+  /// No description provided for @scheduleSend.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'定時發送'**
+  String get scheduleSend;
+
+  /// No description provided for @sendTimeLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'發送時間(您的時間)'**
+  String get sendTimeLabel;
+
+  /// No description provided for @confirmPublishTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'確認發布'**
+  String get confirmPublishTitle;
+
+  /// No description provided for @confirmPublishAll.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'將發送給全體用戶'**
+  String get confirmPublishAll;
+
+  /// No description provided for @sendNow.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'立即發送'**
+  String get sendNow;
+
+  /// No description provided for @publishedOk.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已發布'**
+  String get publishedOk;
+
+  /// No description provided for @scheduledOk.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已排程'**
+  String get scheduledOk;
+
+  /// No description provided for @pendingScheduled.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已排程(未發送)'**
+  String get pendingScheduled;
+
+  /// No description provided for @sentRecentTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'近期已發送'**
+  String get sentRecentTitle;
+
+  /// No description provided for @cancelSchedule.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'取消排程'**
+  String get cancelSchedule;
+
+  /// No description provided for @recallAction.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'撤回'**
+  String get recallAction;
+
+  /// No description provided for @recallWarn.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'撤回後所有用戶的通知中心將不再顯示此通知;已彈出的手機推送無法收回。確定?'**
+  String get recallWarn;
+
   /// No description provided for @tzMore.
   ///
   /// In zh_Hant, this message translates to:
