@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/env.dart';
+import 'core/monday_material_localizations.dart';
 import 'core/prefs.dart';
 import 'core/settings.dart';
 import 'core/theme/app_theme.dart';
@@ -59,7 +60,11 @@ class PureThoughtsApp extends ConsumerWidget {
       routerConfig: ref.watch(routerProvider),
       locale: locale,
       supportedLocales: const [LocaleController.zhHant, LocaleController.zhHans],
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      // Monday 委托放最前:系统日期选择器周一开头(与主日历一致)
+      localizationsDelegates: const [
+        MondayFirstMaterialLocalizationsDelegate(),
+        ...AppLocalizations.localizationsDelegates,
+      ],
       // 宣纸 + 古铜金双主题(PRD v0.5.4 §11)
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
