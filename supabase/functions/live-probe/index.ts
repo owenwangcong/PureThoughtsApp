@@ -41,15 +41,17 @@ async function innertube(
 }
 
 /// /live 链接 → 当前直播/预告的 videoId。
-/// 返回 {videoId}(可为 null = 频道明确没有进行中/预告的直播);接口异常返回 null(未知)。
-async function resolveLiveVideoId(): Promise<{ videoId: string | null } | null> {
+/// {videoId}(null = 频道明确没有进行中/预告的直播);{error} = 接口异常(状态未知)。
+async function resolveLiveVideoId(): Promise<
+  { videoId: string | null } | { error: string }
+> {
   try {
     const j = await innertube("navigation/resolve_url", {
       url: CHANNEL_LIVE_HANDLE_URL,
     });
     return { videoId: j?.endpoint?.watchEndpoint?.videoId ?? null };
-  } catch (_) {
-    return null;
+  } catch (e) {
+    return { error: String((e as Error).message) };
   }
 }
 
@@ -58,22 +60,32 @@ async function resolveLiveVideoId(): Promise<{ videoId: string | null } | null> 
 /// 有效性校验:响应必须回显同一 videoId(降级/错误响应会缺 videoDetails)。
 async function innertubeIsLive(
   videoId: string,
-): Promise<{ live: boolean; title: string | null; client: string } | null> {
+): Promise<
+  | { live: boolean; title: string | null; client: string }
+  | { errors: string[] }
+> {
+  const errors: string[] = [];
   for (const client of PLAYER_CLIENTS) {
     try {
       const j = await innertube("player", { videoId }, client);
       const vd = j?.videoDetails ?? {};
-      if (vd.videoId !== videoId) continue; // 无效响应,换下一个客户端
+      if (vd.videoId !== videoId) {
+        // 降级/错误响应(缺 videoDetails),换下一个客户端
+        errors.push(
+          `${client.clientName}:no_data:${j?.playabilityStatus?.status ?? "?"}`,
+        );
+        continue;
+      }
       return {
         live: vd.isLive === true && vd.isUpcoming !== true,
         title: (vd.title as string | undefined) ?? null,
         client: String(client.clientName),
       };
-    } catch (_) {
-      continue;
+    } catch (e) {
+      errors.push(`${client.clientName}:${(e as Error).message}`);
     }
   }
-  return null;
+  return { errors };
 }
 
 Deno.serve(async (req) => {
@@ -98,23 +110,25 @@ Deno.serve(async (req) => {
 
   // ---- 主通道:innertube 双步(resolve /live → player 确认) ----
   const resolved = await resolveLiveVideoId();
-  if (resolved !== null) {
-    if (resolved.videoId === null) {
-      verdict = false; // 频道明确没有进行中/预告的直播
-      diag = { via: "innertube", resolved: null };
+  if ("error" in resolved) {
+    diag = { resolve_error: resolved.error };
+  } else if (resolved.videoId === null) {
+    verdict = false; // 频道明确没有进行中/预告的直播
+    diag = { via: "innertube", resolved: null };
+  } else {
+    const it = await innertubeIsLive(resolved.videoId);
+    if ("client" in it) {
+      verdict = it.live; // 预告(isUpcoming)判 false,不误报
+      videoId = resolved.videoId;
+      title = it.title;
+      diag = {
+        via: "innertube",
+        resolved: resolved.videoId,
+        player_live: it.live,
+        player_client: it.client,
+      };
     } else {
-      const it = await innertubeIsLive(resolved.videoId);
-      if (it !== null) {
-        verdict = it.live; // 预告(isUpcoming)判 false,不误报
-        videoId = resolved.videoId;
-        title = it.title;
-        diag = {
-          via: "innertube",
-          resolved: resolved.videoId,
-          player_live: it.live,
-          player_client: it.client,
-        };
-      }
+      diag = { resolved: resolved.videoId, player_errors: it.errors };
     }
   }
 
