@@ -20,6 +20,7 @@ import 'features/live/video_player_screen.dart';
 import 'features/live/web_view_screen.dart';
 import 'features/logs/group_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
+import 'features/moderation/admin_notify_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
 import 'features/notifications/notifications_screen.dart';
 import 'features/qa/qa_detail_screen.dart';
@@ -135,6 +136,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/admin/reports',
           builder: (context, state) => const AdminReportsScreen()),
+      GoRoute(
+          path: '/admin/notify',
+          builder: (context, state) => const AdminNotifyScreen()),
     ],
   );
 });

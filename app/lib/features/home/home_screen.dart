@@ -211,6 +211,33 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
+
+          // ---- 管理:仅 App 管理员可见(PRD v0.5.16 §5.3) ----
+          if (ref.watch(myProfileProvider).value?['is_app_admin'] == true) ...[
+            SectionHeader(l10n.sectionAdmin),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _BigTile(
+                      icon: Icons.campaign_outlined,
+                      label: l10n.publishNotify,
+                      onTap: () => context.push('/admin/notify'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _BigTile(
+                      icon: Icons.flag_outlined,
+                      label: l10n.adminReports,
+                      onTap: () => context.push('/admin/reports'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

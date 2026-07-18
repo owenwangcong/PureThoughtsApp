@@ -990,6 +990,54 @@ class AppLocalizationsZh extends AppLocalizations {
   String get yourLocalTime => '您的時間';
 
   @override
+  String get sectionAdmin => '管理';
+
+  @override
+  String get publishNotify => '發布通知';
+
+  @override
+  String get titleLabel => '標題';
+
+  @override
+  String get contentLabel => '內容(選填)';
+
+  @override
+  String get scheduleSend => '定時發送';
+
+  @override
+  String get sendTimeLabel => '發送時間(您的時間)';
+
+  @override
+  String get confirmPublishTitle => '確認發布';
+
+  @override
+  String get confirmPublishAll => '將發送給全體用戶';
+
+  @override
+  String get sendNow => '立即發送';
+
+  @override
+  String get publishedOk => '已發布';
+
+  @override
+  String get scheduledOk => '已排程';
+
+  @override
+  String get pendingScheduled => '已排程(未發送)';
+
+  @override
+  String get sentRecentTitle => '近期已發送';
+
+  @override
+  String get cancelSchedule => '取消排程';
+
+  @override
+  String get recallAction => '撤回';
+
+  @override
+  String get recallWarn => '撤回後所有用戶的通知中心將不再顯示此通知;已彈出的手機推送無法收回。確定?';
+
+  @override
   String get tzMore => '其他時區…';
 }
 
@@ -1979,6 +2027,54 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get yourLocalTime => '您的时间';
 
   @override
+  String get sectionAdmin => '管理';
+
+  @override
+  String get publishNotify => '发布通知';
+
+  @override
+  String get titleLabel => '标题';
+
+  @override
+  String get contentLabel => '内容(选填)';
+
+  @override
+  String get scheduleSend => '定时发送';
+
+  @override
+  String get sendTimeLabel => '发送时间(您的时间)';
+
+  @override
+  String get confirmPublishTitle => '确认发布';
+
+  @override
+  String get confirmPublishAll => '将发送给全体用户';
+
+  @override
+  String get sendNow => '立即发送';
+
+  @override
+  String get publishedOk => '已发布';
+
+  @override
+  String get scheduledOk => '已排程';
+
+  @override
+  String get pendingScheduled => '已排程(未发送)';
+
+  @override
+  String get sentRecentTitle => '近期已发送';
+
+  @override
+  String get cancelSchedule => '取消排程';
+
+  @override
+  String get recallAction => '撤回';
+
+  @override
+  String get recallWarn => '撤回后所有用户的通知中心将不再显示此通知;已弹出的手机推送无法收回。确定?';
+
+  @override
   String get tzMore => '其他时区…';
 }
 
@@ -2966,6 +3062,54 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get yourLocalTime => '您的時間';
+
+  @override
+  String get sectionAdmin => '管理';
+
+  @override
+  String get publishNotify => '發布通知';
+
+  @override
+  String get titleLabel => '標題';
+
+  @override
+  String get contentLabel => '內容(選填)';
+
+  @override
+  String get scheduleSend => '定時發送';
+
+  @override
+  String get sendTimeLabel => '發送時間(您的時間)';
+
+  @override
+  String get confirmPublishTitle => '確認發布';
+
+  @override
+  String get confirmPublishAll => '將發送給全體用戶';
+
+  @override
+  String get sendNow => '立即發送';
+
+  @override
+  String get publishedOk => '已發布';
+
+  @override
+  String get scheduledOk => '已排程';
+
+  @override
+  String get pendingScheduled => '已排程(未發送)';
+
+  @override
+  String get sentRecentTitle => '近期已發送';
+
+  @override
+  String get cancelSchedule => '取消排程';
+
+  @override
+  String get recallAction => '撤回';
+
+  @override
+  String get recallWarn => '撤回後所有用戶的通知中心將不再顯示此通知;已彈出的手機推送無法收回。確定?';
 
   @override
   String get tzMore => '其他時區…';

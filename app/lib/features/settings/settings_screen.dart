@@ -256,13 +256,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/privacy'),
           ),
+          // 檢舉處理入口已迁至首页「管理」分组(PRD v0.5.16);設置頁只留设置类项
           if (profile.value?['is_app_admin'] == true) ...[
-            ListTile(
-              leading: const Icon(Icons.flag_outlined),
-              title: Text(l10n.adminReports),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/admin/reports'),
-            ),
             // 管理员:新建活动的默认时区(app_settings,PRD v0.5.15 §5)
             ListTile(
               leading: const Icon(Icons.public),
