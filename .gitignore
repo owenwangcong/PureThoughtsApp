@@ -46,3 +46,4 @@ supabase/.branches/
 
 # 推送等密钥材料(绝不入库)
 docs/secretFiles/
+supabase/functions/.env

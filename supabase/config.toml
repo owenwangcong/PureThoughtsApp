@@ -412,3 +412,8 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# push-dispatch 由 DB 触发器/pg_cron 经 pg_net 调用,无用户 JWT;
+# 以 DISPATCH_SECRET 共享密钥自校验(见函数与 migration 0014)
+[functions.push-dispatch]
+verify_jwt = false

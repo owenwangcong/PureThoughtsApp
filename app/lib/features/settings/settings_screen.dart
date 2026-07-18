@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/error_text.dart';
 import '../../core/env.dart';
 import '../../core/prefs.dart';
+import '../../core/push_service.dart';
 import '../../core/settings.dart';
 import '../../core/timezones.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -294,6 +295,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const Divider(height: 32),
             FilledButton.tonal(
               onPressed: () async {
+                // 先删本设备推送 token,再登出(避免登出后仍收到原账号推送;P2.1)
+                await PushService.instance.unregister();
                 await Supabase.instance.client.auth.signOut();
                 if (context.mounted) context.go('/');
               },

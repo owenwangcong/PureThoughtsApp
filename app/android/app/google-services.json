@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "832279479289",
+    "project_id": "purethoughtsapp",
+    "storage_bucket": "purethoughtsapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:832279479289:android:bd1111fb4ca6e6f6ba3328",
+        "android_client_info": {
+          "package_name": "com.aeonlectron.purethoughts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB0YAv60FL8MmvzqJfANVWS9yjPkXf6FA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
