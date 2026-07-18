@@ -17,15 +17,24 @@ const CHANNEL_LIVE_URL =
 // YouTube 网页端公开的 innertube key(内嵌于所有 youtube.com 页面,非私密)
 const INNERTUBE_BASE = "https://www.youtube.com/youtubei/v1";
 const INNERTUBE_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
-const INNERTUBE_CONTEXT = {
-  client: { clientName: "WEB", clientVersion: "2.20250101.00.00" },
-};
+const WEB_CLIENT = { clientName: "WEB", clientVersion: "2.20250101.00.00" };
+// player 多客户端级联:EC2 上 WEB 客户端连 player 都被降级(响应无 videoDetails,
+// 真实直播实测),移动端客户端通常不受数据中心 IP 限制(yt-dlp 同款做法)
+const PLAYER_CLIENTS: Record<string, unknown>[] = [
+  WEB_CLIENT,
+  { clientName: "ANDROID", clientVersion: "20.10.38", androidSdkVersion: 30 },
+  { clientName: "IOS", clientVersion: "20.10.4", deviceModel: "iPhone16,2" },
+];
 
-async function innertube(path: string, body: Record<string, unknown>) {
+async function innertube(
+  path: string,
+  body: Record<string, unknown>,
+  client: Record<string, unknown> = WEB_CLIENT,
+) {
   const res = await fetch(`${INNERTUBE_BASE}/${path}?key=${INNERTUBE_KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ context: INNERTUBE_CONTEXT, ...body }),
+    body: JSON.stringify({ context: { client }, ...body }),
   });
   if (!res.ok) throw new Error(`innertube ${path} ${res.status}`);
   return await res.json();
@@ -44,20 +53,27 @@ async function resolveLiveVideoId(): Promise<{ videoId: string | null } | null> 
   }
 }
 
-/// innertube 确认某视频是否正在直播:true/false;接口异常返回 null(状态未知)
+/// innertube 确认某视频是否正在直播(多客户端级联):true/false;
+/// 全部客户端都拿不到有效数据时返回 null(状态未知)。
+/// 有效性校验:响应必须回显同一 videoId(降级/错误响应会缺 videoDetails)。
 async function innertubeIsLive(
   videoId: string,
-): Promise<{ live: boolean; title: string | null } | null> {
-  try {
-    const j = await innertube("player", { videoId });
-    const vd = j?.videoDetails ?? {};
-    return {
-      live: vd.isLive === true && vd.isUpcoming !== true,
-      title: (vd.title as string | undefined) ?? null,
-    };
-  } catch (_) {
-    return null;
+): Promise<{ live: boolean; title: string | null; client: string } | null> {
+  for (const client of PLAYER_CLIENTS) {
+    try {
+      const j = await innertube("player", { videoId }, client);
+      const vd = j?.videoDetails ?? {};
+      if (vd.videoId !== videoId) continue; // 无效响应,换下一个客户端
+      return {
+        live: vd.isLive === true && vd.isUpcoming !== true,
+        title: (vd.title as string | undefined) ?? null,
+        client: String(client.clientName),
+      };
+    } catch (_) {
+      continue;
+    }
   }
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -92,7 +108,12 @@ Deno.serve(async (req) => {
         verdict = it.live; // 预告(isUpcoming)判 false,不误报
         videoId = resolved.videoId;
         title = it.title;
-        diag = { via: "innertube", resolved: resolved.videoId, player_live: it.live };
+        diag = {
+          via: "innertube",
+          resolved: resolved.videoId,
+          player_live: it.live,
+          player_client: it.client,
+        };
       }
     }
   }
