@@ -345,3 +345,47 @@ sudo docker exec supabase-db psql -U postgres -c \
 ```
 
 **升级纪律**:升级前确认当天备份存在;Supabase 镜像大版本升级先读官方 self-host 变更说明。
+
+## 11. 推送上生产(P2.1-4,一次性)
+
+前置:migration `20260717000014_push_dispatch.sql` 已推生产(重跑一键脚本或手动+记账,见 §5/§10);
+Edge Functions 目录已随代码同步到服务器(含 `push-dispatch`)。
+
+**① 函数密钥**(加进 edge-runtime 容器的环境,即 `~/purethoughts/.env` 追加;
+p8/服务账号 JSON 均为**单行转义**格式,可直接从开发机 `supabase/functions/.env` 拷贝对应行):
+
+```
+APNS_KEY_ID=9MQL47W54J
+APPLE_TEAM_ID=3AL8X4TB9M
+APNS_TOPIC=com.aeonlectron.purethoughts
+APNS_KEY_P8="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FCM_SERVICE_ACCOUNT="{...service account json 单行...}"
+DISPATCH_SECRET=<随机长字符串,自行生成>
+```
+
+改完重建函数容器:`sudo docker compose up -d functions`(服务名以 compose 文件为准)。
+
+**② 打开触发链路**(Studio SQL Editor 或 psql):
+
+```sql
+update app_settings set value = 'https://api.pure-thoughts.com/functions/v1/push-dispatch'
+ where key = 'push_dispatch_url';
+update app_settings set value = '<与 DISPATCH_SECRET 相同>' where key = 'push_dispatch_key';
+```
+
+> 注意:自托管 edge-runtime 默认校验 JWT;`push-dispatch` 需免 JWT(由 DISPATCH_SECRET 自校验)。
+> 官方 compose 用 `FUNCTIONS_VERIFY_JWT=false` 全局关闭,或在 kong 路由为该函数放行——
+> 部署时实测,若 401 则调整此项。
+
+**③ 验证**:App 登录后 `select count(*) from push_tokens;` 应 ≥1;
+插一条测试通知后手表通知应在数秒内弹出:
+
+```sql
+insert into notifications (scope, type, title, body, channels)
+values ('all', 'general', '推送测试', '看到即链路畅通', '{inapp}');
+-- 触发器自动外呼;也可手动:select invoke_push_dispatch();
+-- 结果核对:select sent_at from notifications order by created_at desc limit 1;  -- 应非空
+```
+
+**④ 失败排查**:`select * from net._http_response order by id desc limit 3;`(pg_net 外呼结果)
++ 函数容器日志 `sudo docker logs --tail 50 supabase-edge-functions`。

@@ -32,8 +32,8 @@
 |---|---|---|---|:---:|
 | E1 | 境外服务器 | 自托管 Supabase | P0.1, P0.2 | 🔄 2026-07-11:共置方案 A **实测否决**(旧服务器 Ubuntu 16.04 EOL,老内核跑不动 Supabase 镜像)→ 方案 B **新 EC2 已开机**(Ubuntu 24.04,ap-southeast-1 新加坡);余:DNS 切到新机 + 跑一键脚本模式 1(卡 E5 SMTP 凭据);境外红线 ✅ |
 | E2 | 域名 | TLS / 自有 API 地址 | P0.2 | ✅ 2026-07-10:`pure-thoughts.com`(现有,含 WordPress 主站/Discuz/FastAPI);API 用子域 `api.pure-thoughts.com`;2026-07-11:api 证书用 certbot(webroot 方式,兼容 Bitnami Apache,自动续期) |
-| E3 | Apple Developer 账号(个人或组织,99 USD/年) | APNs、TestFlight(Sign in with Apple 已随 v0.5.9 移出 MVP) | P2.1, P1.10 | ⬜ |
-| E4 | Google Cloud / Firebase 项目 | FCM(Google OAuth 已随 v0.5.9 移出 MVP) | P2.1 | ⬜ |
+| E3 | Apple Developer 账号(个人或组织,99 USD/年) | APNs、TestFlight(Sign in with Apple 已随 v0.5.9 移出 MVP) | P2.1, P1.10 | ✅ 2026-07-17:账号就位(TestFlight 已在用,Team ID 3AL8X4TB9M);App ID 已启用 Push;APNs Auth Key(.p8,Key ID 9MQL47W54J)已交付(docs/secretFiles/ios,gitignored) |
+| E4 | Google Cloud / Firebase 项目 | FCM(Google OAuth 已随 v0.5.9 移出 MVP) | P2.1 | ✅ 2026-07-17:Firebase 项目 purethoughtsapp;google-services.json + FCM v1 服务账号 JSON 已交付(docs/secretFiles/anroid,gitignored) |
 | E5 | 发信服务账号(Resend / SES) | 重置密码邮件、邮件兜底(v0.5.9 起注册不依赖邮件) | P2.2 | ✅ 2026-07-11:Resend 已配通(smtp.resend.com:587,域名已验证) |
 | E6 | 大陆真实网络的测试协助(自己或成员) | 机房实测、可达性验收 | P0.1, P2.7, P3.3 | ⬜ |
 | E13 | Codemagic 控制台配置:上传 upload keystore(引用名 purethoughts_upload)+ production 环境变量组(SUPABASE_URL/ANON_KEY 待 E1) | CI 构建与发布(codemagic.yaml,2026-07-08 定案:不在本机做 release 构建) | P1.10 分发 | ⬜ |
@@ -96,7 +96,13 @@
 
 **目标**:三层通知可达性(iOS 全球 / 海外 Android / 大陆 Android 兜底)+ 活动日历 + 发愿 + 离线工具。
 
-- [ ] **P2.1** 推送基础设施(L)— iOS **原生 APNs 注册**(不经 FCM);FCM 仅海外 Android;push_tokens 管理 + `fcm_failed` 标记;`push-dispatch` Edge Function(APNs JWT 直连 + FCM);失效 token 清理;**免打扰时段**(默认 22:00–07:00 顺延,实时类不受限)。(PRD §5.1)
+- [ ] **P2.1** 🔄 推送基础设施(L,2026-07-17 开工,E3/E4 已到位)— iOS **原生 APNs 注册**(不经 FCM);FCM 仅海外 Android;push_tokens 管理 + `fcm_failed` 标记;`push-dispatch` Edge Function(APNs JWT 直连 + FCM v1);失效 token 清理。(PRD §5.1)子任务:
+  - [x] **P2.1-1** iOS 客户端 ✅ 代码完成 2026-07-17 — Runner.entitlements(aps-environment=production)+ pbxproj 三配置挂 CODE_SIGN_ENTITLEMENTS + AppDelegate 原生 APNs 注册(MethodChannel `purethoughts/push`)→ PushService 上报 push_tokens(platform=apns)。⏳ 真机验证需 TestFlight 构建(Windows 无法本地跑 iOS)
+  - [x] **P2.1-2** Android 客户端 ✅ 2026-07-17 **真机验证通过** — firebase_messaging + google-services.json(公开配置,入库)+ Android 13 通知权限;登录后 token 自动上报;登出 unregister 删本设备 token。真机:登录 → push_tokens 出现 fcm 行 → 后台收到系统通知(见下)。注:`fcm_failed` 标记依赖"有 token 的行",大陆机拿不到 token 时静默降级(通知中心+邮件兜底口径不变),标记机制随 P2.2 邮件兜底再定
+  - [x] **P2.1-3** 服务端 ✅ 2026-07-17 本地栈端到端验证 — `push-dispatch` Edge Function(APNs ES256 JWT + FCM v1 OAuth;BadDeviceToken 双环境试探;410/UNREGISTERED 清 token;按用户 locale 简繁渲染;sent_at 抢占幂等)+ migration 0014(notifications insert 语句级触发器 + pg_cron 每分钟兜底,经 pg_net;url/key 存 app_settings,本地默认空不外呼)+ pgTAP 5 项。**密钥以 base64 存环境变量**(dotenv/compose 对多行值的转义各异,曾实测踩坑)。真机:插通知 → 手动调函数 → `{ok:1}` → 平板通知栏弹「推送測試」
+  - [ ] **P2.1-4** 生产部署 ⏳ — 操作步骤已写入 [`infra/deploy-aws-ec2.md`](infra/deploy-aws-ec2.md) §11(函数密钥上 .env + app_settings 两键 + 验证/排查);iOS 待新 TestFlight 构建后真机验证 APNs;Android 海外/大陆矩阵随 P2.7
+  - **免打扰时段 + 分类订阅上云**推迟为阶段 C(随 P2.7 测试一并做),先保证可达性
+
 - [ ] **P2.2** 邮件兜底(M)— `email-fallback` Edge Function:region=cn 或 fcm_failed 用户,时效性通知附发邮件(E5)。
 - [x] **P2.3** 通知中心(M)— 首页铃铛红点(未读数)、通知列表(按类型渲染本地化文案:代报/公告/通用)、进入即标记已读;migration 0006 补 P1.4 遗留的「公告更新→群通知」触发器。验收 ✅ 2026-07-07:pgTAP 45/45(公告通知可见性 2 项),e2e 公告→通知→已读。**大陆 Android 的唯一通道,刚需**。
 - [x] **P2.4b** 日历增强(M,2026-07-09 用户需求,PRD v0.5.7)— **未來活動列表**(90 天内前 10 场);事件类型改动态表 `event_types`(migration 0008:靜坐/共修/講法/禪七/其它默认 + 图标键,管理员增删改,被引用类型只能停用);管理员**编辑/删除整个活动**(原有新增/取消单次保留);**任何活动变更 DB 触发器自动全员通知**(新增/更新/删除/单次取消/改期,通知中心分动作渲染、点击进日历);同日多活动共存显示(标记上限 4)。验收 ✅ 2026-07-09:pgTAP 49/49(变更通知 2 项)。

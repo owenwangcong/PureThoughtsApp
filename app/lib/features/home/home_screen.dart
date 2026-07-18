@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/almanac/almanac.dart';
 import '../../core/channels.dart';
 import '../../core/prefs.dart';
+import '../../core/push_service.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -38,6 +39,8 @@ class HomeScreen extends ConsumerWidget {
     final liveNow = ref.watch(hasLiveNowProvider).value ?? false;
     // 离线报数自动补传(每会话一次,P5.1)
     if (user != null) scheduleOfflineFlush(context, ref);
+    // 推送 token 注册(每会话一次,幂等;P2.1)
+    if (user != null) PushService.instance.register();
 
     return Scaffold(
       appBar: AppBar(
