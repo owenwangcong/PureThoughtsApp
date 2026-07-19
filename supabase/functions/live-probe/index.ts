@@ -35,9 +35,36 @@ async function innertube(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ context: { client }, ...body }),
+    signal: AbortSignal.timeout(8000), // 防黑洞挂起(EC2 实测出现过 40s+ 无响应)
   });
   if (!res.ok) throw new Error(`innertube ${path} ${res.status}`);
   return await res.json();
+}
+
+/// YouTube Data API v3(官方公开接口,不受数据中心 bot 检测影响;需 YOUTUBE_API_KEY)。
+/// liveBroadcastContent:"live"=在播 / "upcoming"·"none"=未播;未配 key 或接口异常返回 null。
+/// 配额:videos.list(part=snippet)每次 1 单位,免费额度 1 万/天,5 分钟一探仅 288/天。
+async function dataApiIsLive(
+  videoId: string,
+): Promise<{ live: boolean; title: string | null } | null> {
+  const key = Deno.env.get("YOUTUBE_API_KEY");
+  if (!key) return null;
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${key}`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    if (!res.ok) return null;
+    const j = await res.json();
+    const item = j?.items?.[0];
+    if (!item) return { live: false, title: null }; // 视频不存在/已删 = 非在播
+    return {
+      live: item.snippet?.liveBroadcastContent === "live",
+      title: (item.snippet?.title as string | undefined) ?? null,
+    };
+  } catch (_) {
+    return null;
+  }
 }
 
 /// /live 链接 → 当前直播/预告的 videoId。
@@ -116,19 +143,28 @@ Deno.serve(async (req) => {
     verdict = false; // 频道明确没有进行中/预告的直播
     diag = { via: "innertube", resolved: null };
   } else {
-    const it = await innertubeIsLive(resolved.videoId);
-    if ("client" in it) {
-      verdict = it.live; // 预告(isUpcoming)判 false,不误报
+    // 判定优先级:Data API(官方,EC2 免疫 bot 检测)→ innertube player 级联
+    const da = await dataApiIsLive(resolved.videoId);
+    if (da !== null) {
+      verdict = da.live; // "upcoming"/"none" 判 false,预告不误报
       videoId = resolved.videoId;
-      title = it.title;
-      diag = {
-        via: "innertube",
-        resolved: resolved.videoId,
-        player_live: it.live,
-        player_client: it.client,
-      };
+      title = da.title;
+      diag = { via: "data_api", resolved: resolved.videoId, live: da.live };
     } else {
-      diag = { resolved: resolved.videoId, player_errors: it.errors };
+      const it = await innertubeIsLive(resolved.videoId);
+      if ("client" in it) {
+        verdict = it.live; // 预告(isUpcoming)判 false,不误报
+        videoId = resolved.videoId;
+        title = it.title;
+        diag = {
+          via: "innertube",
+          resolved: resolved.videoId,
+          player_live: it.live,
+          player_client: it.client,
+        };
+      } else {
+        diag = { resolved: resolved.videoId, player_errors: it.errors };
+      }
     }
   }
 
@@ -138,6 +174,7 @@ Deno.serve(async (req) => {
     try {
       const res = await fetch(CHANNEL_LIVE_URL, {
         redirect: "follow",
+        signal: AbortSignal.timeout(10000),
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
