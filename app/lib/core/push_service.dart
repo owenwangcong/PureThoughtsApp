@@ -61,9 +61,32 @@ class PushService {
     await Firebase.initializeApp(); // 配置来自 google-services.json(原生注入)
     final messaging = FirebaseMessaging.instance;
     messaging.onTokenRefresh.listen((t) => _saveToken(t, 'fcm'));
+    // 前台也弹横幅(FCM 前台默认不显示,用本地通知镜像;后台由系统显示,无重复)
+    FirebaseMessaging.onMessage.listen(_showForegroundNotification);
     // 大陆机(无 Google 服务)这里抛异常或返回 null → 上层 catch 静默降级
     final token = await messaging.getToken();
     if (token != null) await _saveToken(token, 'fcm');
+  }
+
+  Future<void> _showForegroundNotification(RemoteMessage message) async {
+    final n = message.notification;
+    if (n == null) return;
+    try {
+      await FlutterLocalNotificationsPlugin().show(
+        id: message.hashCode,
+        title: n.title,
+        body: n.body,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'push', '通知', // 频道名会出现在系统设置里,简繁同形
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('[push] foreground show failed: $e');
+    }
   }
 
   Future<void> _saveToken(String token, String platform) async {

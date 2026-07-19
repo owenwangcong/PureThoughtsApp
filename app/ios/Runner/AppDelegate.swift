@@ -49,4 +49,24 @@ import UIKit
     NSLog("[push] APNs register failed: \(error.localizedDescription)")
     super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
   }
+
+  /// 前台也展示远程推送横幅(2026-07-19 用户需求:开着 App 也要看到推送)。
+  /// 仅拦截 APNs 远程通知;本地通知(正念提醒等)仍走 FlutterAppDelegate → 插件的原路径。
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler:
+      @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    if notification.request.trigger is UNPushNotificationTrigger {
+      if #available(iOS 14.0, *) {
+        completionHandler([.banner, .list, .sound])
+      } else {
+        completionHandler([.alert, .sound])
+      }
+    } else {
+      super.userNotificationCenter(
+        center, willPresent: notification, withCompletionHandler: completionHandler)
+    }
+  }
 }
