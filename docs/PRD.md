@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.16(管理员发布通知 + 首页管理区,详见 §5.3 与 [`design/admin-notifications.md`](design/admin-notifications.md)) · 来源:`initial.md` + 十二轮需求澄清
+> 版本:v0.5.17(管理后台 Web,详见 §15) · 来源:`initial.md` + 十二轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -340,6 +340,7 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `push-dispatch` | DB webhook(notifications insert)/ cron | 查目标用户 token,APNs(JWT 直连)+ FCM 发送;失败 token 标记清理 |
 | `email-fallback` | 由 push-dispatch 级联 | 对 region=cn 或 fcm_failed 的用户发邮件(Resend/SES) |
 | `delete-account` | 客户端调用(需登录) | §10.1 删除 + 匿名化流程 |
+| `admin-ops` | 管理后台调用(需登录,函数内验 `is_app_admin()`) | §15 需 `service_role` 的特权操作:重置任意用户密码、代删账号、设/撤管理员;CORS 仅放行 admin 子域 |
 
 > ~~`qa-proxy`~~ **已取消**(v0.5.11):上游问答 API 完全公开、无认证、CORS 全开,「隐藏上游地址 / 统一鉴权」两个立项理由均不成立;客户端直连(§6)。
 
@@ -370,6 +371,7 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 - **v0.4** — 念诵导引音视频(下载管理、后台播放、播放模式)。
 - **v0.5** — 打磨:离线报数暂存、Realtime 实时统计。
 - **后续** — 讲法问答检索(待通用 API JSON);群数据导出 CSV(本轮未采纳,留作备选)。
+- **管理后台(Web,v0.5.17)** — `admin.pure-thoughts.com` 静态站,与 App 并行推进,分两期(§15,任务见 PLAN P7)。
 
 ---
 
@@ -382,3 +384,38 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 5. **自托管运维责任**(v0.5 新增):备份可恢复性、安全更新、监控告警均自担;上线前需完成一次完整的**备份恢复演练**(§12.5)。
 
 **已定案**(四轮澄清):注册用户可自建群、建群者即群主 · 入群申请需附一条说明 · 补报统一计入当天 · 代报允许自由名字 · 音频从 HTTPS endpoint 下载 · 计数器仅用屏幕按钮 · 推送 = APNs(iOS)+ FCM(海外 Android)+ App 内通知中心兜底,**不接国内厂商推送** · 报数软删除可改可删 · 代报通知被代报人且其可删 · 统计按 `local_date` 单一口径 · 发愿默认跨群统计 · 账号删除 + 举报拉黑纳入 MVP · **删号匿名化保留群总量** · **自定义功课项群成员均可加** · **Supabase 自托管** · **采纳:快捷报数 / 群公告 / 发愿随喜回向 / 连续用功天数(仅自己可见)/ 计数器整串提示 / 免打扰时段;群数据导出暂不做** · **代报自由名字自动记忆成本群共享名单,供复用** · **账号体系 = 用户名+密码,注册免邮箱验证,邮箱选填仅作找回,Google/Apple 登录移出 MVP(v0.5.9,面向年长/无邮箱用户)**。
+
+---
+
+## 15. 管理后台(Web,v0.5.17 新增)
+
+面向 App 管理员(`profiles.is_app_admin`)的桌面 Web 管理台。目标:覆盖手机端管理员的全部能力并桌面化增强,再补上手机端做不了的运维/内容/看板类功能;不影响 App 内已有管理入口。
+
+### 15.1 已定案(2026-07-20)
+
+- **技术栈**:Next.js(App Router,**静态导出 `output: 'export'`,无 Node 服务端**)+ React + shadcn/ui + Tailwind + supabase-js;仓库目录 **`admin/`**(与 `app/`、`supabase/` 并列,schema/RPC/类型生成强耦合,不分仓)。
+- **部署**:子域 **`admin.pure-thoughts.com`**,纯静态文件托管在现有服务器(Apache vhost + certbot,同 E2 模式)。
+- **安全模型**:管理员用自己的账号密码登录(复用 Supabase Auth,**不做 MFA**,用户定案);一切读写走 anon key + 登录 session,由现有 RLS / `is_app_admin()` / RPC 把关——与 App 同一套权限模型,后台不引入新特权面。需 `service_role` 的操作走新 Edge Function **`admin-ops`**(§12.4):函数内先验 `is_app_admin()`,处理浏览器 CORS 且仅放行 admin 子域(本地开发另放行 localhost)。
+- 非管理员账号登录后台:提示无权限并登出,不渲染任何数据。
+
+### 15.2 功能范围
+
+**一期(对齐手机端管理员,桌面化增强)**
+
+- 活动管理:events CRUD(RRULE 编辑 + 未来场次预览)、单次改期/取消(event_overrides)、议程与 PDF 附件(Storage `event-files`)、活动类型 event_types。
+- 通知发布:立即/定时发布、排程队列一览、撤回(`admin_publish_notification` / `admin_cancel_notification`)。
+- 举报处理台:reports 列表与处理流转、封禁/解封(`banned_at`)。
+- 佛历 `almanac_days` 与 `app_settings` 维护。
+
+**二期(后台独有)**
+
+- 用户管理:搜索、封禁/解封、**重置密码**(替代 deploy 文档 §10 的 psql 运维命令,走 `admin-ops`)、设/撤管理员、代删账号。
+- 群总览:全部群列表(成员数/群总量)、纠纷处理(转让/解散)。
+- 数据看板:每日报数量与活跃趋势、推送投递健康(`push_tokens.fcm_failed` 率)、通知队列积压(`scheduled_at` 到点未 `sent_at`)。
+- 内容上架:media_items(P4 音频)、live_streams 频道、practice_types 主清单、scriptures。
+
+### 15.3 非目标
+
+- **不重造 Studio**:临时查数/改表仍走白名单内的 Studio;后台只做业务语义操作(带校验、二次确认、上下文)。
+- 不做 MFA;不做多角色分级(仅 `is_app_admin` 一档)。
+- 审计日志(`admin_audit_log`)为可选增强,单管理员阶段可缓;多管理员出现时再立项。

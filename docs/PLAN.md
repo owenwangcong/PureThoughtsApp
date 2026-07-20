@@ -2,7 +2,7 @@
 
 > **本文件是执行计划与进度的唯一事实来源**;需求细节一律以 [`PRD.md`](PRD.md)(v0.5.1)为准,本文只负责"做什么、什么顺序、现在到哪了"。
 > **使用规则见 §8**:开工先看 §1;任务完成即勾选并更新总览;新任务先写进本文再动手。
-> 最后更新:2026-07-16
+> 最后更新:2026-07-20
 
 ---
 
@@ -17,12 +17,13 @@
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
 | **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | 🔄 进行中 | 0/3(P6.1 客户端已完成 2/3 子项;仅余 P6.1.1 后端 E14 简繁改造,不在本仓库) | — |
+| **P7** | 管理后台(Web,`admin/`,PRD §15) | ⬜ 未开始 | 0/5 | — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
 
 **已完成的前置工作**:需求定稿(PRD v0.5.1)✅ · 项目基础文件(CLAUDE.md / README / .gitignore / git init)✅
 
-**依赖关系**:P0 → P1 → P2 → P3 → P4 → P5(串行为主);P2.6 工具、P3、P4 彼此独立,人力允许可并行。任务量级 S/M/L 为**粗略相对量级**,不是时间承诺。
+**依赖关系**:P0 → P1 → P2 → P3 → P4 → P5(串行为主);P2.6 工具、P3、P4、P7 管理后台彼此独立,人力允许可并行(P7 开发全程对本地栈,仅 P7.5 部署依赖生产实例与 E16)。任务量级 S/M/L 为**粗略相对量级**,不是时间承诺。
 
 ---
 
@@ -44,6 +45,7 @@
 | E11 | 音频下载 HTTPS endpoint(内容方托管) | 念诵音频 | P4.1 | ⬜ |
 | E12 | 讲法问答通用 API 的 JSON 样例 | 问答检索 | P6.1 | ✅ 2026-07-15:`docs/FLUTTER_QA_SEARCH_API.md` 已提供并实测(903 条,接口活的);设计定稿 `docs/design/qa-search.md`,PRD v0.5.11 §6 |
 | E15 | 佛历精选节日清单的内容方审定(初版 24 条见 `docs/design/buddhist-calendar.md` §3.3;清单是生成器配置 `tools/almanac/festivals.cjs`,改后重新生成即可) | 佛教日曆(P2.9) | 无(**非阻塞**,默认清单先行) | ⬜ |
+| E16 | admin 子域 DNS 解析(`admin.pure-thoughts.com`)+ Apache vhost + certbot 证书(同 E2 模式) | 管理后台部署 | P7.5 | ⬜ |
 | E14 | **上游 FastAPI 简繁双字形改造**(内容方服务器,不在本仓库):OpenCC 入库生成 hans/hant 双份 + 简体归一检索列 `search_norm`;`/search` 与 `/tags` 加 `script=hans\|hant` 参数(响应字段名不变);存量 903 条一次性回填。规格见 `docs/design/qa-search.md` §4 | 问答检索(繁体用户搜索可用性) | P6.1.2 | ⬜ ⛔ **硬前置**——不做则 App 默认语言(繁体)用户搜索基本不可用(实测 `禅修`→6 条 / `禪修`→1 条,互不包含) |
 
 ---
@@ -131,7 +133,7 @@
 
 ---
 
-## 6. P3–P6 · 内容与打磨
+## 6. P3–P7 · 内容与打磨 + 管理后台
 
 ### P3 · 视频 + 经本(PRD Roadmap v0.3)
 
@@ -174,6 +176,18 @@
   - [x] **P6.1.3** 标签选择器 + 入口(S)— ✅ 2026-07-16:`/qa/tags` 可搜索多选(本地过滤 `/tags` 全量,会话内缓存,OR 提示);首页共修组重排为 (直播,往期問答)(經本,群)(日曆,—)+ 直播页「往期回看」上方入口;l10n 三份 ARB 新增 16 键(qa*);详情页接入 `layout_walkthrough_test` 大字号回归(简繁 × 2.0 不溢出)。验收 ✅:同上。
 - [ ] **P6.2** 群数据导出 CSV — v0.5.1 未采纳的备选,视群主反馈决定。
 - [ ] **P6.3** 大陆备用内容源评估 — PRD §14.2,视 P3.3 实测结果与内容方意愿。
+
+### P7 · 管理后台(Web,PRD §15,2026-07-20 立项)
+
+**已定案**:Next.js 静态导出(无 Node 服务端)+ React + shadcn/ui + supabase-js;目录 `admin/`;部署 `admin.pure-thoughts.com`(纯静态,Apache + certbot);登录复用 Supabase Auth(**无 MFA**),权限全走现有 RLS / `is_app_admin()`,特权操作走 Edge Function `admin-ops`。与 P3–P5 并行不冲突;开发全程对本地栈,仅 P7.5 依赖生产实例(P0.2)与 E16。
+
+- [ ] **P7.1** 脚手架 + 登录(M)— `admin/`:Next.js(App Router,`output: 'export'`)+ TS + Tailwind + shadcn/ui + supabase-js + TanStack Query;`supabase gen types typescript --local` 类型生成脚本(挂进 package.json);管理员账号密码登录、非管理员拒入并登出;环境变量本地栈 ⇄ 生产可切。验收:本地栈 `admin@test.local` 可登录,`member@test.local` 被拒;`next build` 产出纯静态目录且能本地静态伺服跑通。
+- [ ] **P7.2** 一期功能(L)— 活动管理(events CRUD + RRULE 编辑与未来场次预览、event_overrides 单次改期/取消、议程 + PDF 附件上传 Storage `event-files`)、活动类型 event_types、通知发布(立即/定时/撤回 + 排程队列一览)、举报处理台(reports 流转 + 封禁/解封)、佛历 almanac_days 与 app_settings 维护。验收:本地栈全流程可操作,App 端能看到后台建的活动/通知;举报处理与 App 端状态互通。
+- [ ] **P7.3** `admin-ops` Edge Function(M)— service_role 特权操作:重置任意用户密码(替代 deploy 文档 §10 psql 命令)、代删账号(复用 delete-account 匿名化逻辑)、设/撤管理员;函数内先验 `is_app_admin()`;CORS 仅放行 admin 子域 + localhost(开发)。验收:管理员调用成功、非管理员/匿名被拒(集成测试);重置后目标账号能用新密码登录。
+- [ ] **P7.4** 二期功能(L)— 用户管理(搜索/封禁/重置密码/设撤管理员/代删)、群总览(全部群 + 成员数 + 总量,转让/解散)、数据看板(每日报数量与活跃趋势、`push_tokens.fcm_failed` 率、通知队列积压)、内容上架(media_items / live_streams / practice_types / scriptures)。验收:看板数字与 SQL 抽查一致;media_items 上架后 App 回看列表可见。
+- [ ] **P7.5** 部署(S)— E16:DNS + Apache vhost + certbot;静态目录发布脚本(构建产物 rsync/scp 上服务器);生产冒烟。验收:HTTPS 可达,生产管理员登录并成功发一条测试通知,App 通知中心收到。
+
+**P7 DoD**:手机端管理员的全部操作后台均可完成且体验不劣于手机;§10 psql 重置密码命令退役;生产冒烟通过。
 
 ---
 
