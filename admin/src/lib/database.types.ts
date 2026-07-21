@@ -70,6 +70,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_secrets: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -1080,6 +1098,13 @@ export type Database = {
     }
     Functions: {
       admin_cancel_notification: { Args: { p_id: string }; Returns: undefined }
+      admin_list_logins: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          login_email: string
+          user_id: string
+        }[]
+      }
       admin_publish_notification: {
         Args: { p_body?: string; p_scheduled_at?: string; p_title: string }
         Returns: string

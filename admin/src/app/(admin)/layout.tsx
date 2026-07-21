@@ -10,10 +10,14 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/", label: "總覽" },
+  { href: "/dashboard", label: "數據看板" },
   { href: "/events", label: "活動管理" },
   { href: "/event-types", label: "活動類型" },
   { href: "/notifications", label: "通知發佈" },
   { href: "/reports", label: "舉報處理" },
+  { href: "/users", label: "用戶管理" },
+  { href: "/groups", label: "群組總覽" },
+  { href: "/content", label: "內容上架" },
   { href: "/almanac", label: "佛曆與設定" },
 ];
 

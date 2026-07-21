@@ -9,19 +9,18 @@ import {
 } from "@/components/ui/card";
 
 const LIVE = [
+  { href: "/dashboard", title: "數據看板", description: "報數趨勢、推送健康、通知積壓" },
   { href: "/events", title: "活動管理", description: "活動 CRUD、每週循環、單次取消/改期、議程與附件" },
   { href: "/event-types", title: "活動類型", description: "類型增改停用、圖示" },
   { href: "/notifications", title: "通知發佈", description: "立即/定時發佈、排程佇列、撤回" },
   { href: "/reports", title: "舉報處理", description: "舉報流轉、封禁/解封" },
+  { href: "/users", title: "用戶管理", description: "搜尋、重置密碼、封禁、設/撤管理員、代刪帳號" },
+  { href: "/groups", title: "群組總覽", description: "全部群、成員數與總量、轉讓/解散" },
+  { href: "/content", title: "內容上架", description: "音訊媒體、功課主清單、經本、直播場次" },
   { href: "/almanac", title: "佛曆與設定", description: "佛曆數據瀏覽、app_settings 維護" },
 ];
 
-const PENDING = [
-  { title: "用戶管理", description: "搜尋、重置密碼、設/撤管理員", phase: "P7.4" },
-  { title: "群組總覽", description: "全部群列表、轉讓/解散", phase: "P7.4" },
-  { title: "數據看板", description: "報數趨勢、推送健康、通知積壓", phase: "P7.4" },
-  { title: "內容上架", description: "音訊、直播頻道、功課主清單", phase: "P7.4" },
-];
+const PENDING: { title: string; description: string; phase: string }[] = [];
 
 export default function HomePage() {
   return (
