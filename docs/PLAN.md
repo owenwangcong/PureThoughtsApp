@@ -17,7 +17,7 @@
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
 | **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | 🔄 进行中 | 0/3(P6.1 客户端已完成 2/3 子项;仅余 P6.1.1 后端 E14 简繁改造,不在本仓库) | — |
-| **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 2/5(P7.1 ✅ P7.2 ✅ 2026-07-20) | — |
+| **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 3/5(P7.1-P7.3 ✅ 2026-07-20) | — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
 
@@ -183,7 +183,7 @@
 
 - [x] **P7.1** 脚手架 + 登录(M)— ✅ 2026-07-20:`admin/` Next.js 16(App Router,`output:'export'` + `trailingSlash`,Apache 免 rewrite)+ TS + Tailwind v4 + shadcn/ui + supabase-js + TanStack Query;`npm run gen:types` 类型生成;登录页(`src/lib/username.ts` 移植 App 端用户名→内部邮箱映射)、`AdminGuard`(未登录跳 /login、非管理员登出并提示);env 不设置默认本地栈,生产走 `.env.production.local`(README)。验收 ✅:静态产物 `npx serve out` 浏览器实测——匿名访问 `/` 弹回登录页、`member@test.local` 拒入提示「此帳號沒有管理員權限」、`admin@test.local` 登录进仪表盘、登出回登录页、控制台零报错;lint + build 全绿。要点:登录成功跳转前须 `removeQueries(["admin-guard"])`,否则守卫用登录前的 anon 缓存把人弹回登录页(实测踩坑)。
 - [x] **P7.2** 一期功能(L)— ✅ 2026-07-20:五个页面全部落地并对本地栈浏览器实测。**活动管理**(`/events` 列表含类型/当地时间/循环/下次场次/议程附件计数;`/events/edit?id=` 编辑器完整复刻 App 语义:墙钟×IANA 时区→UTC(`lib/tz.ts` 纯 Intl 实现,DST 二次校准)、`FREQ=WEEKLY` 每周展开(+7 日历日保墙钟)、override 仅写 `{cancelled:true}`/`{start_at:ISO}`(改期为后台增强,App 读取端已支持)、议程删旧插新 day 循环恒 1、附件 `<eventId>/<时间戳>.pdf` 上 `event-files`、删除先清 Storage 再删行);**活动类型**(增 sort_order=50/改/删 23503 引导停用,12 图示键与 `event_icons.dart` 对齐);**通知发布**(RPC 发布/撤回、排程/待投遞/已發佈三态、全部系统通知只读页);**举报处理**(open→resolved 流转 + 重开;**目标上下文联查**(用户/群/报数记录),封禁+**解封**(App 无)、log 举报可软删记录(`delete_practice_log`));**佛曆与設定**(almanac_days **只读浏览**——schema 无人可写、数据来自生成器,PRD §15.2 已勘误;app_settings 任意键编辑/新增)。验收 ✅:本地栈端到端实测(通知发→撤、活动建→取消 07-29→改期 08-05→议程→PDF 上传→删除活动含 Storage 清理,DB 逐项核对 patch/UTC 换算无误;举报两类目标处理);lint + build 全绿(8 路由静态)。
-- [ ] **P7.3** `admin-ops` Edge Function(M)— service_role 特权操作:重置任意用户密码(替代 deploy 文档 §10 psql 命令)、代删账号(复用 delete-account 匿名化逻辑)、设/撤管理员;函数内先验 `is_app_admin()`;CORS 仅放行 admin 子域 + localhost(开发)。验收:管理员调用成功、非管理员/匿名被拒(集成测试);重置后目标账号能用新密码登录。
+- [x] **P7.3** `admin-ops` Edge Function(M)— ✅ 2026-07-20:三动作 `reset_password`(后台强制 ≥8 位)/ `delete_user`(复用 delete-account 语义:活跃群群主 409、匿名化靠级联触发器;删自己 409 引导走 App 内流程)/ `set_admin`(撤自己 409 防自锁);调用者 JWT → `profiles.is_app_admin` 校验,anon 401 / 非管理员 403;CORS 白名单 = admin 子域 + localhost:3000/3001。验收 ✅:本地集成测试 16/16(鉴权矩阵、新密码可登录旧密码失效、短密码 400、set_admin 落库、删号后登录被拒);**生产已部署**(functions 目录同步 + edge-runtime 重启,无凭证 POST 401、预检 200)。注:函数自带 JWT 校验,不依赖网关 verify_jwt(生产全局关闭也安全)。
 - [ ] **P7.4** 二期功能(L)— 用户管理(搜索/封禁/重置密码/设撤管理员/代删)、群总览(全部群 + 成员数 + 总量,转让/解散)、数据看板(每日报数量与活跃趋势、`push_tokens.fcm_failed` 率、通知队列积压)、内容上架(media_items / live_streams / practice_types / scriptures)。验收:看板数字与 SQL 抽查一致;media_items 上架后 App 回看列表可见。
 - [ ] **P7.5** 部署(S)— 🔄 大部分完成(2026-07-20):E16 ✅(用户自配);发布脚本 ✅ `admin/scripts/deploy.ps1`(build → scp 至 /tmp → rsync --delete 原子替换,含"产物必须指向生产 URL"防呆;**密钥用 OpenSSH 格式 `D:\Projects\PureThoughts\purethoughts.pem`**,.ppk 的 PuTTY 工具在本机静默无输出不可用;pem 已 icacls 收紧);P7.2 产物已发布,线上 8 路由全 200。**教训:静态站无热更新,每次改版必须重跑 deploy.ps1,否则新路由 404(2026-07-20 实际踩到)**。余:生产冒烟验收——管理员在线上后台发一条测试通知,App 通知中心收到后勾选本项。
 
