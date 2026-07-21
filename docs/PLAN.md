@@ -17,7 +17,7 @@
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
 | **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | 🔄 进行中 | 0/3(P6.1 客户端已完成 2/3 子项;仅余 P6.1.1 后端 E14 简繁改造,不在本仓库) | — |
-| **P7** | 管理后台(Web,`admin/`,PRD §15) | ⬜ 未开始 | 0/5 | — |
+| **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 1/5(P7.1 ✅ 2026-07-20) | — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
 
@@ -181,7 +181,7 @@
 
 **已定案**:Next.js 静态导出(无 Node 服务端)+ React + shadcn/ui + supabase-js;目录 `admin/`;部署 `admin.pure-thoughts.com`(纯静态,Apache + certbot);登录复用 Supabase Auth(**无 MFA**),权限全走现有 RLS / `is_app_admin()`,特权操作走 Edge Function `admin-ops`。与 P3–P5 并行不冲突;开发全程对本地栈,仅 P7.5 依赖生产实例(P0.2)与 E16。
 
-- [ ] **P7.1** 脚手架 + 登录(M)— `admin/`:Next.js(App Router,`output: 'export'`)+ TS + Tailwind + shadcn/ui + supabase-js + TanStack Query;`supabase gen types typescript --local` 类型生成脚本(挂进 package.json);管理员账号密码登录、非管理员拒入并登出;环境变量本地栈 ⇄ 生产可切。验收:本地栈 `admin@test.local` 可登录,`member@test.local` 被拒;`next build` 产出纯静态目录且能本地静态伺服跑通。
+- [x] **P7.1** 脚手架 + 登录(M)— ✅ 2026-07-20:`admin/` Next.js 16(App Router,`output:'export'` + `trailingSlash`,Apache 免 rewrite)+ TS + Tailwind v4 + shadcn/ui + supabase-js + TanStack Query;`npm run gen:types` 类型生成;登录页(`src/lib/username.ts` 移植 App 端用户名→内部邮箱映射)、`AdminGuard`(未登录跳 /login、非管理员登出并提示);env 不设置默认本地栈,生产走 `.env.production.local`(README)。验收 ✅:静态产物 `npx serve out` 浏览器实测——匿名访问 `/` 弹回登录页、`member@test.local` 拒入提示「此帳號沒有管理員權限」、`admin@test.local` 登录进仪表盘、登出回登录页、控制台零报错;lint + build 全绿。要点:登录成功跳转前须 `removeQueries(["admin-guard"])`,否则守卫用登录前的 anon 缓存把人弹回登录页(实测踩坑)。
 - [ ] **P7.2** 一期功能(L)— 活动管理(events CRUD + RRULE 编辑与未来场次预览、event_overrides 单次改期/取消、议程 + PDF 附件上传 Storage `event-files`)、活动类型 event_types、通知发布(立即/定时/撤回 + 排程队列一览)、举报处理台(reports 流转 + 封禁/解封)、佛历 almanac_days 与 app_settings 维护。验收:本地栈全流程可操作,App 端能看到后台建的活动/通知;举报处理与 App 端状态互通。
 - [ ] **P7.3** `admin-ops` Edge Function(M)— service_role 特权操作:重置任意用户密码(替代 deploy 文档 §10 psql 命令)、代删账号(复用 delete-account 匿名化逻辑)、设/撤管理员;函数内先验 `is_app_admin()`;CORS 仅放行 admin 子域 + localhost(开发)。验收:管理员调用成功、非管理员/匿名被拒(集成测试);重置后目标账号能用新密码登录。
 - [ ] **P7.4** 二期功能(L)— 用户管理(搜索/封禁/重置密码/设撤管理员/代删)、群总览(全部群 + 成员数 + 总量,转让/解散)、数据看板(每日报数量与活跃趋势、`push_tokens.fcm_failed` 率、通知队列积压)、内容上架(media_items / live_streams / practice_types / scriptures)。验收:看板数字与 SQL 抽查一致;media_items 上架后 App 回看列表可见。
