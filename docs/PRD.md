@@ -405,7 +405,7 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 - 活动管理:events CRUD(RRULE 编辑 + 未来场次预览)、单次改期/取消(event_overrides)、议程与 PDF 附件(Storage `event-files`)、活动类型 event_types。
 - 通知发布:立即/定时发布、排程队列一览、撤回(`admin_publish_notification` / `admin_cancel_notification`)。
 - 举报处理台:reports 列表与处理流转、封禁/解封(`banned_at`)。
-- 佛历 `almanac_days` 与 `app_settings` 维护。
+- 佛历 `almanac_days` **只读浏览**(数据仅来自生成器 migration,schema 即无人可写;调整清单走 E15 生成链路)+ `app_settings` 维护。
 
 **二期(后台独有)**
 

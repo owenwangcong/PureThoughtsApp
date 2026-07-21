@@ -17,7 +17,7 @@
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
 | **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | 🔄 进行中 | 0/3(P6.1 客户端已完成 2/3 子项;仅余 P6.1.1 后端 E14 简繁改造,不在本仓库) | — |
-| **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 1/5(P7.1 ✅ 2026-07-20) | — |
+| **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 2/5(P7.1 ✅ P7.2 ✅ 2026-07-20) | — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
 
@@ -182,7 +182,7 @@
 **已定案**:Next.js 静态导出(无 Node 服务端)+ React + shadcn/ui + supabase-js;目录 `admin/`;部署 `admin.pure-thoughts.com`(纯静态,API 同机 Caddy site block,自动 HTTPS);登录复用 Supabase Auth(**无 MFA**),权限全走现有 RLS / `is_app_admin()`,特权操作走 Edge Function `admin-ops`。与 P3–P5 并行不冲突;开发全程对本地栈,仅 P7.5 依赖生产实例(P0.2)与 E16。
 
 - [x] **P7.1** 脚手架 + 登录(M)— ✅ 2026-07-20:`admin/` Next.js 16(App Router,`output:'export'` + `trailingSlash`,Apache 免 rewrite)+ TS + Tailwind v4 + shadcn/ui + supabase-js + TanStack Query;`npm run gen:types` 类型生成;登录页(`src/lib/username.ts` 移植 App 端用户名→内部邮箱映射)、`AdminGuard`(未登录跳 /login、非管理员登出并提示);env 不设置默认本地栈,生产走 `.env.production.local`(README)。验收 ✅:静态产物 `npx serve out` 浏览器实测——匿名访问 `/` 弹回登录页、`member@test.local` 拒入提示「此帳號沒有管理員權限」、`admin@test.local` 登录进仪表盘、登出回登录页、控制台零报错;lint + build 全绿。要点:登录成功跳转前须 `removeQueries(["admin-guard"])`,否则守卫用登录前的 anon 缓存把人弹回登录页(实测踩坑)。
-- [ ] **P7.2** 一期功能(L)— 活动管理(events CRUD + RRULE 编辑与未来场次预览、event_overrides 单次改期/取消、议程 + PDF 附件上传 Storage `event-files`)、活动类型 event_types、通知发布(立即/定时/撤回 + 排程队列一览)、举报处理台(reports 流转 + 封禁/解封)、佛历 almanac_days 与 app_settings 维护。验收:本地栈全流程可操作,App 端能看到后台建的活动/通知;举报处理与 App 端状态互通。
+- [x] **P7.2** 一期功能(L)— ✅ 2026-07-20:五个页面全部落地并对本地栈浏览器实测。**活动管理**(`/events` 列表含类型/当地时间/循环/下次场次/议程附件计数;`/events/edit?id=` 编辑器完整复刻 App 语义:墙钟×IANA 时区→UTC(`lib/tz.ts` 纯 Intl 实现,DST 二次校准)、`FREQ=WEEKLY` 每周展开(+7 日历日保墙钟)、override 仅写 `{cancelled:true}`/`{start_at:ISO}`(改期为后台增强,App 读取端已支持)、议程删旧插新 day 循环恒 1、附件 `<eventId>/<时间戳>.pdf` 上 `event-files`、删除先清 Storage 再删行);**活动类型**(增 sort_order=50/改/删 23503 引导停用,12 图示键与 `event_icons.dart` 对齐);**通知发布**(RPC 发布/撤回、排程/待投遞/已發佈三态、全部系统通知只读页);**举报处理**(open→resolved 流转 + 重开;**目标上下文联查**(用户/群/报数记录),封禁+**解封**(App 无)、log 举报可软删记录(`delete_practice_log`));**佛曆与設定**(almanac_days **只读浏览**——schema 无人可写、数据来自生成器,PRD §15.2 已勘误;app_settings 任意键编辑/新增)。验收 ✅:本地栈端到端实测(通知发→撤、活动建→取消 07-29→改期 08-05→议程→PDF 上传→删除活动含 Storage 清理,DB 逐项核对 patch/UTC 换算无误;举报两类目标处理);lint + build 全绿(8 路由静态)。
 - [ ] **P7.3** `admin-ops` Edge Function(M)— service_role 特权操作:重置任意用户密码(替代 deploy 文档 §10 psql 命令)、代删账号(复用 delete-account 匿名化逻辑)、设/撤管理员;函数内先验 `is_app_admin()`;CORS 仅放行 admin 子域 + localhost(开发)。验收:管理员调用成功、非管理员/匿名被拒(集成测试);重置后目标账号能用新密码登录。
 - [ ] **P7.4** 二期功能(L)— 用户管理(搜索/封禁/重置密码/设撤管理员/代删)、群总览(全部群 + 成员数 + 总量,转让/解散)、数据看板(每日报数量与活跃趋势、`push_tokens.fcm_failed` 率、通知队列积压)、内容上架(media_items / live_streams / practice_types / scriptures)。验收:看板数字与 SQL 抽查一致;media_items 上架后 App 回看列表可见。
 - [ ] **P7.5** 部署(S)— E16:DNS A 记录 + Caddyfile 追加 site block(`admin.pure-thoughts.com { root * /var/www/admin; encode gzip; file_server; handle_errors { rewrite * /404.html; file_server } }`,reload 即自动签证书);静态目录发布脚本(out/ 经 pscp/scp 上服务器;**SSH 密钥 `D:\Projects\PureThoughts\purethoughts.ppk`**,PuTTY 格式——用 `pscp -i` 或先转 OpenSSH pem,见 infra 文档 §2;`/var/www/admin` 先 `sudo chown ubuntu` 一次,之后免 sudo 直传);生产冒烟。验收:HTTPS 可达,生产管理员登录并成功发一条测试通知,App 通知中心收到。
@@ -197,7 +197,8 @@
 
 | 日期 | 任务 | 原因 | 解除条件 | 状态 |
 |---|---|---|---|---|
-| —— | —— | 当前无阻塞 | —— | —— |
+| 2026-07-20 | (安全,非阻塞)migration 14 | `push_dispatch_key`(= push-dispatch 函数的 `DISPATCH_SECRET`)存于 `app_settings`,该表 RLS `using(true)` 且授 anon SELECT → **匿名可读该密钥**,可直呼投递函数(函数幂等、影响限于提前触发/骚扰调用,不泄数据)。P7.2 后台设置页浏览时发现 | 出 migration:密钥迁至无 SELECT 策略的私有表(`invoke_push_dispatch` 为 security definer,不受影响),或 push-dispatch 改核对 service_role JWT;生产同步改值 | ⬜ 待修 |
+| —— | —— | 当前无其他阻塞 | —— | —— |
 
 **长期背景风险(来自 PRD §14,开发中随时对照)**:YouTube/Webex 对大陆用户不可达(影响 P3/P4 的 1/3 用户)· 自托管运维责任(P0.4 恢复演练是硬门槛)· 中国区不上架的分发口径待与内容方确认。
 
