@@ -394,7 +394,7 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 ### 15.1 已定案(2026-07-20)
 
 - **技术栈**:Next.js(App Router,**静态导出 `output: 'export'`,无 Node 服务端**)+ React + shadcn/ui + Tailwind + supabase-js;仓库目录 **`admin/`**(与 `app/`、`supabase/` 并列,schema/RPC/类型生成强耦合,不分仓)。
-- **部署**:子域 **`admin.pure-thoughts.com`**,纯静态文件托管在现有服务器(Apache vhost + certbot,同 E2 模式)。
+- **部署**:子域 **`admin.pure-thoughts.com`**,纯静态文件托管在 API 同机 EC2,由 **Caddy** 加一个 site block 伺服(自动 HTTPS,无需 certbot;Caddy 是该机唯一前门,见 `infra/deploy-aws-ec2.md` §4;2026-07-20 依生产实况更正)。
 - **安全模型**:管理员用自己的账号密码登录(复用 Supabase Auth,**不做 MFA**,用户定案);一切读写走 anon key + 登录 session,由现有 RLS / `is_app_admin()` / RPC 把关——与 App 同一套权限模型,后台不引入新特权面。需 `service_role` 的操作走新 Edge Function **`admin-ops`**(§12.4):函数内先验 `is_app_admin()`,处理浏览器 CORS 且仅放行 admin 子域(本地开发另放行 localhost)。
 - 非管理员账号登录后台:提示无权限并登出,不渲染任何数据。
 
