@@ -185,7 +185,7 @@
 - [ ] **P7.2** 一期功能(L)— 活动管理(events CRUD + RRULE 编辑与未来场次预览、event_overrides 单次改期/取消、议程 + PDF 附件上传 Storage `event-files`)、活动类型 event_types、通知发布(立即/定时/撤回 + 排程队列一览)、举报处理台(reports 流转 + 封禁/解封)、佛历 almanac_days 与 app_settings 维护。验收:本地栈全流程可操作,App 端能看到后台建的活动/通知;举报处理与 App 端状态互通。
 - [ ] **P7.3** `admin-ops` Edge Function(M)— service_role 特权操作:重置任意用户密码(替代 deploy 文档 §10 psql 命令)、代删账号(复用 delete-account 匿名化逻辑)、设/撤管理员;函数内先验 `is_app_admin()`;CORS 仅放行 admin 子域 + localhost(开发)。验收:管理员调用成功、非管理员/匿名被拒(集成测试);重置后目标账号能用新密码登录。
 - [ ] **P7.4** 二期功能(L)— 用户管理(搜索/封禁/重置密码/设撤管理员/代删)、群总览(全部群 + 成员数 + 总量,转让/解散)、数据看板(每日报数量与活跃趋势、`push_tokens.fcm_failed` 率、通知队列积压)、内容上架(media_items / live_streams / practice_types / scriptures)。验收:看板数字与 SQL 抽查一致;media_items 上架后 App 回看列表可见。
-- [ ] **P7.5** 部署(S)— E16:DNS A 记录 + Caddyfile 追加 site block(`admin.pure-thoughts.com { root * /var/www/admin; encode gzip; file_server; handle_errors { rewrite * /404.html; file_server } }`,reload 即自动签证书);静态目录发布脚本(out/ rsync/scp 上服务器);生产冒烟。验收:HTTPS 可达,生产管理员登录并成功发一条测试通知,App 通知中心收到。
+- [ ] **P7.5** 部署(S)— E16:DNS A 记录 + Caddyfile 追加 site block(`admin.pure-thoughts.com { root * /var/www/admin; encode gzip; file_server; handle_errors { rewrite * /404.html; file_server } }`,reload 即自动签证书);静态目录发布脚本(out/ 经 pscp/scp 上服务器;**SSH 密钥 `D:\Projects\PureThoughts\purethoughts.ppk`**,PuTTY 格式——用 `pscp -i` 或先转 OpenSSH pem,见 infra 文档 §2;`/var/www/admin` 先 `sudo chown ubuntu` 一次,之后免 sudo 直传);生产冒烟。验收:HTTPS 可达,生产管理员登录并成功发一条测试通知,App 通知中心收到。
 
 **P7 DoD**:手机端管理员的全部操作后台均可完成且体验不劣于手机;§10 psql 重置密码命令退役;生产冒烟通过。
 

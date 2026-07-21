@@ -58,6 +58,10 @@ bash setup.sh
 
 ## 2. 服务器初始化
 
+> **本机密钥**(2026-07-20 记录):`D:\Projects\PureThoughts\purethoughts.ppk`(PuTTY 格式,在仓库外,勿入库)。
+> OpenSSH 系工具(`ssh`/`scp`)不认 `.ppk`:要么用 PuTTY 套件的 `plink`/`pscp -i ...ppk`,
+> 要么用 PuTTYgen「Conversions → Export OpenSSH key」转出 `purethoughts.pem` 后用 `-i` 指定。
+
 ```bash
 ssh -i your-key.pem ubuntu@<Elastic IP>
 
