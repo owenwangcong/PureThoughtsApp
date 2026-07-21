@@ -197,7 +197,7 @@
 
 | 日期 | 任务 | 原因 | 解除条件 | 状态 |
 |---|---|---|---|---|
-| 2026-07-20 | (安全,非阻塞)migration 14 | `push_dispatch_key`(= push-dispatch 函数的 `DISPATCH_SECRET`)存于 `app_settings`,该表 RLS `using(true)` 且授 anon SELECT → **匿名可读该密钥**,可直呼投递函数(函数幂等、影响限于提前触发/骚扰调用,不泄数据)。P7.2 后台设置页浏览时发现 | 出 migration:密钥迁至无 SELECT 策略的私有表(`invoke_push_dispatch` 为 security definer,不受影响),或 push-dispatch 改核对 service_role JWT;生产同步改值 | ⬜ 待修 |
+| 2026-07-20 | (安全,非阻塞)migration 14 | `push_dispatch_key`(= push-dispatch 函数的 `DISPATCH_SECRET`)存于 `app_settings`,该表 RLS `using(true)` 且授 anon SELECT → **匿名可读该密钥**。P7.2 后台设置页浏览时发现 | migration 0016:密钥迁 `app_secrets`(零策略 RLS + 显式 REVOKE anon/authenticated——生产实测有"新表默认授权",仅零策略是空结果而非拒绝;service_role/definer 可达);`invoke_push_dispatch` 改读新表;deploy 文档 §11② 同步。**本地+生产均已应用**:pgTAP 81/81;生产 anon REST 401、`invoke_push_dispatch()` 外呼 push-dispatch 200(密钥校验通过) | ✅ 已修 2026-07-20 |
 | —— | —— | 当前无其他阻塞 | —— | —— |
 
 **长期背景风险(来自 PRD §14,开发中随时对照)**:YouTube/Webex 对大陆用户不可达(影响 P3/P4 的 1/3 用户)· 自托管运维责任(P0.4 恢复演练是硬门槛)· 中国区不上架的分发口径待与内容方确认。

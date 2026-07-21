@@ -372,9 +372,10 @@ DISPATCH_SECRET=<随机长字符串,自行生成>
 **② 打开触发链路**(Studio SQL Editor 或 psql):
 
 ```sql
-update app_settings set value = 'https://api.pure-thoughts.com/functions/v1/push-dispatch'
+-- 2026-07-20 起(migration 0016)密钥表改为 app_secrets(客户端不可读);旧 app_settings 键已迁移删除
+update app_secrets set value = 'https://api.pure-thoughts.com/functions/v1/push-dispatch'
  where key = 'push_dispatch_url';
-update app_settings set value = '<与 DISPATCH_SECRET 相同>' where key = 'push_dispatch_key';
+update app_secrets set value = '<与 DISPATCH_SECRET 相同>' where key = 'push_dispatch_key';
 ```
 
 > 注意:自托管 edge-runtime 默认校验 JWT;`push-dispatch` 需免 JWT(由 DISPATCH_SECRET 自校验)。
