@@ -45,7 +45,7 @@
 | E11 | 音频下载 HTTPS endpoint(内容方托管) | 念诵音频 | P4.1 | ⬜ |
 | E12 | 讲法问答通用 API 的 JSON 样例 | 问答检索 | P6.1 | ✅ 2026-07-15:`docs/FLUTTER_QA_SEARCH_API.md` 已提供并实测(903 条,接口活的);设计定稿 `docs/design/qa-search.md`,PRD v0.5.11 §6 |
 | E15 | 佛历精选节日清单的内容方审定(初版 24 条见 `docs/design/buddhist-calendar.md` §3.3;清单是生成器配置 `tools/almanac/festivals.cjs`,改后重新生成即可) | 佛教日曆(P2.9) | 无(**非阻塞**,默认清单先行) | ⬜ |
-| E16 | admin 子域 DNS A 记录指向 API EC2(`admin.pure-thoughts.com`);TLS 由 Caddy 自动签发,**无需 certbot**(2026-07-20 确认生产前门为 Caddy) | 管理后台部署 | P7.5 | ⬜ |
+| E16 | admin 子域 DNS A 记录指向 API EC2(`admin.pure-thoughts.com`);TLS 由 Caddy 自动签发,**无需 certbot**(2026-07-20 确认生产前门为 Caddy) | 管理后台部署 | P7.5 | ✅ 2026-07-20:用户已配 DNS + Caddyfile site block(root `/var/www/admin`,与 PLAN 建议一致),证书已自动签发,HTTPS 可达 |
 | E14 | **上游 FastAPI 简繁双字形改造**(内容方服务器,不在本仓库):OpenCC 入库生成 hans/hant 双份 + 简体归一检索列 `search_norm`;`/search` 与 `/tags` 加 `script=hans\|hant` 参数(响应字段名不变);存量 903 条一次性回填。规格见 `docs/design/qa-search.md` §4 | 问答检索(繁体用户搜索可用性) | P6.1.2 | ⬜ ⛔ **硬前置**——不做则 App 默认语言(繁体)用户搜索基本不可用(实测 `禅修`→6 条 / `禪修`→1 条,互不包含) |
 
 ---
@@ -185,7 +185,7 @@
 - [x] **P7.2** 一期功能(L)— ✅ 2026-07-20:五个页面全部落地并对本地栈浏览器实测。**活动管理**(`/events` 列表含类型/当地时间/循环/下次场次/议程附件计数;`/events/edit?id=` 编辑器完整复刻 App 语义:墙钟×IANA 时区→UTC(`lib/tz.ts` 纯 Intl 实现,DST 二次校准)、`FREQ=WEEKLY` 每周展开(+7 日历日保墙钟)、override 仅写 `{cancelled:true}`/`{start_at:ISO}`(改期为后台增强,App 读取端已支持)、议程删旧插新 day 循环恒 1、附件 `<eventId>/<时间戳>.pdf` 上 `event-files`、删除先清 Storage 再删行);**活动类型**(增 sort_order=50/改/删 23503 引导停用,12 图示键与 `event_icons.dart` 对齐);**通知发布**(RPC 发布/撤回、排程/待投遞/已發佈三态、全部系统通知只读页);**举报处理**(open→resolved 流转 + 重开;**目标上下文联查**(用户/群/报数记录),封禁+**解封**(App 无)、log 举报可软删记录(`delete_practice_log`));**佛曆与設定**(almanac_days **只读浏览**——schema 无人可写、数据来自生成器,PRD §15.2 已勘误;app_settings 任意键编辑/新增)。验收 ✅:本地栈端到端实测(通知发→撤、活动建→取消 07-29→改期 08-05→议程→PDF 上传→删除活动含 Storage 清理,DB 逐项核对 patch/UTC 换算无误;举报两类目标处理);lint + build 全绿(8 路由静态)。
 - [ ] **P7.3** `admin-ops` Edge Function(M)— service_role 特权操作:重置任意用户密码(替代 deploy 文档 §10 psql 命令)、代删账号(复用 delete-account 匿名化逻辑)、设/撤管理员;函数内先验 `is_app_admin()`;CORS 仅放行 admin 子域 + localhost(开发)。验收:管理员调用成功、非管理员/匿名被拒(集成测试);重置后目标账号能用新密码登录。
 - [ ] **P7.4** 二期功能(L)— 用户管理(搜索/封禁/重置密码/设撤管理员/代删)、群总览(全部群 + 成员数 + 总量,转让/解散)、数据看板(每日报数量与活跃趋势、`push_tokens.fcm_failed` 率、通知队列积压)、内容上架(media_items / live_streams / practice_types / scriptures)。验收:看板数字与 SQL 抽查一致;media_items 上架后 App 回看列表可见。
-- [ ] **P7.5** 部署(S)— E16:DNS A 记录 + Caddyfile 追加 site block(`admin.pure-thoughts.com { root * /var/www/admin; encode gzip; file_server; handle_errors { rewrite * /404.html; file_server } }`,reload 即自动签证书);静态目录发布脚本(out/ 经 pscp/scp 上服务器;**SSH 密钥 `D:\Projects\PureThoughts\purethoughts.ppk`**,PuTTY 格式——用 `pscp -i` 或先转 OpenSSH pem,见 infra 文档 §2;`/var/www/admin` 先 `sudo chown ubuntu` 一次,之后免 sudo 直传);生产冒烟。验收:HTTPS 可达,生产管理员登录并成功发一条测试通知,App 通知中心收到。
+- [ ] **P7.5** 部署(S)— 🔄 大部分完成(2026-07-20):E16 ✅(用户自配);发布脚本 ✅ `admin/scripts/deploy.ps1`(build → scp 至 /tmp → rsync --delete 原子替换,含"产物必须指向生产 URL"防呆;**密钥用 OpenSSH 格式 `D:\Projects\PureThoughts\purethoughts.pem`**,.ppk 的 PuTTY 工具在本机静默无输出不可用;pem 已 icacls 收紧);P7.2 产物已发布,线上 8 路由全 200。**教训:静态站无热更新,每次改版必须重跑 deploy.ps1,否则新路由 404(2026-07-20 实际踩到)**。余:生产冒烟验收——管理员在线上后台发一条测试通知,App 通知中心收到后勾选本项。
 
 **P7 DoD**:手机端管理员的全部操作后台均可完成且体验不劣于手机;§10 psql 重置密码命令退役;生产冒烟通过。
 

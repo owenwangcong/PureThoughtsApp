@@ -13,7 +13,11 @@ npm run dev        # 开发(默认连本地 Supabase 栈,先 npx supabase start)
 npm run build      # 静态导出到 out/
 npm run lint       # ESLint
 npm run gen:types  # 重新生成 src/lib/database.types.ts(需本地栈运行;改 schema 后必跑)
+
+.\scripts\deploy.ps1   # 构建并发布到 admin.pure-thoughts.com(scp+rsync 原子替换)
 ```
+
+**静态站没有热更新**:每次改完代码要让线上生效,必须重新执行 `deploy.ps1`(否则线上还是旧产物,新路由会 404)。
 
 本地测试账号(根目录 seed):`admin@test.local` / `test1234`(管理员),`member@test.local` / `test1234`(非管理员,应被拒)。
 
