@@ -196,6 +196,11 @@ function renderText(n: any, hans: boolean): { title: string; body: string } {
       return { title: hans ? "直播开始了" : "直播開始了", body: String(p.title ?? "YouTube") };
     case "proxy_log":
       return { title: hans ? "有同修为您代报" : "有同修為您代報", body: "" };
+    // 学修问答(PRD §16):隐私定案,推送不带问题正文
+    case "qa_reply":
+      return { title: hans ? "您的提问有新回复" : "您的提問有新回覆", body: "" };
+    case "qa_question":
+      return { title: hans ? "有新的学修提问" : "有新的學修提問", body: "" };
     default:
       return { title: n.title || n.type, body: n.body ?? "" };
   }

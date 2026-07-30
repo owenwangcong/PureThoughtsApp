@@ -247,8 +247,8 @@ lib/features/study_qa/
 
 ## 7. 实施计划(= PLAN P8;完成一项勾一项,并同步 PLAN §1 计数)
 
-- [ ] **P8.1 数据层**(M)— migration:两表 + 索引 + RLS + `qa_thread_owner` + 上限触发器 + 消息后处理触发器(冗余列/通知)+ 两个 RPC;`push-dispatch/index.ts` `renderText` 增 `qa_reply`/`qa_question`;pgTAP 覆盖 §8.1 全项。
-  **验收**:`npx supabase test db` 全绿(§8.1 各编号勾完);本地栈手工:admin 回复后 `notifications` 出现正确行。
+- [x] **P8.1 数据层**(M)— ✅ 2026-07-30:migration `20260730000018_study_qa.sql`(两表 + 索引 + **最小授权:qa_threads 不授 update、qa_messages 不授 update/delete,表级即锁死** + RLS + `qa_thread_owner` + 上限触发器 + 消息后处理触发器 + 两 RPC);`push-dispatch` renderText 增 `qa_reply`/`qa_question`(文案不带正文);pgTAP `study_qa.test.sql` 36 项。
+  **验收 ✅**:`npx supabase test db` 全绿(7 文件 121 项);本地栈 REST 冒烟:真 JWT 走 `create_qa_thread` → 管理员 insert 回复 → 冗余列更新 + `qa_reply` 通知(target/payload/channels 正确,title/body 空)→ owner REST 删除级联清空。
 - [ ] **P8.2 App 用户端**(L)— `features/study_qa/` 三屏 + providers;首页宫格入口 + `_guard`;通知中心两 case + 深链;l10n 三份 ARB;`layout_walkthrough_test` 接入会话页与列表页。
   **验收**:§8.2 中 T-APP-01…07 勾完;`flutter analyze` + `flutter test` 全绿。
 - [ ] **P8.3 App 管理员视图**(M)— 列表 tab 分流 + 管理员回复 + 删除任意线程。
@@ -270,27 +270,27 @@ lib/features/study_qa/
 ### 8.1 pgTAP(`supabase/tests/study_qa_test.sql`,随 P8.1)
 
 **RLS 隔离(需求 2/3)**
-- [ ] T-DB-01 A 建线程发首问后:A 可 select 该线程与消息;**B select 结果为 0 行**;管理员可 select。
-- [ ] T-DB-02 anon 对两表 select / insert 全部拒绝或 0 行。
-- [ ] T-DB-03 B 向 A 的线程 insert 消息被拒(RLS)。
-- [ ] T-DB-04 A 可追问自己的线程;管理员可以 `sender_role='admin'` 回复任意线程。
-- [ ] T-DB-05 非管理员以 `sender_role='admin'` insert 被拒;伪造 `sender_id` ≠ auth.uid() 被拒。
+- [x] T-DB-01 A 建线程发首问后:A 可 select 该线程与消息;**B select 结果为 0 行**;管理员可 select。
+- [x] T-DB-02 anon 对两表 select / insert 全部拒绝或 0 行。
+- [x] T-DB-03 B 向 A 的线程 insert 消息被拒(RLS)。
+- [x] T-DB-04 A 可追问自己的线程;管理员可以 `sender_role='admin'` 回复任意线程。
+- [x] T-DB-05 非管理员以 `sender_role='admin'` insert 被拒;伪造 `sender_id` ≠ auth.uid() 被拒。
 
 **封禁与防滥用**
-- [ ] T-DB-06 置 `banned_at` 后,该用户建线程 / 发消息均被拒;解封恢复。
-- [ ] T-DB-07 A 已有 3 个待回覆线程 → 建第 4 个报 `QA_PENDING_LIMIT`;管理员回复其中一个(`last_sender_role` 变 `admin`)后,可再建新线程。
-- [ ] T-DB-08 body 为空白 / 超 2000 字被 check 拒绝。
+- [x] T-DB-06 置 `banned_at` 后,该用户建线程 / 发消息均被拒;解封恢复。
+- [x] T-DB-07 A 已有 3 个待回覆线程 → 建第 4 个报 `QA_PENDING_LIMIT`;管理员回复其中一个(`last_sender_role` 变 `admin`)后,可再建新线程。
+- [x] T-DB-08 body 为空白 / 超 2000 字被 check 拒绝。
 
 **删除(需求 6)**
-- [ ] T-DB-09 B 删 A 的线程被拒;A 删自己的成功且消息级联清空;管理员删任意线程成功。
-- [ ] T-DB-10 删除 profiles 行(模拟删号)→ 其线程与消息级联消失;删某管理员 profiles 行 → 其他人线程中该管理员的回复保留且 `sender_id` 为 null。
+- [x] T-DB-09 B 删 A 的线程被拒;A 删自己的成功且消息级联清空;管理员删任意线程成功。
+- [x] T-DB-10 删除 profiles 行(模拟删号)→ 其线程与消息级联消失;删某管理员 profiles 行 → 其他人线程中该管理员的回复保留且 `sender_id` 为 null。
 
 **触发器与通知(需求 4)**
-- [ ] T-DB-11 管理员回复 → 恰好 1 条 `notifications`(scope=user,target=A,type=qa_reply,payload.thread_id 正确,channels 含 inapp+push);**title/body 不含消息正文**。
-- [ ] T-DB-12 A 提问/追问 → 每个未封禁管理员各 1 条 `qa_question`;发送者本人不收;管理员回复自己拥有的线程不产生自通知。
-- [ ] T-DB-13 消息插入后线程冗余列正确(`last_sender_role`/`last_message_at`/两个 preview;首条写 `first_message_preview`;preview 截断 ≤100 字)。
-- [ ] T-DB-14 客户端直接 update `qa_threads` 被拒;`mark_qa_thread_read` 仅 owner 生效(B 调 A 的线程无效果)。
-- [ ] T-DB-15 `create_qa_thread` 原子性:body 非法时线程与消息都不产生;成功时两者都在且返回 id 正确。
+- [x] T-DB-11 管理员回复 → 恰好 1 条 `notifications`(scope=user,target=A,type=qa_reply,payload.thread_id 正确,channels 含 inapp+push);**title/body 不含消息正文**。
+- [x] T-DB-12 A 提问/追问 → 每个未封禁管理员各 1 条 `qa_question`;发送者本人不收;管理员回复自己拥有的线程不产生自通知。
+- [x] T-DB-13 消息插入后线程冗余列正确(`last_sender_role`/`last_message_at`/两个 preview;首条写 `first_message_preview`;preview 截断 ≤100 字)。
+- [x] T-DB-14 客户端直接 update `qa_threads` 被拒;`mark_qa_thread_read` 仅 owner 生效(B 调 A 的线程无效果)。
+- [x] T-DB-15 `create_qa_thread` 原子性:body 非法时线程与消息都不产生;成功时两者都在且返回 id 正确。
 
 ### 8.2 Flutter 自动化(`app/test/study_qa_*.dart`,随 P8.2/P8.3)
 
