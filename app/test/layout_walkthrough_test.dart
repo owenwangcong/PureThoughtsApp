@@ -15,8 +15,12 @@ import 'package:pure_thoughts/features/events/occurrence_utils.dart';
 import 'package:pure_thoughts/features/onboarding/onboarding_screen.dart';
 import 'package:pure_thoughts/features/qa/qa_detail_screen.dart';
 import 'package:pure_thoughts/features/qa/qa_models.dart';
+import 'package:pure_thoughts/features/study_qa/study_qa_list_screen.dart';
+import 'package:pure_thoughts/features/study_qa/study_qa_providers.dart';
+import 'package:pure_thoughts/features/study_qa/study_qa_thread_screen.dart';
 import 'package:pure_thoughts/l10n/gen/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show User;
 
 /// P1.10 布局走查(自动化部分):关键无网络界面在
 /// 简/繁 × 最大字号(2.0)下渲染不溢出(RenderFlex overflow 在测试中即失败)。
@@ -180,6 +184,85 @@ void main() {
           eventsProvider.overrideWith((ref) async => []),
           eventOverridesProvider.overrideWith((ref) async => []),
           eventTypesProvider.overrideWith((ref) async => []),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 学修问答列表(管理员视图含 tab + 提问人名,信息密度最高)· 大字号不溢出(P8.2)
+    testWidgets('學修問答列表 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      await pumpScreen(
+        tester,
+        const StudyQaListScreen(),
+        locale,
+        overrides: [
+          myProfileProvider.overrideWith((ref) => {'is_app_admin': true}),
+          qaThreadsProvider.overrideWith((ref) async => [
+                {
+                  'id': 'th-1',
+                  'user_id': 'u1',
+                  'last_sender_role': 'user',
+                  'last_message_at': '2026-07-30T10:00:00',
+                  'first_message_preview':
+                      '打坐時妄念很多,無法安住,請問應如何對治?是否應該改為經行或誦經?',
+                  'last_message_preview': '同上',
+                  'user_last_read_at': '2026-07-30T09:00:00',
+                  'created_at': '2026-07-29T08:00:00',
+                  'profiles': {'display_name': '王師姐'},
+                },
+              ]),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 学修问答会话页:长气泡 + 署名 + 输入框,大字号不溢出(P8.2)
+    testWidgets('學修問答會話 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      final viewer = User(
+        id: 'admin-1',
+        appMetadata: const {},
+        userMetadata: const {},
+        aud: 'authenticated',
+        createdAt: '2026-07-30T00:00:00Z',
+      );
+      await pumpScreen(
+        tester,
+        const StudyQaThreadScreen(threadId: 'th-1'),
+        locale,
+        overrides: [
+          currentUserProvider.overrideWith((ref) => viewer),
+          qaThreadProvider('th-1').overrideWith((ref) async => {
+                'id': 'th-1',
+                'user_id': 'u1',
+                'last_sender_role': 'admin',
+                'user_last_read_at': '2026-07-30T09:00:00',
+              }),
+          qaMessagesProvider('th-1').overrideWith((ref) async => [
+                {
+                  'id': 'm1',
+                  'sender_id': 'u1',
+                  'sender_role': 'user',
+                  'body': '打坐時妄念很多,無法安住,請問應如何對治?'
+                      '是否應該改為經行或誦經?懇請開示。',
+                  'created_at': '2026-07-30T09:00:00',
+                },
+                {
+                  'id': 'm2',
+                  'sender_id': 'admin-2',
+                  'sender_role': 'admin',
+                  'body': '妄念來去不隨,不迎不拒。安住呼吸,念起即覺,覺之即無。'
+                      '功夫在平常,不必求速效。',
+                  'created_at': '2026-07-30T10:00:00',
+                },
+              ]),
         ],
       );
       expect(tester.takeException(), isNull);

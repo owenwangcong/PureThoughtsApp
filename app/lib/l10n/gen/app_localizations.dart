@@ -2131,6 +2131,108 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'其他時區…'**
   String get tzMore;
+
+  /// No description provided for @back.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'返回'**
+  String get back;
+
+  /// No description provided for @studyQaTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'學修問答'**
+  String get studyQaTitle;
+
+  /// No description provided for @studyQaMine.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'我的提問'**
+  String get studyQaMine;
+
+  /// No description provided for @studyQaAsk.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提問'**
+  String get studyQaAsk;
+
+  /// No description provided for @studyQaNewHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'請寫下您的學修問題…'**
+  String get studyQaNewHint;
+
+  /// No description provided for @studyQaPending.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'待回覆'**
+  String get studyQaPending;
+
+  /// No description provided for @studyQaAnswered.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已回覆'**
+  String get studyQaAnswered;
+
+  /// No description provided for @studyQaTabAll.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'全部'**
+  String get studyQaTabAll;
+
+  /// No description provided for @studyQaAdminLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'管理員'**
+  String get studyQaAdminLabel;
+
+  /// No description provided for @studyQaDelete.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'刪除提問'**
+  String get studyQaDelete;
+
+  /// No description provided for @studyQaDeleteConfirm.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'刪除後問答內容將永久消失,無法恢復。確定刪除?'**
+  String get studyQaDeleteConfirm;
+
+  /// No description provided for @studyQaDeleted.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'該提問已刪除'**
+  String get studyQaDeleted;
+
+  /// No description provided for @studyQaEmpty.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'還沒有提問。向管理員請教學修問題吧。'**
+  String get studyQaEmpty;
+
+  /// No description provided for @studyQaLimitHit.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'您已有 3 個提問待回覆,請耐心等待回覆後再提問。'**
+  String get studyQaLimitHit;
+
+  /// No description provided for @studyQaSend.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'發送'**
+  String get studyQaSend;
+
+  /// No description provided for @notifQaReply.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'您的提問有新回覆'**
+  String get notifQaReply;
+
+  /// No description provided for @notifQaQuestion.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'有新的學修提問'**
+  String get notifQaQuestion;
 }
 
 class _AppLocalizationsDelegate

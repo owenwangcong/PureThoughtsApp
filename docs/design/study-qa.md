@@ -249,10 +249,10 @@ lib/features/study_qa/
 
 - [x] **P8.1 数据层**(M)— ✅ 2026-07-30:migration `20260730000018_study_qa.sql`(两表 + 索引 + **最小授权:qa_threads 不授 update、qa_messages 不授 update/delete,表级即锁死** + RLS + `qa_thread_owner` + 上限触发器 + 消息后处理触发器 + 两 RPC);`push-dispatch` renderText 增 `qa_reply`/`qa_question`(文案不带正文);pgTAP `study_qa.test.sql` 36 项。
   **验收 ✅**:`npx supabase test db` 全绿(7 文件 121 项);本地栈 REST 冒烟:真 JWT 走 `create_qa_thread` → 管理员 insert 回复 → 冗余列更新 + `qa_reply` 通知(target/payload/channels 正确,title/body 空)→ owner REST 删除级联清空。
-- [ ] **P8.2 App 用户端**(L)— `features/study_qa/` 三屏 + providers;首页宫格入口 + `_guard`;通知中心两 case + 深链;l10n 三份 ARB;`layout_walkthrough_test` 接入会话页与列表页。
-  **验收**:§8.2 中 T-APP-01…07 勾完;`flutter analyze` + `flutter test` 全绿。
-- [ ] **P8.3 App 管理员视图**(M)— 列表 tab 分流 + 管理员回复 + 删除任意线程。
-  **验收**:§8.2 中 T-APP-08…10 勾完;analyze/test 全绿。
+- [x] **P8.2 App 用户端**(L)— ✅ 2026-07-30:`features/study_qa/`(providers + 列表/会话/新提问三屏);首页共修组第三行加「學修問答」格(`_guard` 未登录跳登录);通知中心 `qa_reply`/`qa_question` 渲染 + 深链 `/study-qa/:tid`;l10n 三份 ARB 各 +19 键(studyQa* / notifQa* / back);走查测试接入列表页 + 会话页(简繁 × 2.0)。
+  **验收 ✅**:T-APP-01…07 勾完;`flutter analyze` 0 issue + `flutter test` 159 项全绿(含本地栈 smoke `study_qa_flow_smoke_test.dart`:提问→隔离→回复→通知→追问→上限→删除全链路)。
+- [x] **P8.3 App 管理员视图**(M)— ✅ 2026-07-30(与 P8.2 同批实现,同屏分流):列表按 `is_app_admin` 变待回覆/全部两 tab + 提问人名;会话页按 `qaSenderRole`(线程主人恒 user,他人即管理员回复)发送;管理员对任意线程有删除入口。
+  **验收 ✅**:T-APP-08…10 勾完(T-APP-09 由 smoke 测试在库中验 sender_role='admin');analyze/test 全绿。
 - [ ] **P8.4 管理后台页**(M)— `/qa` 列表 + 会话面板 + 回复 + 删除 + 侧栏角标。
   **验收**:§8.3 勾完;`npm run lint` + `npm run build` 全绿(新路由计入静态导出)。
 - [ ] **P8.5 联测与发布**(S)— 本地栈端到端(§8.4 全场景);migration 推生产 + edge-runtime 重启(push-dispatch 更新)+ admin 重跑 deploy.ps1;生产冒烟(§8.5)。
@@ -295,19 +295,19 @@ lib/features/study_qa/
 ### 8.2 Flutter 自动化(`app/test/study_qa_*.dart`,随 P8.2/P8.3)
 
 **用户端(P8.2)**
-- [ ] T-APP-01 列表页三态:骨架屏 / 空态文案 / 错误重试(provider override)。
-- [ ] T-APP-02 列表行渲染:待回覆/已回覆状态章、未读红点逻辑(`last_message_at > user_last_read_at` 且 admin 最后发言)。
-- [ ] T-APP-03 新提问页:空内容发送钮禁用;超 2000 字受限;`QA_PENDING_LIMIT` 错误显示上限文案。
-- [ ] T-APP-04 会话页:气泡按 `sender_role` 左右分侧;管理员署名「管理員」;发送后列表追加。
-- [ ] T-APP-05 删除流:确认对话框 → 删除 → 返回列表。
-- [ ] T-APP-06 通知中心:`qa_reply`/`qa_question` 渲染标题与图标,副标题不含正文;onTap 路由到 `/study-qa/:id`。
-- [ ] T-APP-07 `layout_walkthrough_test`:列表页 + 会话页,简繁 × 字号 2.0 不溢出。
-- [ ] 底线:`flutter analyze` + `flutter test` 全绿。
+- [x] T-APP-01 列表页三态:骨架屏 / 空态文案 / 错误重试(provider override)。
+- [x] T-APP-02 列表行渲染:待回覆/已回覆状态章、未读红点逻辑(`last_message_at > user_last_read_at` 且 admin 最后发言)。
+- [x] T-APP-03 新提问页:空内容发送钮禁用;超 2000 字受限;`QA_PENDING_LIMIT` 错误显示上限文案。
+- [x] T-APP-04 会话页:气泡按 `sender_role` 左右分侧;管理员署名「管理員」;发送后列表追加。
+- [x] T-APP-05 删除流:确认对话框 → 删除 → 返回列表。
+- [x] T-APP-06 通知中心:`qa_reply`/`qa_question` 渲染标题与图标,副标题不含正文;onTap 路由到 `/study-qa/:id`。
+- [x] T-APP-07 `layout_walkthrough_test`:列表页 + 会话页,简繁 × 字号 2.0 不溢出。
+- [x] 底线:`flutter analyze` + `flutter test` 全绿。(159 项,2026-07-30)
 
 **管理员视图(P8.3)**
-- [ ] T-APP-08 `is_app_admin` 分流:管理员进列表见「待回覆/全部」tab 与提问人名。
-- [ ] T-APP-09 管理员发送的消息 `sender_role='admin'`。
-- [ ] T-APP-10 管理员可对任意线程出现删除入口。
+- [x] T-APP-08 `is_app_admin` 分流:管理员进列表见「待回覆/全部」tab 与提问人名。
+- [x] T-APP-09 管理员发送的消息 `sender_role='admin'`。
+- [x] T-APP-10 管理员可对任意线程出现删除入口。
 
 ### 8.3 管理后台(随 P8.4,本地栈浏览器实测)
 

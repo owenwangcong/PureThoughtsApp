@@ -89,6 +89,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             'festival_eve' => (l10n.notifAlmanacEve, '${names.join('、')} · $lunar'),
             _ => (l10n.notifAlmanacFestival, '${names.join('、')} · $lunar'),
           };
+        // 学修问答(PRD §16):隐私定案,通知中心不显示问题正文
+        case 'qa_reply':
+          return (l10n.notifQaReply, '');
+        case 'qa_question':
+          return (l10n.notifQaQuestion, '');
         default:
           return (
             (n['title'] as String?)?.isNotEmpty == true ? n['title'] as String : n['type'] as String,
@@ -126,6 +131,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       'live_started' => Icons.live_tv,
                       'event_changed' => Icons.event_note,
                       'almanac' => Icons.spa_outlined,
+                      'qa_reply' || 'qa_question' => Icons.question_answer_outlined,
                       _ => Icons.notifications_outlined,
                     },
                     color: unread ? Theme.of(context).colorScheme.primary : null,
@@ -134,6 +140,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     'live_started' => () => context.push('/live'),
                     'event_changed' => () => context.push('/calendar'),
                     'almanac' => () => context.push('/calendar'),
+                    // 深链会话页;线程已删则落「該提問已刪除」空态
+                    'qa_reply' || 'qa_question' => () => context.push(
+                        '/study-qa/${(n['payload'] as Map?)?['thread_id']}'),
                     _ => null,
                   },
                   title: Text(

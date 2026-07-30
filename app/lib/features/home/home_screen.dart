@@ -17,7 +17,7 @@ import '../logs/offline_queue.dart';
 import '../notifications/notifications_providers.dart';
 
 /// 首页(PRD v0.5.8):登录与未登录**同一套分组界面**(日課/共修/修行/通用);
-/// 未登录时点击账号类功能(報數/快捷報數/群組/統計/發願/通知)强制跳登录页;
+/// 未登录时点击账号类功能(報數/快捷報數/群組/統計/發願/通知/學修問答)强制跳登录页;
 /// 直播/經本/日曆/工具/設定匿名可用。
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -152,6 +152,23 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () => context.push('/calendar'),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // 學修問答(PRD §16):账号类功能;E14 完成「往期問答」回归后
+                // 与其重排为 (直播,往期問答)(經本,群組)(日曆,學修問答)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BigTile(
+                        icon: Icons.question_answer_outlined,
+                        label: l10n.studyQaTitle,
+                        onTap: () =>
+                            _guard(context, ref, () => context.push('/study-qa')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(child: SizedBox.shrink()),
                   ],
                 ),
               ],
