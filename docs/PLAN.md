@@ -18,7 +18,7 @@
 | **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | 🔄 进行中 | 0/3(P6.1 客户端已完成 2/3 子项;仅余 P6.1.1 后端 E14 简繁改造,不在本仓库) | — |
 | **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 4/5(P7.1-P7.4 ✅ 2026-07-20;余 P7.5 生产冒烟一项) | — |
-| **P8** | 学修问答(私密提问,PRD §16,设计 `design/study-qa.md`) | 🔄 进行中 | 3/5(P8.1–P8.3 ✅ 2026-07-30) | — |
+| **P8** | 学修问答(私密提问,PRD §16,设计 `design/study-qa.md`) | 🔄 进行中 | 4/5(P8.1–P8.4 ✅ 2026-07-30;余 P8.5 联测发布) | — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
 
@@ -197,7 +197,7 @@
 - [x] **P8.1** 数据层(M)— ✅ 2026-07-30:migration `20260730000018_study_qa.sql`(两表 + 索引 + **最小授权**:qa_threads 不授 update、qa_messages 不授 update/delete(表级即锁死,直改报 42501)+ RLS + `qa_thread_owner` + 待回覆上限触发器(`QA_PENDING_LIMIT`)+ 消息后处理触发器(冗余列 + qa_reply/qa_question 通知)+ RPC `create_qa_thread`(invoker,原子)/`mark_qa_thread_read`(definer));`push-dispatch` renderText 增两 type(文案不带正文);pgTAP `study_qa.test.sql` 36 项(T-DB-01…15)。验收 ✅:`npx supabase test db` 7 文件 121 项全绿;REST 冒烟(真 JWT:建线程→管理员回复→冗余列/qa_reply 通知正确、title/body 空→owner 删除级联)。要点:项目无默认授权,新表必须显式 grant;pgTAP 事务内 now() 恒定,「时间前进」断言用预置旧时间戳。
 - [x] **P8.2** App 用户端(L)— ✅ 2026-07-30:`features/study_qa/` 三屏 + providers(纯逻辑 `qaThreadUnread`/`qaThreadPending`/`qaSenderRole`/`qaErrorText` 可单测);首页共修组第三行「學修問答」格 + `_guard`;通知中心两 type 渲染(无正文)+ 深链;l10n 三份 ARB 各 +19 键;走查测试两页接入。验收 ✅:T-APP-01…07;analyze 0 issue + test 159 全绿(含本地栈 smoke 全链路)。要点:测试内同一 tester 多次 pump 须给 ProviderScope 加 UniqueKey(不支持换 overrides);`FilledButton.icon` 找按钮用 `find.bySubtype`。
 - [x] **P8.3** App 管理员视图(M)— ✅ 2026-07-30(与 P8.2 同批,同屏按 `is_app_admin` 分流):待回覆/全部 tab、提问人名、App 内回复(`qaSenderRole`:线程主人恒 user)、删任意线程。验收 ✅:T-APP-08…10(T-APP-09 由 smoke 在库中验)。
-- [ ] **P8.4** 管理后台「學修問答」页(M)— `/qa` 列表(tab 筛选/角标)+ 会话面板回复 + 删除二次确认。验收:设计 §8.3 T-ADM-01…05;lint+build 绿。
+- [x] **P8.4** 管理后台「學修問答」页(M)— ✅ 2026-07-30:`(admin)/qa/page.tsx`(待回覆/全部 tab 含计数、会话 Dialog 气泡流、回复、删除二次确认)+ 侧栏导航红点角标 + gen:types 更新。验收 ✅:T-ADM-01…05;lint+build 全绿(13 路由);本地栈浏览器实测全流程(角标与库一致、回复通知落库无正文、删除用户侧同步消失、守卫覆盖新路由、控制台零报错)。要点:`.env.local` 现指生产,本地实测须临时建 `.env.development.local` 跑 dev(测毕删);`out/` 恒为生产配置不能本地实测。
 - [ ] **P8.5** 联测与发布(S)— 本地栈端到端(设计 §8.4 T-E2E-01…08);migration 推生产 + edge-runtime 重启 + admin 重跑 deploy.ps1;生产冒烟(§8.5 T-PROD-01…03)。
 
 **P8 DoD**:`design/study-qa.md` §7/§8 清单全部勾选;用户隔离与双端回复经端到端验证;生产冒烟通过。

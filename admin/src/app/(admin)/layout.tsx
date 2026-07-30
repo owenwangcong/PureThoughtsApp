@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminGuard, useAdminProfile } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -14,6 +14,7 @@ const NAV = [
   { href: "/events", label: "活動管理" },
   { href: "/event-types", label: "活動類型" },
   { href: "/notifications", label: "通知發佈" },
+  { href: "/qa", label: "學修問答" },
   { href: "/reports", label: "舉報處理" },
   { href: "/users", label: "用戶管理" },
   { href: "/groups", label: "群組總覽" },
@@ -21,11 +22,28 @@ const NAV = [
   { href: "/almanac", label: "佛曆與設定" },
 ];
 
+/** 待回覆提问数(侧栏角标;导航加载时查询,不做实时——设计 study-qa.md §5) */
+function usePendingQaCount() {
+  const { data } = useQuery({
+    queryKey: ["qa-pending-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("qa_threads")
+        .select("id", { count: "exact", head: true })
+        .eq("last_sender_role", "user");
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+  return data ?? 0;
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
   const profile = useAdminProfile();
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = (usePathname() ?? "/").replace(/\/+$/, "") || "/";
+  const pendingQa = usePendingQaCount();
 
   async function onSignOut() {
     await supabase.auth.signOut();
@@ -59,11 +77,16 @@ function Shell({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm hover:bg-muted",
+                    "flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted",
                     active && "bg-muted font-medium",
                   )}
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  {item.href === "/qa" && pendingQa > 0 && (
+                    <span className="ml-2 rounded-full bg-destructive px-1.5 text-xs text-white">
+                      {pendingQa}
+                    </span>
+                  )}
                 </Link>
               );
             })}

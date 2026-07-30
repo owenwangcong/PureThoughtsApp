@@ -811,6 +811,89 @@ export type Database = {
           },
         ]
       }
+      qa_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_id: string | null
+          sender_role: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_id?: string | null
+          sender_role: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string | null
+          sender_role?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qa_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "qa_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qa_threads: {
+        Row: {
+          created_at: string
+          first_message_preview: string
+          id: string
+          last_message_at: string
+          last_message_preview: string
+          last_sender_role: string
+          user_id: string
+          user_last_read_at: string
+        }
+        Insert: {
+          created_at?: string
+          first_message_preview?: string
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string
+          last_sender_role?: string
+          user_id: string
+          user_last_read_at?: string
+        }
+        Update: {
+          created_at?: string
+          first_message_preview?: string
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string
+          last_sender_role?: string
+          user_id?: string
+          user_last_read_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_threads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -1109,6 +1192,7 @@ export type Database = {
         Args: { p_body?: string; p_scheduled_at?: string; p_title: string }
         Returns: string
       }
+      create_qa_thread: { Args: { p_body: string }; Returns: string }
       delete_practice_log: { Args: { p_log_id: string }; Returns: undefined }
       dissolve_group: { Args: { p_group_id: string }; Returns: undefined }
       gen_join_code: { Args: never; Returns: string }
@@ -1124,6 +1208,8 @@ export type Database = {
         Args: { p_code: string; p_message?: string }
         Returns: string
       }
+      mark_qa_thread_read: { Args: { p_thread_id: string }; Returns: undefined }
+      qa_thread_owner: { Args: { tid: string }; Returns: string }
       reset_group_join_code: { Args: { p_group_id: string }; Returns: string }
       transfer_group_ownership: {
         Args: { p_group_id: string; p_new_owner: string }
