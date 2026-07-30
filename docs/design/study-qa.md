@@ -253,8 +253,9 @@ lib/features/study_qa/
   **验收 ✅**:T-APP-01…07 勾完;`flutter analyze` 0 issue + `flutter test` 159 项全绿(含本地栈 smoke `study_qa_flow_smoke_test.dart`:提问→隔离→回复→通知→追问→上限→删除全链路)。
 - [x] **P8.3 App 管理员视图**(M)— ✅ 2026-07-30(与 P8.2 同批实现,同屏分流):列表按 `is_app_admin` 变待回覆/全部两 tab + 提问人名;会话页按 `qaSenderRole`(线程主人恒 user,他人即管理员回复)发送;管理员对任意线程有删除入口。
   **验收 ✅**:T-APP-08…10 勾完(T-APP-09 由 smoke 测试在库中验 sender_role='admin');analyze/test 全绿。
-- [ ] **P8.4 管理后台页**(M)— `/qa` 列表 + 会话面板 + 回复 + 删除 + 侧栏角标。
-  **验收**:§8.3 勾完;`npm run lint` + `npm run build` 全绿(新路由计入静态导出)。
+- [x] **P8.4 管理后台页**(M)— ✅ 2026-07-30:`admin/src/app/(admin)/qa/page.tsx`(待回覆/全部 tab 含计数、行点击开会话 Dialog、气泡流按角色分色、回复 insert(管理员自问自答按 owner 口径取 role)、删除二次确认);侧栏「學修問答」导航 + 待回覆红点角标(`qa-pending-count` 查询,回复/删除后 invalidate);`npm run gen:types` 已含两新表。
+  **验收 ✅**:§8.3 T-ADM-01…05 勾完;lint + build 全绿(13 路由含 /qa);本地栈浏览器实测:登录→角标 7 与库一致→回复(库中中文/通知行/无正文全对,角标 7→6)→删除(确认→行消失→用户侧同步消失,角标→5)→登出直访 /qa 弹回登录;控制台零报错。
+  **要点**:`.env.local` 被指向生产(2026-07-20 用户设置),本地浏览器实测须临时建 `.env.development.local` 指回本地栈跑 `npm run dev`(测毕删除,不动用户文件);静态产物 `out/` 恒为生产配置,不能拿来本地实测。
 - [ ] **P8.5 联测与发布**(S)— 本地栈端到端(§8.4 全场景);migration 推生产 + edge-runtime 重启(push-dispatch 更新)+ admin 重跑 deploy.ps1;生产冒烟(§8.5)。
   **验收**:§8.4 + §8.5 勾完;PLAN P8 全部勾选并更新 §1。
 
@@ -311,11 +312,11 @@ lib/features/study_qa/
 
 ### 8.3 管理后台(随 P8.4,本地栈浏览器实测)
 
-- [ ] T-ADM-01 非管理员登录被 AdminGuard 拒(既有机制,冒烟确认新页不漏)。
-- [ ] T-ADM-02 列表:待回覆/全部 tab 过滤正确;列内容与库一致;侧栏角标数 = 待回覆线程数。
-- [ ] T-ADM-03 会话面板完整显示多轮消息;回复后 App 端 A 可见且收到通知。
-- [ ] T-ADM-04 删除需二次确认;删除后列表消失、A 的 App 列表同步消失。
-- [ ] T-ADM-05 `npm run lint` + `npm run build` 全绿,新路由计入导出。
+- [x] T-ADM-01 非管理员登录被 AdminGuard 拒(既有机制,冒烟确认新页不漏)。
+- [x] T-ADM-02 列表:待回覆/全部 tab 过滤正确;列内容与库一致;侧栏角标数 = 待回覆线程数。
+- [x] T-ADM-03 会话面板完整显示多轮消息;回复后 App 端 A 可见且收到通知。
+- [x] T-ADM-04 删除需二次确认;删除后列表消失、A 的 App 列表同步消失。
+- [x] T-ADM-05 `npm run lint` + `npm run build` 全绿,新路由计入导出。
 
 ### 8.4 本地栈端到端手工联测(随 P8.5,四账号)
 
