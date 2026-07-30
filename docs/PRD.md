@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.17(管理后台 Web,详见 §15) · 来源:`initial.md` + 十二轮需求澄清
+> 版本:v0.5.18(学修问答,详见 §16) · 来源:`initial.md` + 十二轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -40,6 +40,7 @@
 | 发布通知 / 活动 / 上传音视频 | ❌ | ❌ | ❌ | ✅ |
 | 处理举报 / 封禁用户 | ❌ | ❌ | ❌ | ✅ |
 | 建群(建群者自动成为群主) | ❌ | ✅ | ✅ | ✅ |
+| 学修问答(私密提问,§16) | ❌ | ✅(仅见自己的) | 同注册用户 | 全部可见、可回复、可删除 |
 | 删除自己的账号 | — | ✅ | ✅ | ✅ |
 
 - **群主**是**群内角色**:注册用户建群后自动成为该群群主(管理员亦可建群 / 指定群主),不是全局管理员。
@@ -313,6 +314,8 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `notification_reads` | notification_id, user_id, read_at |
 | **`reports`** | id, reporter_id, target_type(user/group/log), target_id, reason, status(open/resolved), handled_by, created_at |
 | **`user_blocks`** | user_id, blocked_user_id, created_at |
+| **`qa_threads`**(v0.5.18) | id, user_id(FK cascade,删号连带清空), last_sender_role(user=待回覆/admin=已回覆), last_message_at, first/last_message_preview, user_last_read_at, created_at —— 学修问答线程(§16);冗余列由触发器维护 |
+| **`qa_messages`**(v0.5.18) | id, thread_id(FK cascade), sender_id(删号 set null), sender_role(user/admin), body(≤2000 字), created_at —— 首问与全部往来消息,硬删随线程级联 |
 
 > 统计:按 `local_date` 聚合;建 `daily_user_stats` / `daily_group_stats` **视图**(量大后改物化视图或 rollup 表)。`practice_logs` 建索引 `(group_id, local_date)`、`(subject_user_id, practice_type_id, local_date)`(发愿进度查询)。
 
@@ -332,6 +335,8 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `notifications` | scope 命中者可读;仅服务端(service_role)写 |
 | `reports` | 举报人可 insert / 读自己的;管理员全权 |
 | `user_blocks` | 仅本人读写 |
+| `qa_threads` | 本人可读/建/删自己的;管理员全读全删;update 不开放(冗余列走触发器,已读走 RPC `mark_qa_thread_read`);insert 校验未封禁,待回覆 ≤3 由触发器拦截(v0.5.18) |
+| `qa_messages` | 能读所属线程者可读;insert 限线程主人(role=user)或管理员(role=admin)且未封禁;不可单条改删,随线程级联硬删(v0.5.18) |
 
 ### 12.4 Edge Functions 与定时任务
 
@@ -372,6 +377,7 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 - **v0.5** — 打磨:离线报数暂存、Realtime 实时统计。
 - **后续** — 讲法问答检索(待通用 API JSON);群数据导出 CSV(本轮未采纳,留作备选)。
 - **管理后台(Web,v0.5.17)** — `admin.pure-thoughts.com` 静态站,与 App 并行推进,分两期(§15,任务见 PLAN P7)。
+- **学修问答(v0.5.18)** — 私密提问 + 多轮问答 + App/后台双端回复(§16,任务见 PLAN P8);独立于 P2–P5 与 P7 余项,可并行。
 
 ---
 
@@ -419,3 +425,17 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 - **不重造 Studio**:临时查数/改表仍走白名单内的 Studio;后台只做业务语义操作(带校验、二次确认、上下文)。
 - 不做 MFA;不做多角色分级(仅 `is_app_admin` 一档)。
 - 审计日志(`admin_audit_log`)为可选增强,单管理员阶段可缓;多管理员出现时再立项。
+
+---
+
+## 16. 学修问答(在线提问,v0.5.18 新增)
+
+用户在 App 内向管理员提出学修问题的**私密一对一问答**,与 §6 的「讲法问答检索」(只读检索既有讲法内容)互补、完全独立。详细设计与完整测试计划见 [`design/study-qa.md`](design/study-qa.md),任务见 PLAN P8。
+
+- **提问**:注册用户可提交问题(纯文字,单条 ≤2000 字);未登录点击入口跳登录(§2 口径)。入口:首页「共修」组宫格加一格「學修問答」。
+- **可见性**:问题与全部往来**仅提问人本人与管理员可见**,其他用户不可见(RLS 实现)。
+- **回答**:管理员(`is_app_admin`)可见全部问题并回复;**App 与管理后台(§15)双端均可回答**;用户侧管理员回复统一署名「管理員」,不暴露具体身份。
+- **多轮**:一个问题是一个会话线程,回答后可**无限追问**,不设「关闭/已解决」状态;线程状态即「待回覆/已回覆」(以最后发言方区分)。
+- **通知**:管理员回复 → 通知提问人;用户提问/追问 → 通知全体管理员。走既有 `notifications` 链路(通知中心 + 推送 + 邮件兜底,数据库触发器生成);**通知与推送文案均不携带问题正文**(隐私)。
+- **删除**:提问人与管理员都可删除问题——**硬删**,整个线程连同全部消息永久删除(不影响任何统计,私密内容不留档);账号删除时其全部提问级联清空。
+- **防滥用**:被封禁用户不可提问/发消息;每人同时最多 **3 个待回覆**问题。
