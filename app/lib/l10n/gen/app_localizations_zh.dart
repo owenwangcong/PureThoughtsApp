@@ -1039,6 +1039,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tzMore => '其他時區…';
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get studyQaTitle => '學修問答';
+
+  @override
+  String get studyQaMine => '我的提問';
+
+  @override
+  String get studyQaAsk => '提問';
+
+  @override
+  String get studyQaNewHint => '請寫下您的學修問題…';
+
+  @override
+  String get studyQaPending => '待回覆';
+
+  @override
+  String get studyQaAnswered => '已回覆';
+
+  @override
+  String get studyQaTabAll => '全部';
+
+  @override
+  String get studyQaAdminLabel => '管理員';
+
+  @override
+  String get studyQaDelete => '刪除提問';
+
+  @override
+  String get studyQaDeleteConfirm => '刪除後問答內容將永久消失,無法恢復。確定刪除?';
+
+  @override
+  String get studyQaDeleted => '該提問已刪除';
+
+  @override
+  String get studyQaEmpty => '還沒有提問。向管理員請教學修問題吧。';
+
+  @override
+  String get studyQaLimitHit => '您已有 3 個提問待回覆,請耐心等待回覆後再提問。';
+
+  @override
+  String get studyQaSend => '發送';
+
+  @override
+  String get notifQaReply => '您的提問有新回覆';
+
+  @override
+  String get notifQaQuestion => '有新的學修提問';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2076,6 +2127,57 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get tzMore => '其他时区…';
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get studyQaTitle => '学修问答';
+
+  @override
+  String get studyQaMine => '我的提问';
+
+  @override
+  String get studyQaAsk => '提问';
+
+  @override
+  String get studyQaNewHint => '请写下您的学修问题…';
+
+  @override
+  String get studyQaPending => '待回复';
+
+  @override
+  String get studyQaAnswered => '已回复';
+
+  @override
+  String get studyQaTabAll => '全部';
+
+  @override
+  String get studyQaAdminLabel => '管理员';
+
+  @override
+  String get studyQaDelete => '删除提问';
+
+  @override
+  String get studyQaDeleteConfirm => '删除后问答内容将永久消失,无法恢复。确定删除?';
+
+  @override
+  String get studyQaDeleted => '该提问已删除';
+
+  @override
+  String get studyQaEmpty => '还没有提问。向管理员请教学修问题吧。';
+
+  @override
+  String get studyQaLimitHit => '您已有 3 个提问待回复,请耐心等待回复后再提问。';
+
+  @override
+  String get studyQaSend => '发送';
+
+  @override
+  String get notifQaReply => '您的提问有新回复';
+
+  @override
+  String get notifQaQuestion => '有新的学修提问';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3113,4 +3215,55 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tzMore => '其他時區…';
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get studyQaTitle => '學修問答';
+
+  @override
+  String get studyQaMine => '我的提問';
+
+  @override
+  String get studyQaAsk => '提問';
+
+  @override
+  String get studyQaNewHint => '請寫下您的學修問題…';
+
+  @override
+  String get studyQaPending => '待回覆';
+
+  @override
+  String get studyQaAnswered => '已回覆';
+
+  @override
+  String get studyQaTabAll => '全部';
+
+  @override
+  String get studyQaAdminLabel => '管理員';
+
+  @override
+  String get studyQaDelete => '刪除提問';
+
+  @override
+  String get studyQaDeleteConfirm => '刪除後問答內容將永久消失,無法恢復。確定刪除?';
+
+  @override
+  String get studyQaDeleted => '該提問已刪除';
+
+  @override
+  String get studyQaEmpty => '還沒有提問。向管理員請教學修問題吧。';
+
+  @override
+  String get studyQaLimitHit => '您已有 3 個提問待回覆,請耐心等待回覆後再提問。';
+
+  @override
+  String get studyQaSend => '發送';
+
+  @override
+  String get notifQaReply => '您的提問有新回覆';
+
+  @override
+  String get notifQaQuestion => '有新的學修提問';
 }

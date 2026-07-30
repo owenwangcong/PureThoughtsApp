@@ -30,6 +30,9 @@ import 'features/qa/qa_tag_picker_screen.dart';
 import 'features/reminders/mindfulness_screen.dart';
 import 'features/reminders/reminder_help_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/study_qa/study_qa_compose_screen.dart';
+import 'features/study_qa/study_qa_list_screen.dart';
+import 'features/study_qa/study_qa_thread_screen.dart';
 import 'features/tools/counter_screen.dart';
 import 'features/tools/timer_screen.dart';
 import 'features/tools/tools_screen.dart';
@@ -113,6 +116,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/qa/detail',
         builder: (context, state) =>
             QaDetailScreen(segment: state.extra as QaSegment?),
+      ),
+      // 学修问答(PRD §16;登录后可用,入口经首页 _guard)
+      GoRoute(
+          path: '/study-qa',
+          builder: (context, state) => const StudyQaListScreen()),
+      GoRoute(
+          path: '/study-qa/new',
+          builder: (context, state) => const StudyQaComposeScreen()),
+      GoRoute(
+        path: '/study-qa/:tid',
+        builder: (context, state) =>
+            StudyQaThreadScreen(threadId: state.pathParameters['tid']!),
       ),
       GoRoute(
         path: '/webview',

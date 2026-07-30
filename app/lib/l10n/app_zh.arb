@@ -338,5 +338,22 @@
   "cancelSchedule": "取消排程",
   "recallAction": "撤回",
   "recallWarn": "撤回後所有用戶的通知中心將不再顯示此通知;已彈出的手機推送無法收回。確定?",
-  "tzMore": "其他時區…"
+  "tzMore": "其他時區…",
+  "back": "返回",
+  "studyQaTitle": "學修問答",
+  "studyQaMine": "我的提問",
+  "studyQaAsk": "提問",
+  "studyQaNewHint": "請寫下您的學修問題…",
+  "studyQaPending": "待回覆",
+  "studyQaAnswered": "已回覆",
+  "studyQaTabAll": "全部",
+  "studyQaAdminLabel": "管理員",
+  "studyQaDelete": "刪除提問",
+  "studyQaDeleteConfirm": "刪除後問答內容將永久消失,無法恢復。確定刪除?",
+  "studyQaDeleted": "該提問已刪除",
+  "studyQaEmpty": "還沒有提問。向管理員請教學修問題吧。",
+  "studyQaLimitHit": "您已有 3 個提問待回覆,請耐心等待回覆後再提問。",
+  "studyQaSend": "發送",
+  "notifQaReply": "您的提問有新回覆",
+  "notifQaQuestion": "有新的學修提問"
 }
