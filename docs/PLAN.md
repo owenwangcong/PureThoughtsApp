@@ -198,7 +198,7 @@
 - [x] **P8.2** App 用户端(L)— ✅ 2026-07-30:`features/study_qa/` 三屏 + providers(纯逻辑 `qaThreadUnread`/`qaThreadPending`/`qaSenderRole`/`qaErrorText` 可单测);首页共修组第三行「學修問答」格 + `_guard`;通知中心两 type 渲染(无正文)+ 深链;l10n 三份 ARB 各 +19 键;走查测试两页接入。验收 ✅:T-APP-01…07;analyze 0 issue + test 159 全绿(含本地栈 smoke 全链路)。要点:测试内同一 tester 多次 pump 须给 ProviderScope 加 UniqueKey(不支持换 overrides);`FilledButton.icon` 找按钮用 `find.bySubtype`。
 - [x] **P8.3** App 管理员视图(M)— ✅ 2026-07-30(与 P8.2 同批,同屏按 `is_app_admin` 分流):待回覆/全部 tab、提问人名、App 内回复(`qaSenderRole`:线程主人恒 user)、删任意线程。验收 ✅:T-APP-08…10(T-APP-09 由 smoke 在库中验)。
 - [x] **P8.4** 管理后台「學修問答」页(M)— ✅ 2026-07-30:`(admin)/qa/page.tsx`(待回覆/全部 tab 含计数、会话 Dialog 气泡流、回复、删除二次确认)+ 侧栏导航红点角标 + gen:types 更新。验收 ✅:T-ADM-01…05;lint+build 全绿(13 路由);本地栈浏览器实测全流程(角标与库一致、回复通知落库无正文、删除用户侧同步消失、守卫覆盖新路由、控制台零报错)。要点:`.env.local` 现指生产,本地实测须临时建 `.env.development.local` 跑 dev(测毕删);`out/` 恒为生产配置不能本地实测。
-- [ ] **P8.5** 联测与发布(S)— 本地栈端到端(设计 §8.4 T-E2E-01…08);migration 推生产 + edge-runtime 重启 + admin 重跑 deploy.ps1;生产冒烟(§8.5 T-PROD-01…03)。
+- [ ] **P8.5** 联测与发布(S)— 🔄 **服务端发布完成 2026-07-30**:migration 0018 + **0019(生产验证发现默认授权覆盖最小授权,显式 revoke 收紧,同 0016 教训)**推生产并记账(顺带补 0016/0017 当时漏记的 `_applied_migrations` 记账,避免重跑一键脚本时重复执行报错);push-dispatch 同步 + functions 重启(cron 调度正常);admin 站重发布(`/qa` 线上 200,14 路由)。T-PROD-01/03 ✅;设计 §8.4 各场景数据层已全部自动化覆盖。**余(需用户设备)**:真机 App 走查(T-E2E UI 部分)+ T-PROD-02 真机通知闭环——可与 P2.1-4 iOS TestFlight 验证同批做。
 
 **P8 DoD**:`design/study-qa.md` §7/§8 清单全部勾选;用户隔离与双端回复经端到端验证;生产冒烟通过。
 

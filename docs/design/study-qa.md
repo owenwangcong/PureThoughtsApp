@@ -256,7 +256,7 @@ lib/features/study_qa/
 - [x] **P8.4 管理后台页**(M)— ✅ 2026-07-30:`admin/src/app/(admin)/qa/page.tsx`(待回覆/全部 tab 含计数、行点击开会话 Dialog、气泡流按角色分色、回复 insert(管理员自问自答按 owner 口径取 role)、删除二次确认);侧栏「學修問答」导航 + 待回覆红点角标(`qa-pending-count` 查询,回复/删除后 invalidate);`npm run gen:types` 已含两新表。
   **验收 ✅**:§8.3 T-ADM-01…05 勾完;lint + build 全绿(13 路由含 /qa);本地栈浏览器实测:登录→角标 7 与库一致→回复(库中中文/通知行/无正文全对,角标 7→6)→删除(确认→行消失→用户侧同步消失,角标→5)→登出直访 /qa 弹回登录;控制台零报错。
   **要点**:`.env.local` 被指向生产(2026-07-20 用户设置),本地浏览器实测须临时建 `.env.development.local` 指回本地栈跑 `npm run dev`(测毕删除,不动用户文件);静态产物 `out/` 恒为生产配置,不能拿来本地实测。
-- [ ] **P8.5 联测与发布**(S)— 本地栈端到端(§8.4 全场景);migration 推生产 + edge-runtime 重启(push-dispatch 更新)+ admin 重跑 deploy.ps1;生产冒烟(§8.5)。
+- [ ] **P8.5 联测与发布**(S)— 🔄 **服务端发布已完成(2026-07-30)**:migration 0018/0019 推生产 + 记账(并补 0016/0017 漏记账)· push-dispatch 同步 + functions 容器重启 · admin 站 deploy.ps1 重发布;T-PROD-01/03 ✅。**余(需用户设备)**:§8.4 真机 App 走查(数据层已全部自动化验证)+ T-PROD-02 真机通知闭环。
   **验收**:§8.4 + §8.5 勾完;PLAN P8 全部勾选并更新 §1。
 
 分支约定:`feature/p8-1-study-qa-db` 等;commit 以任务编号开头(如 `P8.1: 学修问答数据层`)。
@@ -320,6 +320,9 @@ lib/features/study_qa/
 
 ### 8.4 本地栈端到端手工联测(随 P8.5,四账号)
 
+> **2026-07-30 状态**:全部场景的**数据层路径**已由自动化覆盖(pgTAP 36 + Flutter smoke 全链路 + 后台浏览器实测);
+> 下列勾选项特指**真机/模拟器上的 App UI 走查**,待用户提供设备时执行(与 T-PROD-02 可同批做)。
+
 - [ ] T-E2E-01 A 提问 → B 的 App 完全看不到 → 管理员后台「待回覆」出现,角标 +1。
 - [ ] T-E2E-02 管理员后台回复 → A 通知中心出现「您的提問有新回覆」(无正文)→ 点击深链进会话 → 红点清除。
 - [ ] T-E2E-03 A 追问 → 管理员 App 收到 `qa_question` 通知 → 在 **App 内**回复 → A 再收通知(双端回答闭环)。
@@ -331,9 +334,9 @@ lib/features/study_qa/
 
 ### 8.5 生产冒烟(随 P8.5,发布后)
 
-- [ ] T-PROD-01 migration 推生产后 pgTAP 关键项抽测(或 anon REST 探测两表均 401/0 行);edge-runtime 重启后 push-dispatch 正常。
+- [x] T-PROD-01 ✅ 2026-07-30:migration 0018+0019 已应用并记账(顺带补上 0016/0017 漏记的记账);anon REST 探测两表 401;authenticated 授权矩阵与设计一致(threads=SELECT/INSERT/DELETE,messages=SELECT/INSERT);functions 容器重启后 push-dispatch 由 pg_cron 正常调度。
 - [ ] T-PROD-02 真机(或 TestFlight)提问 → 线上后台回复 → 真机通知中心收到;若 P2.1 推送已通,锁屏推送出现且**不含正文**。
-- [ ] T-PROD-03 admin 站重发布后 `/qa` 路由 200(静态站需重跑 deploy.ps1)。
+- [x] T-PROD-03 ✅ 2026-07-30:deploy.ps1 重发布,线上 `/qa` 200(14 路由)。
 
 ### P8 DoD
 
