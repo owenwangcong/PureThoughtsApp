@@ -45,6 +45,7 @@ type MessageRow = {
   id: string;
   sender_id: string | null;
   sender_role: "user" | "admin";
+  sender_name: string | null;
   body: string;
   created_at: string;
 };
@@ -71,9 +72,10 @@ function useMessages(threadId: string | null) {
     queryKey: ["qa-messages", threadId],
     enabled: !!threadId,
     queryFn: async () => {
+      // 查 definer 视图:带发送者显示名(v0.5.20 管理员署真名,与 App 端同源)
       const { data, error } = await supabase
-        .from("qa_messages")
-        .select("id, sender_id, sender_role, body, created_at")
+        .from("qa_message_display")
+        .select("id, sender_id, sender_role, sender_name, body, created_at")
         .eq("thread_id", threadId!)
         .order("created_at", { ascending: true });
       if (error) throw error;
@@ -154,7 +156,11 @@ function ThreadDialog({
               }
             >
               <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                <span>{m.sender_role === "admin" ? "管理員" : "提問人"}</span>
+                <span>
+                  {m.sender_role === "admin"
+                    ? (m.sender_name ?? "管理員")
+                    : "提問人"}
+                </span>
                 <span>{fmtDateTime(m.created_at)}</span>
               </div>
               <p className="whitespace-pre-wrap text-sm">{m.body}</p>

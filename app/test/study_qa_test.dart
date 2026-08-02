@@ -234,6 +234,7 @@ void main() {
               'id': 'm2',
               'sender_id': 'admin-2',
               'sender_role': 'admin',
+              'sender_name': '慧明師父', // v0.5.20:管理员署显示名
               'body': '妄念來去不隨。',
               'created_at': '2026-07-30T09:30:00',
             },
@@ -241,6 +242,7 @@ void main() {
               'id': 'm3',
               'sender_id': 'admin-1',
               'sender_role': 'admin',
+              // sender_name 缺失(如已删号)→ 回退「管理員」
               'body': '補充:安住呼吸。',
               'created_at': '2026-07-30T10:00:00',
             },
@@ -256,8 +258,10 @@ void main() {
     expect(alignOf('打坐時妄念很多怎麼辦?'), Alignment.centerLeft);
     expect(alignOf('妄念來去不隨。'), Alignment.centerRight);
     expect(alignOf('補充:安住呼吸。'), Alignment.centerRight);
-    // 管理员消息恒署「管理員」(两条);管理员语境下用户消息署「提問人」
-    expect(find.text('管理員'), findsNWidgets(2));
+    // 管理员消息署显示名(v0.5.20),取不到回退「管理員」;
+    // 管理员语境下用户消息署「提問人」
+    expect(find.text('慧明師父'), findsOneWidget);
+    expect(find.text('管理員'), findsOneWidget);
     expect(find.text('提問人'), findsOneWidget);
   });
 

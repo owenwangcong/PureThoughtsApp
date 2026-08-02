@@ -1160,6 +1160,33 @@ export type Database = {
           },
         ]
       }
+      qa_message_display: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          id: string | null
+          sender_id: string | null
+          sender_name: string | null
+          sender_role: string | null
+          thread_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qa_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "qa_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_practice_totals: {
         Row: {
           entries: number | null

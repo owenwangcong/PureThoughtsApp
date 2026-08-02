@@ -9,7 +9,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(36);
+select plan(39);
 
 -- ---------------------------------------------------------------- 身份切换
 create function sq_login(uid uuid) returns void language plpgsql as $$
@@ -295,6 +295,32 @@ select sq_reset();
 select ok(
   not exists(select 1 from qa_threads where id = (select v from sq_ids where k = 't2')),
   'T-DB-09c 管理员可删任意线程');
+
+-- ---------------------------------------------------------------- T-DB-16 署名视图(0021,PRD v0.5.20)
+-- 普通用户读不了他人 profiles,管理员名字经 qa_message_display definer 视图窄口暴露
+select sq_reset();
+update profiles set display_name = '答疑師父'
+ where id = '00000000-0000-4000-8000-000000000001';
+
+select sq_login('00000000-0000-4000-8000-000000000004');  -- A(普通用户)
+select ok(
+  exists(select 1 from qa_message_display
+    where thread_id = (select v from sq_ids where k = 't1')
+      and sender_role = 'admin' and sender_name = '答疑師父'),
+  'T-DB-16a 提问人经视图可见管理员显示名(直读 profiles 不可得)');
+
+select sq_login('00000000-0000-4000-8000-000000000003');  -- B(非 owner 非管理员)
+select ok(
+  (select count(*) from qa_message_display
+    where thread_id = (select v from sq_ids where k = 't1')) = 0,
+  'T-DB-16b 非线程主人经视图零行(守卫复刻消息 RLS)');
+
+select sq_anon();
+select throws_ok(
+  $$ select count(*) from qa_message_display $$, '42501',
+  'permission denied for view qa_message_display',
+  'T-DB-16c anon 无视图权限');
+select sq_reset();
 
 -- ---------------------------------------------------------------- T-DB-10 账号删除级联(破坏性,最后)
 -- 第二管理员(0002)回复 A 的 t1 后删其 profiles 行:消息保留、sender_id 置空
