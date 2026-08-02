@@ -352,7 +352,7 @@
   "studyQaDelete": "删除提问",
   "studyQaDeleteConfirm": "删除后问答内容将永久消失,无法恢复。确定删除?",
   "studyQaDeleted": "该提问已删除",
-  "studyQaEmpty": "还没有提问。向管理员请教学修问题吧。",
+  "studyQaEmpty": "还没有提问。",
   "studyQaLimitHit": "您已有 3 个提问待回复,请耐心等待回复后再提问。",
   "studyQaSend": "发送",
   "notifQaReply": "您的提问有新回复",

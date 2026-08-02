@@ -2213,7 +2213,7 @@ abstract class AppLocalizations {
   /// No description provided for @studyQaEmpty.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'還沒有提問。向管理員請教學修問題吧。'**
+  /// **'還沒有提問。'**
   String get studyQaEmpty;
 
   /// No description provided for @studyQaLimitHit.

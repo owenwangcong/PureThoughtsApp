@@ -392,7 +392,7 @@
   "studyQaDelete": "刪除提問",
   "studyQaDeleteConfirm": "刪除後問答內容將永久消失,無法恢復。確定刪除?",
   "studyQaDeleted": "該提問已刪除",
-  "studyQaEmpty": "還沒有提問。向管理員請教學修問題吧。",
+  "studyQaEmpty": "還沒有提問。",
   "studyQaLimitHit": "您已有 3 個提問待回覆,請耐心等待回覆後再提問。",
   "studyQaSend": "發送",
   "notifQaReply": "您的提問有新回覆",

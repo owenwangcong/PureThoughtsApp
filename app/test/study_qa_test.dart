@@ -130,7 +130,7 @@ void main() {
       myProfileProvider.overrideWith((ref) => null),
       qaThreadsProvider.overrideWith((ref) async => []),
     ]);
-    expect(find.text('還沒有提問。向管理員請教學修問題吧。'), findsOneWidget);
+    expect(find.text('還沒有提問。'), findsOneWidget);
 
     // 错误态 → 重试按钮
     await pump(tester, const StudyQaListScreen(), overrides: [

@@ -1080,7 +1080,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studyQaDeleted => '該提問已刪除';
 
   @override
-  String get studyQaEmpty => '還沒有提問。向管理員請教學修問題吧。';
+  String get studyQaEmpty => '還沒有提問。';
 
   @override
   String get studyQaLimitHit => '您已有 3 個提問待回覆,請耐心等待回覆後再提問。';
@@ -2171,7 +2171,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get studyQaDeleted => '该提问已删除';
 
   @override
-  String get studyQaEmpty => '还没有提问。向管理员请教学修问题吧。';
+  String get studyQaEmpty => '还没有提问。';
 
   @override
   String get studyQaLimitHit => '您已有 3 个提问待回复,请耐心等待回复后再提问。';
@@ -3262,7 +3262,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get studyQaDeleted => '該提問已刪除';
 
   @override
-  String get studyQaEmpty => '還沒有提問。向管理員請教學修問題吧。';
+  String get studyQaEmpty => '還沒有提問。';
 
   @override
   String get studyQaLimitHit => '您已有 3 個提問待回覆,請耐心等待回覆後再提問。';
