@@ -35,14 +35,16 @@ final qaThreadProvider = FutureProvider.autoDispose
       .maybeSingle();
 });
 
-/// 线程消息(升序,聊天式渲染)
+/// 线程消息(升序,聊天式渲染)。
+/// 查 qa_message_display definer 视图而非表:普通用户读不了他人 profiles,
+/// 管理员署名(sender_name)经视图窄口暴露(0021,PRD v0.5.20)
 final qaMessagesProvider = FutureProvider.autoDispose
     .family<List<Map<String, dynamic>>, String>((ref, threadId) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return const [];
   return Supabase.instance.client
-      .from('qa_messages')
-      .select('id, sender_id, sender_role, body, created_at')
+      .from('qa_message_display')
+      .select('id, sender_id, sender_role, sender_name, body, created_at')
       .eq('thread_id', threadId)
       .order('created_at', ascending: true);
 });

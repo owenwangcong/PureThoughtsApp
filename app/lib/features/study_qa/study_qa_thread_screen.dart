@@ -248,10 +248,13 @@ class _Bubble extends StatelessWidget {
     final isAdminMsg = message['sender_role'] == 'admin';
     final mine = qaBubbleOnRight(message['sender_role'] as String? ?? 'user',
         adminContext);
-    // 管理员消息恒署「管理員」(不暴露具体身份);
+    // 管理员消息署该管理员显示名(v0.5.20;已删号/取不到回退「管理員」);
     // 管理员语境下用户消息署「提問人」;提问人看自己的消息不署名
+    final senderName = (message['sender_name'] as String?)?.trim();
     final label = isAdminMsg
-        ? l10n.studyQaAdminLabel
+        ? (senderName != null && senderName.isNotEmpty
+            ? senderName
+            : l10n.studyQaAdminLabel)
         : (adminContext ? l10n.studyQaAskerLabel : null);
     final time = (message['created_at'] as String? ?? '')
         .replaceFirst('T', ' ')

@@ -374,3 +374,14 @@ lib/features/study_qa/
 - [x] F-3 ✅ 2026-08-01 后台:回复恒 `admin`;lint+build 绿(16 页静态导出)。
 - [x] F-4 ✅ 2026-08-01 测试:pgTAP 121 + Flutter 161 全绿。
 - [ ] F-5 发布 🔄:0020 已推生产+记账(函数校验 t)✅;admin 站已重发布 ✅;**余:真机重装复测 §9.1 四现象消失**(待设备连接)。
+
+### 9.4 增补:管理员署名真名(2026-08-01 用户追加,PRD v0.5.20)
+
+管理员之间有分工,提问人需要知道是**哪位管理员**回答的——管理员消息不再统一署「管理員」,改署该管理员的 `display_name`(取不到/已删号回退「管理員」)。
+
+**实现**:普通用户读不了他人 `profiles`(RLS 只放本人+管理员),PostgREST 内嵌拿不到名字 → 循 `group_member_display` 先例建 **definer 视图** `qa_message_display`(qa_messages ⋈ profiles,守卫复刻消息 RLS:线程主人或管理员),App 与后台的消息查询都改走视图;`sender_name` 为空时回退。
+
+- [ ] F-6 migration `20260801000021_qa_message_display.sql`:definer 视图 + 授权(anon 无);pgTAP:owner 经视图见管理员名、非 owner 无行、anon 拒。
+- [ ] F-7 App:qaMessagesProvider 改查视图;气泡署名 = sender_name ?? 「管理員」;测试更新。
+- [ ] F-8 后台:消息查询改视图,气泡署名同规则;gen:types + lint + build。
+- [ ] F-9 发布:0021 推生产+记账;admin 重发布;随 F-5 真机复测。
