@@ -381,7 +381,7 @@ lib/features/study_qa/
 
 **实现**:普通用户读不了他人 `profiles`(RLS 只放本人+管理员),PostgREST 内嵌拿不到名字 → 循 `group_member_display` 先例建 **definer 视图** `qa_message_display`(qa_messages ⋈ profiles,守卫复刻消息 RLS:线程主人或管理员),App 与后台的消息查询都改走视图;`sender_name` 为空时回退。
 
-- [ ] F-6 migration `20260801000021_qa_message_display.sql`:definer 视图 + 授权(anon 无);pgTAP:owner 经视图见管理员名、非 owner 无行、anon 拒。
-- [ ] F-7 App:qaMessagesProvider 改查视图;气泡署名 = sender_name ?? 「管理員」;测试更新。
-- [ ] F-8 后台:消息查询改视图,气泡署名同规则;gen:types + lint + build。
-- [ ] F-9 发布:0021 推生产+记账;admin 重发布;随 F-5 真机复测。
+- [x] F-6 ✅ 2026-08-01 migration `20260801000021_qa_message_display.sql`:definer 视图 + 授权(anon 显式 revoke);pgTAP T-DB-16a/b/c(owner 经视图见管理员名、非 owner 零行、anon 42501),全库 124 绿。
+- [x] F-7 ✅ 2026-08-01 App:qaMessagesProvider 改查视图;气泡署名 = sender_name(非空)?? 「管理員」;T-APP-04 断言更新(具名+回退双路径),161 绿。
+- [x] F-8 ✅ 2026-08-01 后台:消息查询改视图,气泡署名同规则;gen:types + lint + build 绿。
+- [ ] F-9 发布 🔄:0021 已推生产+记账,视图/授权验证通过(anon f / authenticated t)✅;admin 站已重发布 ✅;**余:随 F-5 真机复测**。⚠️ 过程教训:PowerShell 写的 .sh 带 BOM,经 `bash -s` 管道执行时**首行命令被吞**——生产脚本必须走 Bash 工具直连或先校验首行;本次曾出现「记账已插、migration 未跑」的反向不一致,已当场补齐核实。
