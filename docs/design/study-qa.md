@@ -384,4 +384,5 @@ lib/features/study_qa/
 - [x] F-6 ✅ 2026-08-01 migration `20260801000021_qa_message_display.sql`:definer 视图 + 授权(anon 显式 revoke);pgTAP T-DB-16a/b/c(owner 经视图见管理员名、非 owner 零行、anon 42501),全库 124 绿。
 - [x] F-7 ✅ 2026-08-01 App:qaMessagesProvider 改查视图;气泡署名 = sender_name(非空)?? 「管理員」;T-APP-04 断言更新(具名+回退双路径),161 绿。
 - [x] F-8 ✅ 2026-08-01 后台:消息查询改视图,气泡署名同规则;gen:types + lint + build 绿。
-- [ ] F-9 发布 🔄:0021 已推生产+记账,视图/授权验证通过(anon f / authenticated t)✅;admin 站已重发布 ✅;**余:随 F-5 真机复测**。⚠️ 过程教训:PowerShell 写的 .sh 带 BOM,经 `bash -s` 管道执行时**首行命令被吞**——生产脚本必须走 Bash 工具直连或先校验首行;本次曾出现「记账已插、migration 未跑」的反向不一致,已当场补齐核实。
+- [ ] F-9 发布 🔄:0021 已推生产+记账,视图/授权验证通过(anon f / authenticated t)✅;admin 站已重发布 ✅;**余:随 F-5 真机复测**。
+- [x] F-10 ✅ 2026-08-02 隔离性复测:本地栈真 JWT REST 13/13(B 对 A 的线程/消息/视图全盲、双角色写入 42501、删无效、anon 全拒、A 自见自删正常);生产结构核验(RLS t/t、5 策略在位、视图守卫含 qa_thread_owner+is_app_admin、anon 零授权)。复测中发现**默认授权第三次踩坑**:生产给 0021 新视图塞了 authenticated 全权 → migration `20260802000022_qa_view_grants.sql` 收紧至仅 SELECT,已推生产+记账,矩阵复核一致(视图含 JOIN 本不可写,属纵深防御)。**新对象上生产后必须复核授权矩阵,表和视图都要。**⚠️ 过程教训:PowerShell 写的 .sh 带 BOM,经 `bash -s` 管道执行时**首行命令被吞**——生产脚本必须走 Bash 工具直连或先校验首行;本次曾出现「记账已插、migration 未跑」的反向不一致,已当场补齐核实。
