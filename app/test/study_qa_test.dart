@@ -105,9 +105,22 @@ void main() {
       expect(qaThreadPending(thread(lastRole: 'admin')), isFalse);
     });
 
-    test('发送角色:线程主人恒为 user,他人(管理员)为 admin', () {
-      expect(qaSenderRole('u1', 'u1'), 'user');
-      expect(qaSenderRole('u1', 'admin-1'), 'admin');
+    test('语境判定(P8.6):?as=admin 或非线程主人 → 管理员语境', () {
+      expect(qaAdminContext(asAdmin: false, threadOwnerId: 'u1', myId: 'u1'),
+          isFalse);
+      expect(qaAdminContext(asAdmin: true, threadOwnerId: 'u1', myId: 'u1'),
+          isTrue); // 管理员从管理 tab 进自己的线程:仍是管理员身份
+      expect(qaAdminContext(asAdmin: false, threadOwnerId: 'u1', myId: 'a1'),
+          isTrue); // 非主人(RLS 已证明是管理员)
+      expect(qaContextRole(true), 'admin');
+      expect(qaContextRole(false), 'user');
+    });
+
+    test('气泡分侧按角色对语境(P8.6):同一人自问自答也问答分明', () {
+      expect(qaBubbleOnRight('user', false), isTrue); // 提问人看自己的问题:右
+      expect(qaBubbleOnRight('admin', false), isFalse); // 提问人看管理员回复:左
+      expect(qaBubbleOnRight('admin', true), isTrue); // 管理员语境看回复:右
+      expect(qaBubbleOnRight('user', true), isFalse); // 管理员语境看问题:左
     });
   });
 
@@ -233,17 +246,54 @@ void main() {
             },
           ]),
     ]);
-    // 他人消息左对齐,本人(admin-1)右对齐
+    // P8.6:分侧按角色对语境——管理员语境(非主人)下,admin 消息一律右,
+    // user 消息左;与哪位管理员发的无关
     Alignment alignOf(String text) => tester
         .widget<Align>(find
             .ancestor(of: find.text(text), matching: find.byType(Align))
             .first)
         .alignment as Alignment;
     expect(alignOf('打坐時妄念很多怎麼辦?'), Alignment.centerLeft);
-    expect(alignOf('妄念來去不隨。'), Alignment.centerLeft);
+    expect(alignOf('妄念來去不隨。'), Alignment.centerRight);
     expect(alignOf('補充:安住呼吸。'), Alignment.centerRight);
-    // 他人的管理员消息署名「管理員」(本人消息不署名 → 恰一处)
+    // 管理员消息恒署「管理員」(两条);管理员语境下用户消息署「提問人」
+    expect(find.text('管理員'), findsNWidgets(2));
+    expect(find.text('提問人'), findsOneWidget);
+  });
+
+  testWidgets('T-APP-04c P8.6 回归:自问自答问答分明(提问人语境)', (tester) async {
+    // 同一账号手机提问、后台以管理员身份回复:提问人语境下,
+    // 自己的问题在右、管理员回复在左并署名——即使 sender_id 都是本人
+    await pump(tester, const StudyQaThreadScreen(threadId: 'th-1'), overrides: [
+      currentUserProvider.overrideWith((ref) => testUser),
+      qaThreadProvider('th-1').overrideWith((ref) async => thread()),
+      qaMessagesProvider('th-1').overrideWith((ref) async => [
+            {
+              'id': 'm1',
+              'sender_id': 'u-owner',
+              'sender_role': 'user',
+              'body': '打坐時妄念很多怎麼辦?',
+              'created_at': '2026-07-30T09:00:00',
+            },
+            {
+              'id': 'm2',
+              'sender_id': 'u-owner', // 本人在后台以管理员身份自答
+              'sender_role': 'admin',
+              'body': '妄念來去不隨。',
+              'created_at': '2026-07-30T09:30:00',
+            },
+          ]),
+    ]);
+    Alignment alignOf(String text) => tester
+        .widget<Align>(find
+            .ancestor(of: find.text(text), matching: find.byType(Align))
+            .first)
+        .alignment as Alignment;
+    expect(alignOf('打坐時妄念很多怎麼辦?'), Alignment.centerRight);
+    expect(alignOf('妄念來去不隨。'), Alignment.centerLeft);
     expect(find.text('管理員'), findsOneWidget);
+    // 提问人语境下自己的消息不署「提問人」
+    expect(find.text('提問人'), findsNothing);
   });
 
   testWidgets('T-APP-05 删除流:菜单 → 确认对话框 → 取消保留', (tester) async {
@@ -286,8 +336,9 @@ void main() {
       GoRoute(path: '/', builder: (_, _) => const NotificationsScreen()),
       GoRoute(
         path: '/study-qa/:tid',
-        builder: (context, state) =>
-            Scaffold(body: Text('thread:${state.pathParameters['tid']}')),
+        builder: (context, state) => Scaffold(
+            body: Text('thread:${state.pathParameters['tid']}'
+                ':${state.uri.queryParameters['as'] ?? 'user'}')),
       ),
     ]);
     await pump(tester, const SizedBox.shrink(), router: router, overrides: [
@@ -328,27 +379,36 @@ void main() {
     expect(find.text('有新的學修提問'), findsOneWidget);
     // 副标题不含任何正文(qa 行副标题只有时间行)
     expect(find.textContaining('妄念'), findsNothing);
-    // 点击深链到会话页
+    // 点击深链到会话页:qa_reply 提问人语境
     await tester.tap(find.text('您的提問有新回覆'));
     await tester.pumpAndSettle();
-    expect(find.text('thread:th-9'), findsOneWidget);
+    expect(find.text('thread:th-9:user'), findsOneWidget);
+    // qa_question 管理员语境(P8.6:?as=admin)
+    router.go('/');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('有新的學修提問'));
+    await tester.pumpAndSettle();
+    expect(find.text('thread:th-9:admin'), findsOneWidget);
   });
 
-  testWidgets('T-APP-08/10 管理员视图:待回覆/全部 tab + 提问人名 + 全线程可删', (tester) async {
+  testWidgets('T-APP-08/10 管理员视图:待回覆/全部/我的 三 tab + 提问人名 + 全线程可删', (tester) async {
     await pump(tester, const StudyQaListScreen(), overrides: [
-      myProfileProvider.overrideWith((ref) => {'is_app_admin': true}),
+      myProfileProvider
+          .overrideWith((ref) => {'is_app_admin': true, 'id': 'admin-1'}),
       qaThreadsProvider.overrideWith((ref) async => [
             thread(id: 'a', lastRole: 'user', asker: '王師姐'),
             thread(
                 id: 'b',
+                userId: 'admin-1', // 管理员自己的提问
                 lastRole: 'admin',
                 asker: '李師兄',
                 preview: '誦經迴向如法嗎?'),
           ]),
     ]);
-    // 两个 tab
+    // 三个 tab(P8.6:管理员也有自己的提问人视角)
     expect(find.widgetWithText(Tab, '待回覆'), findsOneWidget);
     expect(find.widgetWithText(Tab, '全部'), findsOneWidget);
+    expect(find.widgetWithText(Tab, '我的提問'), findsOneWidget);
     // 默认「待回覆」tab 只显示 a,含提问人名
     expect(find.text('王師姐'), findsOneWidget);
     expect(find.text('誦經迴向如法嗎?'), findsNothing);
@@ -357,6 +417,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('王師姐'), findsOneWidget);
     expect(find.text('李師兄'), findsOneWidget);
+    // 切「我的提問」tab 只显示本人线程,提问人语境不显示名字
+    await tester.tap(find.widgetWithText(Tab, '我的提問'));
+    await tester.pumpAndSettle();
+    expect(find.text('誦經迴向如法嗎?'), findsOneWidget);
+    expect(find.text('打坐時妄念很多怎麼辦?'), findsNothing);
+    expect(find.text('李師兄'), findsNothing);
 
     // 管理员打开任意线程都有删除入口(T-APP-10)
     final adminUser = User(

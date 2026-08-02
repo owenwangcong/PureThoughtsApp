@@ -1068,6 +1068,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studyQaAdminLabel => '管理員';
 
   @override
+  String get studyQaAskerLabel => '提問人';
+
+  @override
   String get studyQaDelete => '刪除提問';
 
   @override
@@ -2156,6 +2159,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get studyQaAdminLabel => '管理员';
 
   @override
+  String get studyQaAskerLabel => '提问人';
+
+  @override
   String get studyQaDelete => '删除提问';
 
   @override
@@ -3242,6 +3248,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get studyQaAdminLabel => '管理員';
+
+  @override
+  String get studyQaAskerLabel => '提問人';
 
   @override
   String get studyQaDelete => '刪除提問';
