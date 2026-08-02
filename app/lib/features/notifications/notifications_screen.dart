@@ -140,9 +140,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     'live_started' => () => context.push('/live'),
                     'event_changed' => () => context.push('/calendar'),
                     'almanac' => () => context.push('/calendar'),
-                    // 深链会话页;线程已删则落「該提問已刪除」空态
-                    'qa_reply' || 'qa_question' => () => context.push(
+                    // 深链会话页;线程已删则落「該提問已刪除」空态。
+                    // qa_question 是发给管理员的 → 管理员语境(P8.6)
+                    'qa_reply' => () => context.push(
                         '/study-qa/${(n['payload'] as Map?)?['thread_id']}'),
+                    'qa_question' => () => context.push(
+                        '/study-qa/${(n['payload'] as Map?)?['thread_id']}?as=admin'),
                     _ => null,
                   },
                   title: Text(

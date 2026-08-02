@@ -348,6 +348,7 @@
   "studyQaAnswered": "已回复",
   "studyQaTabAll": "全部",
   "studyQaAdminLabel": "管理员",
+  "studyQaAskerLabel": "提问人",
   "studyQaDelete": "删除提问",
   "studyQaDeleteConfirm": "删除后问答内容将永久消失,无法恢复。确定删除?",
   "studyQaDeleted": "该提问已删除",

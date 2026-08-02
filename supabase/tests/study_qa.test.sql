@@ -200,7 +200,7 @@ select ok(
 update profiles set banned_at = null
  where id = '00000000-0000-4000-8000-000000000002';
 
--- 管理员自己的线程自己回复 → 不产生 qa_reply
+-- 管理员自己的线程自己回复 → 也产生 qa_reply,target=本人(P8.6/0020:不再抑制自通知)
 select sq_login('00000000-0000-4000-8000-000000000001');
 insert into sq_ids select 'at', public.create_qa_thread('管理員自問');
 select sq_reset();
@@ -210,9 +210,14 @@ insert into public.qa_messages (thread_id, sender_id, sender_role, body)
   select v, '00000000-0000-4000-8000-000000000001', 'admin', '自答' from sq_ids where k = 'at';
 select sq_reset();
 select ok(
-  (select count(*) from notifications where type = 'qa_reply')
-    = (select n from sq_nums where k = 'r0'),
-  'T-DB-12c 管理员回复自己的线程不产生自通知');
+  (select count(*) from notifications
+    where type = 'qa_reply'
+      and target_id = '00000000-0000-4000-8000-000000000001'
+      and payload->>'thread_id' = (select v::text from sq_ids where k = 'at'))
+    = 1
+  and (select count(*) from notifications where type = 'qa_reply')
+    - (select n from sq_nums where k = 'r0') = 1,
+  'T-DB-12c 管理员自答自己的线程也产生 qa_reply(target=本人,0020 定案)');
 
 -- ---------------------------------------------------------------- T-DB-13 冗余列
 select sq_login('00000000-0000-4000-8000-000000000004');

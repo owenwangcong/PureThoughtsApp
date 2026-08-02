@@ -105,12 +105,12 @@ function ThreadDialog({
     const body = reply.trim();
     if (!body || busy) return;
     setBusy(true);
-    // 管理员回复自己提的问题时以线程主人身份发言(RLS 口径,与 App 端一致)
-    const role = thread.user_id === profile.userId ? "user" : "admin";
+    // 后台是答疑台:回复恒为管理员身份,与线程归属无关(P8.6/PRD v0.5.19,
+    // 角色 = 发言身份语境;自答自己的提问也记 admin 并通知提问人)
     const { error } = await supabase.from("qa_messages").insert({
       thread_id: thread.id,
       sender_id: profile.userId,
-      sender_role: role,
+      sender_role: "admin",
       body,
     });
     setBusy(false);

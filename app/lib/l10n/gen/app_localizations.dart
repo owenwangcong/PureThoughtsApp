@@ -2186,6 +2186,12 @@ abstract class AppLocalizations {
   /// **'管理員'**
   String get studyQaAdminLabel;
 
+  /// No description provided for @studyQaAskerLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提問人'**
+  String get studyQaAskerLabel;
+
   /// No description provided for @studyQaDelete.
   ///
   /// In zh_Hant, this message translates to:

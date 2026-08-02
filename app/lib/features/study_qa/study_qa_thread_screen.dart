@@ -7,13 +7,19 @@ import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import 'study_qa_providers.dart';
 
-/// 学修问答会话页(设计 §4.2):聊天气泡流 + 底部输入框 + 删除。
-/// 本人消息右侧主色;对方左侧,管理员统一署名「管理員」(不暴露具体身份)。
+/// 学修问答会话页(设计 §4.2/§9):聊天气泡流 + 底部输入框 + 删除。
+/// 角色 = 发言身份语境(P8.6):从管理员视图进入(asAdmin)以管理员身份回复,
+/// 气泡按「角色对语境」分侧——本方角色靠右,对方靠左;管理员消息恒署「管理員」,
+/// 管理员语境下用户消息署「提問人」,同一人自问自答也问答分明。
 /// 线程查无(已删/无权限)→ 空态「該提問已刪除」。
 class StudyQaThreadScreen extends ConsumerStatefulWidget {
-  const StudyQaThreadScreen({super.key, required this.threadId});
+  const StudyQaThreadScreen(
+      {super.key, required this.threadId, this.asAdmin = false});
 
   final String threadId;
+
+  /// 以管理员语境打开(列表管理 tab 与 qa_question 通知深链传入)
+  final bool asAdmin;
 
   @override
   ConsumerState<StudyQaThreadScreen> createState() => _StudyQaThreadScreenState();
@@ -39,8 +45,11 @@ class _StudyQaThreadScreenState extends ConsumerState<StudyQaThreadScreen> {
     setState(() => _sending = true);
     try {
       final myId = ref.read(currentUserProvider)!.id;
-      await sendQaMessage(widget.threadId,
-          qaSenderRole(thread['user_id'] as String, myId), text);
+      final adminContext = qaAdminContext(
+          asAdmin: widget.asAdmin,
+          threadOwnerId: thread['user_id'] as String,
+          myId: myId);
+      await sendQaMessage(widget.threadId, qaContextRole(adminContext), text);
       _input.clear();
       ref.invalidate(qaMessagesProvider(widget.threadId));
       ref.invalidate(qaThreadsProvider);
@@ -98,8 +107,12 @@ class _StudyQaThreadScreenState extends ConsumerState<StudyQaThreadScreen> {
     if (t != null && !_markedRead && myId != null && t['user_id'] == myId) {
       _markedRead = true;
       Future.microtask(() async {
-        await markQaThreadRead(widget.threadId);
-        ref.invalidate(qaThreadsProvider);
+        try {
+          await markQaThreadRead(widget.threadId);
+          ref.invalidate(qaThreadsProvider);
+        } catch (_) {
+          // 已读位点失败(离线等)不影响浏览,下次进入重试
+        }
       });
     }
 
@@ -138,6 +151,11 @@ class _StudyQaThreadScreenState extends ConsumerState<StudyQaThreadScreen> {
                   : null,
             );
           }
+          final adminContext = myId != null &&
+              qaAdminContext(
+                  asAdmin: widget.asAdmin,
+                  threadOwnerId: t['user_id'] as String,
+                  myId: myId);
           return Column(
             children: [
               Expanded(
@@ -158,7 +176,7 @@ class _StudyQaThreadScreenState extends ConsumerState<StudyQaThreadScreen> {
                       itemCount: rows.length,
                       itemBuilder: (context, i) => _Bubble(
                         message: rows[rows.length - 1 - i],
-                        myId: myId,
+                        adminContext: adminContext,
                       ),
                     ),
                   ),
@@ -216,17 +234,25 @@ class _StudyQaThreadScreenState extends ConsumerState<StudyQaThreadScreen> {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message, required this.myId});
+  const _Bubble({required this.message, required this.adminContext});
 
   final Map<String, dynamic> message;
-  final String? myId;
+
+  /// 当前会话语境(P8.6):分侧与署名都按「角色对语境」,不看 sender_id
+  final bool adminContext;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final mine = message['sender_id'] == myId;
     final isAdminMsg = message['sender_role'] == 'admin';
+    final mine = qaBubbleOnRight(message['sender_role'] as String? ?? 'user',
+        adminContext);
+    // 管理员消息恒署「管理員」(不暴露具体身份);
+    // 管理员语境下用户消息署「提問人」;提问人看自己的消息不署名
+    final label = isAdminMsg
+        ? l10n.studyQaAdminLabel
+        : (adminContext ? l10n.studyQaAskerLabel : null);
     final time = (message['created_at'] as String? ?? '')
         .replaceFirst('T', ' ')
         .split('.')
@@ -253,12 +279,11 @@ class _Bubble extends StatelessWidget {
           crossAxisAlignment:
               mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            // 对方是管理员时统一署名「管理員」;本人消息不署名
-            if (!mine && isAdminMsg)
+            if (label != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
-                  l10n.studyQaAdminLabel,
+                  label,
                   style: Theme.of(context)
                       .textTheme
                       .labelSmall

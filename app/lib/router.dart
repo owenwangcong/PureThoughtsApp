@@ -126,8 +126,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => const StudyQaComposeScreen()),
       GoRoute(
         path: '/study-qa/:tid',
-        builder: (context, state) =>
-            StudyQaThreadScreen(threadId: state.pathParameters['tid']!),
+        builder: (context, state) => StudyQaThreadScreen(
+          threadId: state.pathParameters['tid']!,
+          // 管理员语境(P8.6):列表管理 tab 与 qa_question 通知深链带 ?as=admin
+          asAdmin: state.uri.queryParameters['as'] == 'admin',
+        ),
       ),
       GoRoute(
         path: '/webview',

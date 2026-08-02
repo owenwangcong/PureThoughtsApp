@@ -10,7 +10,9 @@ import '../auth/auth_providers.dart';
 /// 客户端不需要也不允许再做权限判断,查询是同一条。
 
 /// 线程列表(按最后消息倒序;profiles 内嵌供管理员视图显示提问人)
-final qaThreadsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+/// autoDispose:离开页面即释放,重进重拉——别端(后台/另一设备)写入无需手动刷新(P8.6)
+final qaThreadsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return const [];
   return Supabase.instance.client
@@ -22,8 +24,8 @@ final qaThreadsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async
 });
 
 /// 单线程(会话页头部;null = 已删除或无权限 → 空态「該提問已刪除」)
-final qaThreadProvider =
-    FutureProvider.family<Map<String, dynamic>?, String>((ref, threadId) async {
+final qaThreadProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>?, String>((ref, threadId) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
   return Supabase.instance.client
@@ -34,8 +36,8 @@ final qaThreadProvider =
 });
 
 /// 线程消息(升序,聊天式渲染)
-final qaMessagesProvider = FutureProvider.family<List<Map<String, dynamic>>, String>(
-    (ref, threadId) async {
+final qaMessagesProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, threadId) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return const [];
   return Supabase.instance.client
@@ -59,9 +61,23 @@ bool qaThreadUnread(Map<String, dynamic> t) {
 /// 待回覆 = 最后发言方是用户
 bool qaThreadPending(Map<String, dynamic> t) => t['last_sender_role'] == 'user';
 
-/// 发消息用的角色:线程主人以 user 身份发言(管理员自问也算),其余为管理员回复
-String qaSenderRole(String threadOwnerId, String myId) =>
-    threadOwnerId == myId ? 'user' : 'admin';
+/// 会话语境(P8.6/PRD v0.5.19:角色 = 发言身份,不从所有权推导):
+/// 从管理员视图进入(路由 ?as=admin)或本就不是线程主人 → 管理员语境。
+/// 非主人能看到线程即已由 RLS 证明是管理员;非管理员伪造 ?as=admin 时,
+/// 发 sender_role='admin' 会被 RLS 拒(42501),不越权。
+bool qaAdminContext({
+  required bool asAdmin,
+  required String threadOwnerId,
+  required String myId,
+}) =>
+    asAdmin || threadOwnerId != myId;
+
+/// 发消息角色 = 当前语境
+String qaContextRole(bool adminContext) => adminContext ? 'admin' : 'user';
+
+/// 气泡分侧按「角色对语境」而非 sender_id:同一人自问自答也问答分明(P8.6)
+bool qaBubbleOnRight(String senderRole, bool adminContext) =>
+    adminContext ? senderRole == 'admin' : senderRole == 'user';
 
 /// 学修问答错误文案:待回覆上限(触发器 QA_PENDING_LIMIT)给专属提示,其余走 errText
 String qaErrorText(AppLocalizations l10n, Object e) {
