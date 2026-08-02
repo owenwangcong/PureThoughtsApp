@@ -369,8 +369,8 @@ lib/features/study_qa/
 
 ### 9.3 实施清单
 
-- [ ] F-1 migration `20260801000020_qa_reply_self_notify.sql`:重建 `on_qa_message_insert` 去掉 owner==sender 抑制;pgTAP T-DB-12c 断言反转(自答产生 1 条 qa_reply,target=本人)。
-- [ ] F-2 App:providers autoDispose + `qaSenderRole` 改语境判定;列表三 tab;路由 `?as=admin` + 通知深链带语境;气泡按角色分侧/署名;返回刷新;l10n +「提問人」键。
-- [ ] F-3 后台:回复恒 `admin`;lint+build 绿。
-- [ ] F-4 测试:pgTAP + Flutter 全绿(受影响用例更新:三 tab、气泡分侧、深链语境)。
-- [ ] F-5 发布:0020 推生产+记账;admin 站重发布;真机重装复测 §9.1 四现象消失。
+- [x] F-1 ✅ 2026-08-01 migration `20260801000020_qa_reply_self_notify.sql`:重建 `on_qa_message_insert` 去掉 owner==sender 抑制;pgTAP T-DB-12c 断言反转(自答产生 1 条 qa_reply,target=本人)。
+- [x] F-2 ✅ 2026-08-01 App:providers autoDispose;`qaSenderRole` 替换为 `qaAdminContext`/`qaContextRole`/`qaBubbleOnRight`;列表三 tab(我的提問复用 studyQaMine);路由 `?as=admin` + qa_question 深链带语境;气泡按角色分侧/署名(新增 T-APP-04c 自问自答回归);已读微任务容错;返回列表刷新;l10n + `studyQaAskerLabel`。
+- [x] F-3 ✅ 2026-08-01 后台:回复恒 `admin`;lint+build 绿(16 页静态导出)。
+- [x] F-4 ✅ 2026-08-01 测试:pgTAP 121 + Flutter 161 全绿。
+- [ ] F-5 发布 🔄:0020 已推生产+记账(函数校验 t)✅;admin 站已重发布 ✅;**余:真机重装复测 §9.1 四现象消失**(待设备连接)。
