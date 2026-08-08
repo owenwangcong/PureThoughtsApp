@@ -1,6 +1,6 @@
 # 善护念 PureThoughts · 产品需求文档 (PRD)
 
-> 版本:v0.5.20(学修问答管理员署名真名,详见 §16) · 来源:`initial.md` + 十二轮需求澄清
+> 版本:v0.5.21(通知系统改造:投递可靠性 / 免打扰落地 / 活动提醒三档 / 变更降噪 / 推送深链,详见 §5–§5.4,设计见 [`design/notification-overhaul.md`](design/notification-overhaul.md)) · 来源:`initial.md` + 十二轮需求澄清
 > 技术栈:Flutter(iOS + Android) · **Supabase 自托管(Auth / Postgres+RLS / Edge Functions / pg_cron / Storage / Realtime)** · 推送(APNs + FCM)
 >
 > **v0.5 主要改动(相对 v0.4)**:
@@ -133,17 +133,22 @@
 
 - **循环模板 + 单次修改**:周六共修、周三打坐等按循环规则自动生成,单次可改时间/内容/取消。
 - **通知类型**:周六共修预告(提前一天)、周六当天 Webex/YouTube 连接、周三打坐提醒、讲法/共修/法会预告。
+- **活动提醒**(v0.5.21 定案,设计 [`design/notification-overhaul.md`](design/notification-overhaul.md) §2/§6):提醒点存 `event_reminders`(每活动可配多个提前量),**新建与存量活动默认三档 = 提前一天(1440 分) / 提前 30 分钟(30) / 活动开始时(0)**;可选档位 0/10/15/30/60/180/1440/2880 分,管理员可按活动增删。三档各司其职,缺一不可:
+  - **提前一天** —— 让用户安排时间,且是**大陆 Android 用户唯一能看到的一档**(§5.1:该群体收不到实时推送,只能靠"打开 App 即见";只有覆盖 24 小时的预告才有机会被看到),也是本节邮件兜底的唯一有意义载体;
+  - **提前 30 分钟** —— 临门一脚的准备提醒,补上预告到开始之间 24 小时的空档(不用 10 分钟:与"开始时"挨得过近,且用户群年龄跨度大,从看到通知到完成准备需要更多时间);
+  - **活动开始时** —— 点击直进 Webex/YouTube。
+  - 排程由 pg_cron 每日展开未来 14 天生成(§12.4);活动改期/取消/删除时未发提醒自动重排,已发的不追回。
 - **跨时区**(v0.5.15 增强):活动时间以 `timestamptz` 存储,**按用户设备时区显示**;**管理员建/编辑活动时显式选择活动时区**(IANA 名,存 `events.timezone`,墙钟时间按该时区转 UTC),**默认时区管理员可配**(`app_settings.default_event_timezone`,初始 Asia/Shanghai);每周循环在**活动时区**做日历算术展开(跨夏令时保持当地墙钟不变);活动详情页当地时间与设备时间不同时加注「活動當地時間」。
 - **日历视图**:所有活动可在日历查看;**未来事件列表**(v0.5.7:日历下方按时间列出即将到来的活动);同一天多种活动共存并全部显示。
 - **事件类型**(v0.5.7 定案):动态表 `event_types`,默认 **靜坐 / 共修 / 講法 / 禪七 / 其它**;**管理员可增删改类型**(名称简繁 + 图标 + 启用状态,图标从预置图标集选择);不同类型在日历中显示不同图标;被活动引用的类型不可删、只能停用。
-- **管理员活动管理**(v0.5.7):新增 / 编辑 / 删除整个活动(含循环全部场次)/ 取消单次;**任何活动变更自动生成全员通知**(新增/更新/删除/单次取消,App 内通知中心即时可见,推送接通后同链路升级)。**新建活动默认不重复**(v0.5.10:「每週重複」开关默认关闭,单次活动为主;需要每周循环时管理员手动开启)。
+- **管理员活动管理**(v0.5.7):新增 / 编辑 / 删除整个活动(含循环全部场次)/ 取消单次;**任何活动变更自动生成全员通知**(新增/更新/删除/单次取消,App 内通知中心即时可见,推送接通后同链路升级)。**变更通知降噪**(v0.5.21):新增/删除立即发,编辑类走 5 分钟防抖窗口(窗口内反复编辑只聚合成一条);撤销单次取消/改期时补发「單次恢復」通知;同一活动的连续变更在手机通知栏折叠为一条;编辑器提供「通知所有人」开关(默认开),关闭后本次改动不发全员通知。**新建活动默认不重复**(v0.5.10:「每週重複」开关默认关闭,单次活动为主;需要每周循环时管理员手动开启)。
 - **活动时间表与相关资料**(v0.5.12 定案,详细设计见 [`design/event-agenda.md`](design/event-agenda.md)):管理员可给活动补一份**时间表**(几点到几点做什么,**支持跨多天**如禪七)与**相关资料**;用户可看、可**整张时间表分享/复制**转发 Line/微信。
   - **时间表**:结构化行(第几天 + 起讫时间 + 活动),每行可选填一个**自由网址**(如读经行链接到经文网页);归属活动本身,循环活动各场次共用;时间为现场墙钟时间原样显示、不做时区换算。
   - **相关资料**:管理员**在 App 内上传 PDF**(如经本)供用户下载 —— 存 **Supabase Storage**(`event-files` bucket,公开可读、仅管理员可写);走自有域名 `api.pure-thoughts.com`,**大陆可达**(相对 YouTube 的关键优势)。另沿用活动级 YouTube/Webex 链接。
   - **分享**:整张时间表渲染为纯文本(含各行链接、PDF 公开 URL、YouTube),经系统分享面板发 Line/微信,或复制到剪贴板;转发后大陆用户点 Storage 链接可下 PDF。
   - **日历列表标记**:活动若含**时间表 / PDF / 链接**,在日历列表项(当日列表与未来活动列表)上分别挂对应小图标(时钟 / PDF / 链接),用户不点开即知里面有内容。
   - 均**管理员维护、用户只读**(匿名可看);改时间表/资料不额外发全员通知。
-- **分类订阅**:用户可按类型开关推送。
+- **分类订阅**(v0.5.21 落地):用户可按通知类型开关,存 `notification_prefs.muted_types`(数组,随账号跨设备同步)。语义 = **不推送 + 通知中心不显示 + 不计红点**(与既有佛历开关行为一致,避免"关了还在列表里"的困惑)。首批可开关类型:活動提醒 / 活動變動 / 佛教節日 / 十齋日 / 學修問答回覆。
 
 ### 5.2 佛教日曆(纪念日 / 节日 / 十斋日,v0.5.15 新增,详细设计见 [`design/buddhist-calendar.md`](design/buddhist-calendar.md))
 
@@ -152,8 +157,9 @@
 - **数据来源(离线)**:`tools/almanac/` 生成器(6tail 官方 lunar Dart 库)一次性预生成 **2026–2075 共 50 年**逐日农历 + 节日 + 十斋日数据:客户端打包为资产文件(每年一个 JSON,**完全离线可读、匿名可见**),服务端同源生成 `almanac_days` 表(仅特殊日)供通知排程——**单一生成器保证两端口径一致**,客户端零农历运行时依赖。
 - **时区语义**:农历日按中国时间(UTC+8)定义、映射为公历日期后**全球同一天显示**(全天性质,不随时区平移)。
 - **首页横幅**:当天为节日/十斋日时,首页顶部(登录/未登录一致)显示莲花横幅「今日 · 農曆四月初八 · 釋迦牟尼佛聖誕(浴佛節)」,点击进日历;非特殊日不占位。
-- **通知**:pg_cron 每日(UTC+8 零点后)生成全员通知(`type=almanac`,payload 携带简繁名/kind,幂等):节日与十斋日**当天**各一条,★ 重大节日**提前一天**加预告;通知中心即时可见,推送(P2.1)接通后同链路自动升级;设置页「佛教節日提醒 / 十齋日提醒」两开关默认开、可分别关闭。
+- **通知**:pg_cron 每日(UTC+8 零点后)生成全员通知(`type=almanac`,payload 携带简繁名/kind,幂等):节日与十斋日**当天**各一条,★ 重大节日**提前一天**加预告;通知中心即时可见,推送(P2.1)接通后同链路自动升级;设置页「佛教節日提醒 / 十齋日提醒」两开关默认开、可分别关闭。**开关上云**(v0.5.21):原实现仅在客户端过滤列表、服务端照推(用户关了仍收推送),现改为存 `notification_prefs.muted_types`(`almanac:festival` / `almanac:zhai`),服务端投递时即过滤;老用户首次登录时把本地两个开关一次性迁入。⚠️ 该 cron 在 UTC+8 零点后触发,对中国大陆用户即凌晨 00:05,**必须配合免打扰顺延**(见上条),否则推送上线即在半夜叫醒用户。
 - **免打扰时段**:默认 22:00–07:00(用户本地时区)不发系统推送,顺延到时段结束后发;活动开始前的实时通知(如"共修连接")不受限;用户可在设置中调整或关闭。
+  - **落地细则**(v0.5.21,原为纯需求描述、无实现):配置存 `notification_prefs`(`quiet_enabled` 默认 true / `quiet_start` 22:00 / `quiet_end` 07:00,支持跨午夜与同日两种窗口),按 **`profiles.timezone`** 判定(客户端登录时随其它偏好一并上报,此前从不同步);**"不受限"的判据 = `event_reminder` 且提前量 ≤60 分钟**(即 30 分钟与开始时两档放行,提前一天的预告遵守免打扰)。顺延实现:命中免打扰的用户不即时推送,由服务端克隆一条仅推送(不进通知中心)的用户级通知,排程到其本地时段结束时刻。
 
 ### 5.3 管理员发布通知 + 首页管理区(v0.5.16 新增,详细设计见 [`design/admin-notifications.md`](design/admin-notifications.md))
 
@@ -161,6 +167,7 @@
 - **发布通知**:标题 + 多行文字内容;可**定时发送**(按管理员设备本地时间);提交前预览确认;经 RPC `admin_publish_notification` 写入(notifications 表维持客户端不可直写),走既有通知中心 + 推送链路。
 - **已排程管理**:未发送的定时通知可查看/取消;**撤回已发**:删行使所有人通知中心消失(已弹出的手机推送无法收回,界面注明);撤回/取消仅限 general 类型。
 - 定时通知到点前不出现在用户通知中心(v0.5.16 一并修复查询口径)。
+- **排程队列状态**(v0.5.21):列表区分「排程中 / 已发送 / 投递失败」三态(此前只能靠两个时间戳推导、无失败态);投递失败的条目显示重试次数与最近错误摘要。定时时刻**不再受"24 小时内创建"限制**——原实现中定到 24 小时以后的通知会永久发不出去(见 §5.4)。
 
 ### 5.1 推送策略(重要:约 1/3 用户在中国大陆)
 
@@ -175,7 +182,25 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 - ⚠️ **关键后果**:**大陆 Android 用户收不到实时系统推送**,只能靠"打开 App 即见"→ 因此 **App 内通知中心是刚需,不是增强项**。
 - **邮件兜底**:时效性强的通知(如周六共修预告)对大陆用户额外发邮件(经 Resend / SES 等,由 Edge Function 触发)。
   - **如何识别大陆用户**(v0.4 补):注册 / 设置中让用户自选"所在地区"(大陆 / 其他);另对 **FCM token 注册失败的 Android 设备自动标记**为需邮件兜底。
+  - **判据修正**(v0.5.21):原设计的 `push_tokens.fcm_failed` 不可行——大陆机 `getToken()` 直接失败,`push_tokens` 里**根本没有该设备的行**可标记,该字段生产恒为 false。判据改为 **`notification_prefs.push_unavailable`**(按用户一行,客户端 FCM 注册失败时主动置位,成功时置回);`fcm_failed` 列保留但标注废弃。
 - 未来若确需大陆 Android 实时推送,再评估接厂商通道(当前明确不接)。
+
+### 5.4 通知中心与投递可靠性(v0.5.21 新增,详细设计见 [`design/notification-overhaul.md`](design/notification-overhaul.md))
+
+**投递可靠性**(修复三个会在生产暴露的缺陷):
+
+- **定时通知不再永久卡死**:原取数条件同时要求"创建于 24 小时内"与"已到排程时刻",定到 24 小时以后的通知到点时已滑出窗口 → 永不投递且永久计入积压告警。窗口基准改为**排程时刻**(到点后 6 小时内有效,防服务长时间宕机恢复后的过期雪崩)。
+- **失败可重试、可见**:原实现在发送**之前**就标记已发送,失败不回滚、不重试、不留痕迹 → 一次网络抖动即静默丢失。改为租约式抢占(`claimed_at` 2 分钟租约 + `attempts` 计数),失败释放租约由每分钟 cron 自动重投,连续 5 次失败记为终局失败并在后台可见。重试粒度为**整条通知**而非单个设备,极端情况下可能对已成功用户重复推送一次,由通知栏折叠兜底(取舍详见设计文档 §4.3)。
+- **投递渠道字段生效**:`notifications.channels`(inapp/push/email)此前两端均未生效,现由服务端按此决定是否推送、客户端按此决定是否进通知中心;这也是 §5.1 邮件兜底(P2.2)的前置。
+
+**通知中心**:
+
+- **已读语义**:由"进入页面即全部标记已读"改为**点击单条标记已读 + 顶部「全部已讀」按钮**,使未读红点真实反映未读量(原实现会把用户没细看的通知一并清掉)。
+- **分页与时效**:游标分页(每页 30,触底加载,原为 50 条硬上限无分页);订阅 Realtime 使 App 前台时红点即时变化(原仅冷启动/下拉刷新时更新)。
+- **时间显示**:按设备本地时区格式化(原直接截取 UTC 字符串显示)。
+- **保留期**:通知保留 **180 天**,由每日 cron 清理(级联清除已读记录);此前无任何清理机制。
+
+**深链**:推送与通知中心条目点击后直达对应页面(活动提醒/变动 → 该场活动详情、直播 → 直播页、问答 → 该会话)。此前点系统推送只是把 App 拉起到当前页,通知中心的活动通知也只能落到日历列表。
 
 ---
 
@@ -309,9 +334,11 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | **`event_attachments`**(v0.5.12) | id, event_id(FK cascade), title, storage_path(`event-files` 桶内 key), size_bytes, content_type, sort_order —— 相关资料 PDF;删行前先删 Storage 对象(级联不清对象) |
 | `media_items` | id, title_hant/hans, kind(audio/video), source(youtube/https), url, size, category, sort_order, active |
 | `scriptures` | id, title, web_url, sort_order |
-| `push_tokens` | user_id, token, platform(apns/fcm), **fcm_failed(bool,邮件兜底标记)**, updated_at |
-| `notifications` | id, scope(user/group/all), target_id, title, body, type, event_id(nullable), **scheduled_at**, **sent_at**, **channels(push/email/inapp)**, created_at |
+| `push_tokens` | user_id, token, platform(apns/fcm), ~~fcm_failed~~(v0.5.21 **废弃**:大陆机无 token 行可标,判据移至 `notification_prefs.push_unavailable`), updated_at |
+| `notifications` | id, scope(user/group/all), target_id, title, body, type, event_id(nullable,**v0.5.21 起活动类通知真实写入**), **scheduled_at**, **sent_at**, **channels(push/email/inapp,v0.5.21 起两端生效)**, created_at, **claimed_at / attempts / failed_at / last_error**(v0.5.21,租约式投递与重试) |
 | `notification_reads` | notification_id, user_id, read_at |
+| **`notification_prefs`**(v0.5.21) | user_id(PK), quiet_enabled(默认 true), quiet_start(22:00) / quiet_end(07:00), muted_types(text[],分类订阅), push_unavailable(bool,FCM 不可用=需邮件兜底), updated_at —— 每用户一行的通知偏好,跨设备同步 |
+| **`event_reminders`**(v0.5.21) | id, event_id(FK cascade), offset_minutes(提前分钟数), enabled, created_at —— 活动提醒点;每活动可多条,默认三档 1440/30/0,唯一键 (event_id, offset_minutes) |
 | **`reports`** | id, reporter_id, target_type(user/group/log), target_id, reason, status(open/resolved), handled_by, created_at |
 | **`user_blocks`** | user_id, blocked_user_id, created_at |
 | **`qa_threads`**(v0.5.18) | id, user_id(FK cascade,删号连带清空), last_sender_role(user=待回覆/admin=已回覆), last_message_at, first/last_message_preview, user_last_read_at, created_at —— 学修问答线程(§16);冗余列由触发器维护 |
@@ -333,6 +360,8 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 | `events` / `event_agenda_items` / `event_attachments` / `media_items` / `scriptures` | **anon 可读**(匿名浏览),仅管理员写(v0.5.12:两活动子表 + `event-files` Storage 桶同口径,`storage.objects` 公开读、`is_app_admin()` 写) |
 | `almanac_days` / `app_settings` | **anon 可读**;`almanac_days` 无人可写(仅 migration/service),`app_settings` 仅 `is_app_admin()` 可写(v0.5.15) |
 | `notifications` | scope 命中者可读;仅服务端(service_role)写 |
+| **`notification_prefs`**(v0.5.21) | 仅本人读写自己;管理员全读。⚠️ 建表时必须显式 `revoke all from public, anon, authenticated` 后再按需 grant(生产库新表默认授权会覆盖最小授权,见 §12.5 教训) |
+| **`event_reminders`**(v0.5.21) | **anon 可读**(与 `events` 同口径,匿名可见活动设了哪些提醒),仅 `is_app_admin()` 可写 |
 | `reports` | 举报人可 insert / 读自己的;管理员全权 |
 | `user_blocks` | 仅本人读写 |
 | `qa_threads` | 本人可读/建/删自己的;管理员全读全删;update 不开放(冗余列走触发器,已读走 RPC `mark_qa_thread_read`);insert 校验未封禁,待回覆 ≤3 由触发器拦截(v0.5.18) |
@@ -342,14 +371,24 @@ Supabase 不发推送,由 Edge Function / DB 触发外部通道。**不接国内
 
 | 函数 | 触发 | 职责 |
 |---|---|---|
-| `push-dispatch` | DB webhook(notifications insert)/ cron | 查目标用户 token,APNs(JWT 直连)+ FCM 发送;失败 token 标记清理 |
+| `push-dispatch` | DB webhook(notifications insert)/ cron | 查目标用户 token,APNs(JWT 直连)+ FCM 发送;失效 token 清理。v0.5.21:租约式抢占(`claim_notifications`)+ 结果回写(`complete_notification`)+ 受众解析下沉为 `push_audience` RPC(内含 channels / 分类订阅 / 免打扰 / 封禁四道过滤)+ 免打扰顺延克隆 + 报文携带深链 route 与折叠 id |
 | `email-fallback` | 由 push-dispatch 级联 | 对 region=cn 或 fcm_failed 的用户发邮件(Resend/SES) |
 | `delete-account` | 客户端调用(需登录) | §10.1 删除 + 匿名化流程 |
 | `admin-ops` | 管理后台调用(需登录,函数内验 `is_app_admin()`) | §15 需 `service_role` 的特权操作:重置任意用户密码、代删账号、设/撤管理员;CORS 仅放行 admin 子域 |
 
 > ~~`qa-proxy`~~ **已取消**(v0.5.11):上游问答 API 完全公开、无认证、CORS 全开,「隐藏上游地址 / 统一鉴权」两个立项理由均不成立;客户端直连(§6)。
 
-**pg_cron**:每日滚动展开未来 14 天活动 occurrence(应用 `event_overrides`)→ 生成 `notifications`(scheduled_at = 规则时间,如提前一天)→ 到点由 cron 触发 `push-dispatch` 投递。**佛历通知**(v0.5.15):每日 16:05 UTC(= UTC+8 次日 00:05)执行 `generate_almanac_notifications()`,按 `almanac_days` 生成当日节日/十斋日 + 次日重大节日预告的全员通知(幂等,重跑不重复)。
+**pg_cron**(v0.5.21 落地并补全,此前只有下列第 2、3 项):
+
+| job | 频率 | 职责 |
+|---|---|---|
+| `event-reminders-daily` | `0 15 * * *`(UTC) | `expand_event_reminders(14)`:按 `event_reminders` 的提前量,在**活动时区**展开未来 14 天 occurrence(RRULE 子集 + 应用 `event_overrides` 的取消/改期)→ 生成 `type=event_reminder` 通知(`scheduled_at` = 提醒时刻,幂等键 = event_id + occurrence_date + offset_minutes)。活动改期/取消/删除或提醒点增删时,由触发器即时清掉未发提醒并重排 |
+| `almanac-daily` | `5 16 * * *`(= UTC+8 次日 00:05) | `generate_almanac_notifications()`(v0.5.15,幂等,重跑不重复) |
+| `push-dispatch-sweep` | `* * * * *` | 兜底触发 `push-dispatch` 投递到点通知 |
+| `notifications-retention` | `0 17 * * *` | `purge_old_notifications(180)`:清理 180 天前的通知(级联清已读记录) |
+
+> **排程精度**:`push-dispatch-sweep` 粒度为 1 分钟,故所有提醒的 `scheduled_at` 统一提前 60 秒排程,避免"活动开始了"迟到一分钟。
+> **展开口径一致性**:服务端 SQL 展开必须与客户端 Dart(`occurrence_utils.dart`)、管理后台 TS 三处口径一致——每周循环在**活动时区**做日历算术(跨 DST 保持当地墙钟),`occurrence_date` 取活动时区日期。
 
 ### 12.5 自托管部署要点(v0.5 新增)
 
@@ -389,7 +428,7 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 4. ⚠️ **中国区 App Store 上架**:宗教类内容在中国区上架需 ICP 备案与宗教信息服务许可,大概率**无法上架中国区**。现实路径:大陆 iOS 用户使用外区 Apple ID 下载;大陆 Android 用户经官网 APK 直接分发(不依赖 Google Play)。需与内容方确认分发口径,并在官网准备下载页。
 5. **自托管运维责任**(v0.5 新增):备份可恢复性、安全更新、监控告警均自担;上线前需完成一次完整的**备份恢复演练**(§12.5)。
 
-**已定案**(四轮澄清):注册用户可自建群、建群者即群主 · 入群申请需附一条说明 · 补报统一计入当天 · 代报允许自由名字 · 音频从 HTTPS endpoint 下载 · 计数器仅用屏幕按钮 · 推送 = APNs(iOS)+ FCM(海外 Android)+ App 内通知中心兜底,**不接国内厂商推送** · 报数软删除可改可删 · 代报通知被代报人且其可删 · 统计按 `local_date` 单一口径 · 发愿默认跨群统计 · 账号删除 + 举报拉黑纳入 MVP · **删号匿名化保留群总量** · **自定义功课项群成员均可加** · **Supabase 自托管** · **采纳:快捷报数 / 群公告 / 发愿随喜回向 / 连续用功天数(仅自己可见)/ 计数器整串提示 / 免打扰时段;群数据导出暂不做** · **代报自由名字自动记忆成本群共享名单,供复用** · **账号体系 = 用户名+密码,注册免邮箱验证,邮箱选填仅作找回,Google/Apple 登录移出 MVP(v0.5.9,面向年长/无邮箱用户)**。
+**已定案**(四轮澄清):注册用户可自建群、建群者即群主 · 入群申请需附一条说明 · 补报统一计入当天 · 代报允许自由名字 · 音频从 HTTPS endpoint 下载 · 计数器仅用屏幕按钮 · 推送 = APNs(iOS)+ FCM(海外 Android)+ App 内通知中心兜底,**不接国内厂商推送** · 报数软删除可改可删 · 代报通知被代报人且其可删 · 统计按 `local_date` 单一口径 · 发愿默认跨群统计 · 账号删除 + 举报拉黑纳入 MVP · **删号匿名化保留群总量** · **自定义功课项群成员均可加** · **Supabase 自托管** · **采纳:快捷报数 / 群公告 / 发愿随喜回向 / 连续用功天数(仅自己可见)/ 计数器整串提示 / 免打扰时段;群数据导出暂不做** · **代报自由名字自动记忆成本群共享名单,供复用** · **账号体系 = 用户名+密码,注册免邮箱验证,邮箱选填仅作找回,Google/Apple 登录移出 MVP(v0.5.9,面向年长/无邮箱用户)** · **通知系统(v0.5.21)**:活动提醒默认三档 1440/30/0 且「提前一天」不可省(大陆 Android 唯一可见档)· 活动提醒发全站(不做活动报名,用分类订阅收敛)· 投递重试粒度为整条通知而非单设备(重复推送由通知栏折叠兜底)· 免打扰放行判据 = `event_reminder` 且提前量 ≤60 分 · 通知保留 180 天 · 已读改为点击单条 + 全部已读。
 
 ---
 
@@ -417,7 +456,7 @@ Supabase 全套开源,自托管(官方 Docker Compose,或 Coolify 等面板)与�
 
 - 用户管理:搜索、封禁/解封、**重置密码**(替代 deploy 文档 §10 的 psql 运维命令,走 `admin-ops`)、设/撤管理员、代删账号。
 - 群总览:全部群列表(成员数/群总量)、纠纷处理(转让/解散)。
-- 数据看板:每日报数量与活跃趋势、推送投递健康(`push_tokens.fcm_failed` 率)、通知队列积压(`scheduled_at` 到点未 `sent_at`)。
+- 数据看板:每日报数量与活跃趋势、推送投递健康(v0.5.21 改读 `notification_prefs.push_unavailable`,原 `fcm_failed` 恒为 0 已废弃)、通知队列积压(`scheduled_at` 到点未 `sent_at` 且未终局失败)、**投递失败明细**(`failed_at` / `attempts` / `last_error`)、近 24h 投递结果汇总。
 - 内容上架:media_items(P4 音频)、live_streams 频道、practice_types 主清单、scriptures。
 
 ### 15.3 非目标
