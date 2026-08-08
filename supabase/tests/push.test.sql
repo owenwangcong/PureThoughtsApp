@@ -10,7 +10,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(29);
+select plan(30);
 
 -- 1) 配置键在 app_secrets(默认空 = 本地不外呼)
 select is(
@@ -169,6 +169,13 @@ select ok(exists(select 1 from cron.job where jobname = 'notifications-retention
 select ok(exists(select 1 from pg_indexes
                   where schemaname = 'public' and indexname = 'idx_notification_reads_user'),
   'T-DB-42b notification_reads(user_id) 索引存在');
+
+-- 通知中心红点靠订阅 notifications 的 INSERT;不在 publication 里则订阅建得起来
+-- 但永远收不到事件(功能静默失效)
+select ok(exists(select 1 from pg_publication_tables
+                  where pubname = 'supabase_realtime'
+                    and schemaname = 'public' and tablename = 'notifications'),
+  'T-DB-42c notifications 已加入 supabase_realtime publication');
 
 select * from finish();
 rollback;

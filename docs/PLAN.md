@@ -135,12 +135,22 @@
 > **立项背景**:2026-08-07 通知链路全量勘察发现——PRD §5 承诺的「周六共修提前一天预告 / 当天连接通知」**一条都没实现**(全库无人写 `type=event_reminder`),活动类通知只有「管理员改了活动 → 全站广播」;同时投递管道有三个会在生产暴露的正确性缺陷(见 §7 登记)。六步按依赖顺序推进,**P2.12 是地基**(不修投递窗口,P2.14 做出来的提醒一条也发不出去)。
 > 六步共 42 项实施清单 + 86 项测试用例,逐项勾选见设计文档 §11 / §12。
 
-- [ ] **P2.12** 投递管道加固(M)— migration 0023:`notifications` 加 `claimed_at/attempts/failed_at/last_error` + 投递队列部分索引;租约式抢占 RPC `claim_notifications`(FOR UPDATE SKIP LOCKED)+ 结果回写 `complete_notification`;语句级触发器改转换表写法(仅当本批含已到点行才外呼);`push-dispatch` 重写主流程(鉴权强制 + POST-only + 并发 20 + 全流程 try/catch)。**修缺陷 A/B**。
-- [ ] **P2.13** 免打扰与通知偏好上云(M)— migration 0024:`notification_prefs` 表(免打扰起讫 + `muted_types` 分类订阅 + `push_unavailable`)+ `quiet_until()` / `push_audience()`;`push-dispatch` 接受众 RPC + 免打扰顺延克隆(`channels='{push}'`,顺带让 `channels` 字段两端生效);客户端偏好上云(含 `profiles.timezone` 首次同步)+ 设置页「通知」分组 + 佛历双开关一次性迁入。**修缺陷 C/D**。
-- [ ] **P2.14** 活动提醒排程(L)— migration 0025:`event_reminders` 表(默认三档 **1440 / 30 / 0**,存量活动一并补齐)+ 幂等唯一索引 + `expand_event_reminders()`(活动时区墙钟算术,与 Dart `occurrence_utils.dart` 口径一致)+ cron `event-reminders-daily` + 改期/取消/删除的重排触发器;四档推送文案(简繁);编辑器提醒区 + 详情页只读展示 + 通知中心渲染。**兑现 PRD §5 核心承诺,本次最大价值项**。
-- [ ] **P2.15** 变更通知降噪(M)— migration 0026:`notify_event_change` 5 分钟防抖聚合(created/deleted 仍立即发)+ `event_id` 真实写入 + 补「單次恢復」通知(修缺陷 F)+ `admin_save_event(jsonb, boolean)` RPC;推送加 `apns-collapse-id` / FCM `collapse_key` 折叠;编辑器「通知所有人」开关。
-- [ ] **P2.16** 推送深链闭环(M)— 新增可 URL 化路由 `/calendar/event/:eventId?date=`;`EventDetailScreen` 支持按 id+dateKey 自加载;推送报文携带 `route`;`PushService` 补 `onMessageOpenedApp`/`getInitialMessage` + 冷启动 pendingRoute + iOS `AppDelegate.didReceive` → MethodChannel;本地通知响应回调;通知中心与服务端共用同一张 route 对照表。**修缺陷 G**。
-- [ ] **P2.17** 通知中心与数据治理(M)— 游标分页 + Realtime 红点 + 已读改单条/全部已读 + 时间本地时区化;migration 0027:`purge_old_notifications(180)` + cron + `notification_reads(user_id)` 索引 + `fcm_failed` 标注废弃;后台看板与通知页状态指标。**修缺陷 H/I**。
+- [ ] **P2.12** 🔄 投递管道加固(M,**代码完成 2026-08-08**)— migration 0023:`notifications` 加 `claimed_at/attempts/failed_at/last_error` + 投递队列部分索引;租约式抢占 RPC `claim_notifications`(FOR UPDATE SKIP LOCKED)+ 结果回写 `complete_notification`;语句级触发器改转换表写法(仅当本批含已到点行才外呼);`push-dispatch` 重写主流程(鉴权强制 + POST-only + 并发 20 + 全流程 try/catch)。**修缺陷 A/B**。
+- [ ] **P2.13** 🔄 免打扰与通知偏好上云(M,**代码完成 2026-08-08**)— migration 0024:`notification_prefs` 表(免打扰起讫 + `muted_types` 分类订阅 + `push_unavailable`)+ `quiet_until()` / `push_audience()`;`push-dispatch` 接受众 RPC + 免打扰顺延克隆(`channels='{push}'`,顺带让 `channels` 字段两端生效);客户端偏好上云(含 `profiles.timezone` 首次同步)+ 设置页「通知」分组 + 佛历双开关一次性迁入。**修缺陷 C/D**。
+- [ ] **P2.14** 🔄 活动提醒排程(L,**代码完成 2026-08-08**)— migration 0025:`event_reminders` 表(默认三档 **1440 / 30 / 0**,存量活动一并补齐)+ 幂等唯一索引 + `expand_event_reminders()`(活动时区墙钟算术,与 Dart `occurrence_utils.dart` 口径一致)+ cron `event-reminders-daily` + 改期/取消/删除的重排触发器;四档推送文案(简繁);编辑器提醒区 + 详情页只读展示 + 通知中心渲染。**兑现 PRD §5 核心承诺,本次最大价值项**。
+- [ ] **P2.15** 🔄 变更通知降噪(M,**代码完成 2026-08-08**)— migration 0026:`notify_event_change` 5 分钟防抖聚合(created/deleted 仍立即发)+ `event_id` 真实写入 + 补「單次恢復」通知(修缺陷 F)+ `admin_save_event(jsonb, boolean)` RPC;推送加 `apns-collapse-id` / FCM `collapse_key` 折叠;编辑器「通知所有人」开关。
+- [ ] **P2.16** 🔄 推送深链闭环(M,**代码完成 2026-08-08**)— 新增可 URL 化路由 `/calendar/event/:eventId?date=`;`EventDetailScreen` 支持按 id+dateKey 自加载;推送报文携带 `route`;`PushService` 补 `onMessageOpenedApp`/`getInitialMessage` + 冷启动 pendingRoute + iOS `AppDelegate.didReceive` → MethodChannel;本地通知响应回调;通知中心与服务端共用同一张 route 对照表。**修缺陷 G**。
+- [ ] **P2.17** 🔄 通知中心与数据治理(M,**代码完成 2026-08-08**)— 游标分页 + Realtime 红点 + 已读改单条/全部已读 + 时间本地时区化;migration 0027:`purge_old_notifications(180)` + cron + `notification_reads(user_id)` 索引 + `fcm_failed` 标注废弃;后台看板与通知页状态指标。**修缺陷 H/I**。
+
+**P2.12–P2.17 收尾状态(2026-08-08)**:六组代码全部完成,自动化底线全绿——
+`npx supabase test db` **198**(原 124 + 本次 74)· `flutter analyze` 0 issue ·
+`flutter test` **194**(原 161 + 本次 33)· admin `lint` + `build`(14 路由)。
+migration 0023–0027 已在本地栈应用并逐条验证(三档时刻含 60 秒补偿、活动时区
+occurrence_date、跨 DST 墙钟不变、取消/恢复联动、防抖聚合、缺陷 A 回归、免打扰顺延克隆)。
+**余 ⏳**:①App UI 端到端走查(设计 §12.4 十二项);②生产发布(migration 记账 + 函数容器
+**重建**而非 restart + admin 重发布,步骤见 `infra/deploy-aws-ec2.md` §11.1);
+③真机矩阵四场景 + 生产冒烟(设计 §12.5/§12.6)——可与 P2.1-4 iOS TestFlight、
+P8.5 的 T-PROD-02 真机通知闭环**同批做**。
 
 **P2 DoD**:推送矩阵四种场景全部验证可达;共修流程演练通过;工具离线可用;佛历日历离线可读且锚点日期正确(设计 §9);**通知改造 §14 DoD 达成(含三个 P0 缺陷回归用例)**。**P2 完成后启动正式上架申请(见 §6 P5.4 前置)。**
 
@@ -224,9 +234,10 @@
 | 日期 | 任务 | 原因 | 解除条件 | 状态 |
 |---|---|---|---|---|
 | 2026-07-20 | (安全,非阻塞)migration 14 | `push_dispatch_key`(= push-dispatch 函数的 `DISPATCH_SECRET`)存于 `app_settings`,该表 RLS `using(true)` 且授 anon SELECT → **匿名可读该密钥**。P7.2 后台设置页浏览时发现 | migration 0016:密钥迁 `app_secrets`(零策略 RLS + 显式 REVOKE anon/authenticated——生产实测有"新表默认授权",仅零策略是空结果而非拒绝;service_role/definer 可达);`invoke_push_dispatch` 改读新表;deploy 文档 §11② 同步。**本地+生产均已应用**:pgTAP 81/81;生产 anon REST 401、`invoke_push_dispatch()` 外呼 push-dispatch 200(密钥校验通过) | ✅ 已修 2026-07-20 |
-| 2026-08-07 | (正确性 P0,非阻塞)**缺陷 A** · push-dispatch | 取数条件同时要求 `created_at > now()-24h` 与 `scheduled_at <= now()` → **定时超过 24 小时的通知永久发不出去**,且永久计入后台「通知积压」告警。PRD §12.4 设计的「展开未来 14 天提醒」会被它整体掐死 | P2.12:窗口基准改为排程时刻(`coalesce(scheduled_at, created_at) > now()-6h`);回归用例 T-DB-02 / T-E2E-09 | 🔄 P2.12 修复中 |
-| 2026-08-07 | (正确性 P0,非阻塞)**缺陷 B** · push-dispatch | `sent_at` 在发送**之前**抢占写入,失败不回滚/不重试/不留痕;fetch 无 try/catch,网络异常致整批已标「已发送」→ **投递失败即永久静默丢失** | P2.12:租约式抢占 + `attempts` 重试 + `last_error` 落库;回归用例 T-FN-06 / T-E2E-08 | 🔄 P2.12 修复中 |
-| 2026-08-07 | (体验 P0,非阻塞)**缺陷 C** · 免打扰未落地 | `almanac-daily` cron 在 UTC+8 次日 00:05 生成并被秒级推送,而 PRD §5.2 的免打扰从无实现(服务端从不读 `profiles.timezone`)→ **P2.1-4 上生产当天,大陆用户凌晨 00:05 被叫醒**;且设置页佛历开关仅客户端过滤,关了照推 | P2.13:`notification_prefs` + `quiet_until()` + 顺延克隆;回归用例 T-DEV-05 | 🔄 P2.13 修复中 |
+| 2026-08-07 | (正确性 P0,非阻塞)**缺陷 A** · push-dispatch | 取数条件同时要求 `created_at > now()-24h` 与 `scheduled_at <= now()` → **定时超过 24 小时的通知永久发不出去**,且永久计入后台「通知积压」告警。PRD §12.4 设计的「展开未来 14 天提醒」会被它整体掐死 | P2.12:窗口基准改为排程时刻(`coalesce(scheduled_at, created_at) > now()-6h`);回归用例 T-DB-02 / T-E2E-09 | ✅ 已修 2026-08-08(migration 0023 + pgTAP T-DB-02 回归绿);余生产验证 |
+| 2026-08-07 | (正确性 P0,非阻塞)**缺陷 B** · push-dispatch | `sent_at` 在发送**之前**抢占写入,失败不回滚/不重试/不留痕;fetch 无 try/catch,网络异常致整批已标「已发送」→ **投递失败即永久静默丢失** | P2.12:租约式抢占 + `attempts` 重试 + `last_error` 落库;回归用例 T-FN-06 / T-E2E-08 | ✅ 已修 2026-08-08(migration 0023 + push-dispatch 重写 + pgTAP T-DB-04/05/06 绿);余生产验证 |
+| 2026-08-07 | (体验 P0,非阻塞)**缺陷 C** · 免打扰未落地 | `almanac-daily` cron 在 UTC+8 次日 00:05 生成并被秒级推送,而 PRD §5.2 的免打扰从无实现(服务端从不读 `profiles.timezone`)→ **P2.1-4 上生产当天,大陆用户凌晨 00:05 被叫醒**;且设置页佛历开关仅客户端过滤,关了照推 | P2.13:`notification_prefs` + `quiet_until()` + 顺延克隆;回归用例 T-DEV-05 | ✅ 已修 2026-08-08(migration 0024 + 本地栈实测克隆行排到用户本地 07:00);**余真机 T-DEV-05** |
+| 2026-08-08 | (功能静默失效,非阻塞)P2.17 Realtime 红点 | `supabase_realtime` publication 只含 `practice_logs`(P5.2 加的),不含 `notifications` → 订阅建得起来但永远收不到事件,红点不会实时更新。实施 P2.17 时本地实测发现 | migration 0027 内 `alter publication supabase_realtime add table public.notifications`(带容错,失败仅 warning 并降级为下拉刷新)+ pgTAP T-DB-42c 守住 | ✅ 已修 2026-08-08 |
 | —— | —— | 当前无其他阻塞 | —— | —— |
 
 **长期背景风险(来自 PRD §14,开发中随时对照)**:YouTube/Webex 对大陆用户不可达(影响 P3/P4 的 1/3 用户)· 自托管运维责任(P0.4 恢复演练是硬门槛)· 中国区不上架的分发口径待与内容方确认。

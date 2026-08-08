@@ -29,6 +29,24 @@ comment on column public.push_tokens.fcm_failed is
   '已废弃(v0.5.21):大陆 Android 拿不到 token,push_tokens 里根本没有该设备的行可标记,'
   '此列生产恒为 false。邮件兜底判据改用 notification_prefs.push_unavailable';
 
+-- ---------------------------------------------------------------- Realtime
+-- 通知中心的红点要即时反映新通知(P2.17),客户端订阅 notifications 的 INSERT。
+-- ⚠️ supabase_realtime publication 默认只含 practice_logs(P5.2 加的),不加这张表
+--    订阅建得起来但永远收不到事件 —— 功能静默失效(2026-08-08 本地实测发现)。
+-- 可见性仍由 RLS 把关(scope 命中者才收到),不会泄露他人通知。
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+     where pubname = 'supabase_realtime'
+       and schemaname = 'public' and tablename = 'notifications'
+  ) then
+    alter publication supabase_realtime add table public.notifications;
+  end if;
+exception when others then
+  raise warning 'notifications 加入 supabase_realtime 失败,红点降级为下拉刷新: %', sqlerrm;
+end $$;
+
 do $$
 begin
   if exists (select 1 from pg_extension where extname = 'pg_cron') then

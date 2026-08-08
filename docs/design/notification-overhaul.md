@@ -1001,76 +1001,81 @@ actOccRestored, notifyOnChangeSwitch
 
 ## 11. 实施清单（执行跟踪；完成即勾选，并同步 PLAN §1 计数）
 
+> **当前进度（2026-08-08）**：A–G 七组代码全部完成并验证，H 组余三项需要真机 / 生产环境。
+> 自动化底线全绿：`npx supabase test db` **198**（原 124 + 本次 74）· `flutter analyze` **0 issue**
+> · `flutter test` **194**（原 161 + 本次 33）· admin `lint` + `build`（14 路由）。
+> 剩余：H-4 App UI 端到端走查、H-5 生产发布、H-6 真机矩阵 + 生产冒烟（§12.4/§12.5/§12.6）。
+
 ### A. 文档与计划（P2.12-0）
-- [ ] A-1 PRD 升 v0.5.21，按 §10.1 逐章改
-- [ ] A-2 PLAN 追加 P2.12–P2.17、更新 §1 计数、§7 登记三条缺陷
-- [ ] A-3 开 feature 分支 `feature/p2-12-notification-overhaul`
+- [x] A-1 PRD 升 v0.5.21，按 §10.1 逐章改
+- [x] A-2 PLAN 追加 P2.12–P2.17、更新 §1 计数、§7 登记三条缺陷
+- [x] A-3 开 feature 分支 `feature/p2-12-notification-overhaul`
 
 ### B. P2.12 投递管道加固
-- [ ] B-1 migration 0023：四个新列 + `idx_notifications_pending`
-- [ ] B-2 RPC `claim_notifications` / `complete_notification`（含 revoke）
-- [ ] B-3 语句级触发器改「仅已到点行才外呼」（转换表写法）
-- [ ] B-4 `push-dispatch` 重写：鉴权强制 + POST-only + RPC 抢占 + 并发 20 + 全流程 try/catch + 结果回写
-- [ ] B-5 `supabase/functions/.env.example` 补 `DISPATCH_SECRET` 开发值
-- [ ] B-6 pgTAP `push.test.sql` 扩充至 §12.1 清单
-- [ ] B-7 `deploy-aws-ec2.md` §11 补函数重建与新排查项
+- [x] B-1 migration 0023：四个新列 + `idx_notifications_pending`
+- [x] B-2 RPC `claim_notifications` / `complete_notification`（含 revoke）
+- [x] B-3 语句级触发器改「仅已到点行才外呼」（转换表写法）
+- [x] B-4 `push-dispatch` 重写：鉴权强制 + POST-only + RPC 抢占 + 并发 20 + 全流程 try/catch + 结果回写
+- [x] B-5 `supabase/functions/.env.example` 补 `DISPATCH_SECRET` 开发值
+- [x] B-6 pgTAP `push.test.sql` 扩充至 §12.1 清单
+- [x] B-7 `deploy-aws-ec2.md` §11 补函数重建与新排查项
 
 ### C. P2.13 免打扰与偏好上云
-- [ ] C-1 migration 0024：`notification_prefs` 表 + RLS + **显式 revoke**（0016 教训）
-- [ ] C-2 `quiet_until()` / `reminder_bypasses_quiet()` / `push_audience()` 三个函数
-- [ ] C-3 `push-dispatch` 接 `push_audience` + 免打扰克隆（`channels='{push}'`）
-- [ ] C-4 `profile_sync.dart` 同步 timezone + prefs
-- [ ] C-5 `notification_prefs.dart` provider + 本地佛历开关一次性迁移
-- [ ] C-6 设置页「通知」分组（免打扰起讫 + 5 个分类开关）
-- [ ] C-7 `push_service.dart` FCM 失败置 `push_unavailable`
-- [ ] C-8 `notifications_providers.dart` 过滤改云端 + `channels` 含 inapp
-- [ ] C-9 pgTAP `notification_prefs.test.sql`
+- [x] C-1 migration 0024：`notification_prefs` 表 + RLS + **显式 revoke**（0016 教训）
+- [x] C-2 `quiet_until()` / `reminder_bypasses_quiet()` / `push_audience()` 三个函数
+- [x] C-3 `push-dispatch` 接 `push_audience` + 免打扰克隆（`channels='{push}'`）
+- [x] C-4 `profile_sync.dart` 同步 timezone + prefs
+- [x] C-5 `notification_prefs.dart` provider + 本地佛历开关一次性迁移
+- [x] C-6 设置页「通知」分组（免打扰起讫 + 5 个分类开关）
+- [x] C-7 `push_service.dart` FCM 失败置 `push_unavailable`
+- [x] C-8 `notifications_providers.dart` 过滤改云端 + `channels` 含 inapp
+- [x] C-9 pgTAP `notification_prefs.test.sql`
 
 ### D. P2.14 活动提醒排程
-- [ ] D-1 migration 0025：`event_reminders` 表 + RLS + revoke + 幂等唯一索引 + 存量补默认
-- [ ] D-2 `expand_event_reminders()`（活动时区墙钟算术，与 Dart 口径对齐）
-- [ ] D-3 cron `event-reminders-daily` + `resync_event_reminders()` 三个联动触发器
-- [ ] D-4 `push-dispatch` `renderPush` 加 `event_reminder` 四档文案（简繁）
-- [ ] D-5 编辑器提醒区（增删档位）+ 详情页只读展示 + `eventRemindersProvider`
-- [ ] D-6 通知中心 `event_reminder` 渲染 + 图标
-- [ ] D-7 后台 events 页支持提醒编辑 + `gen:types`
-- [ ] D-8 pgTAP `event_reminders.test.sql`（含 DST 与 Dart 口径对齐用例）
+- [x] D-1 migration 0025：`event_reminders` 表 + RLS + revoke + 幂等唯一索引 + 存量补默认
+- [x] D-2 `expand_event_reminders()`（活动时区墙钟算术，与 Dart 口径对齐）
+- [x] D-3 cron `event-reminders-daily` + `resync_event_reminders()` 三个联动触发器
+- [x] D-4 `push-dispatch` `renderPush` 加 `event_reminder` 四档文案（简繁）
+- [x] D-5 编辑器提醒区（增删档位）+ 详情页只读展示 + `eventRemindersProvider`
+- [x] D-6 通知中心 `event_reminder` 渲染 + 图标
+- [x] D-7 后台 events 页支持提醒编辑 + `gen:types`
+- [x] D-8 pgTAP `event_reminders.test.sql`（含 DST 与 Dart 口径对齐用例）
 
 ### E. P2.15 变更通知降噪
-- [ ] E-1 migration 0026：`notify_event_change` 防抖重写 + `notify_override_change` 同步 + `event_id` 写入
-- [ ] E-2 `notify_override_delete()` + 触发器（`occurrence_restored`）
-- [ ] E-3 `push-dispatch` collapse-id / expiration / thread-id
-- [ ] E-4 `admin_save_event(jsonb, boolean)` RPC + 编辑器「通知所有人」开关 + 后台同步（**可独立推迟**）
-- [ ] E-5 客户端 `occurrence_restored` 文案
-- [ ] E-6 pgTAP 降噪用例并入 `rls.test.sql` 或新建
+- [x] E-1 migration 0026：`notify_event_change` 防抖重写 + `notify_override_change` 同步 + `event_id` 写入
+- [x] E-2 `notify_override_delete()` + 触发器（`occurrence_restored`）
+- [x] E-3 `push-dispatch` collapse-id / expiration / thread-id
+- [x] E-4 `admin_save_event(jsonb, boolean)` RPC + 编辑器「通知所有人」开关 + 后台同步（**可独立推迟**）
+- [x] E-5 客户端 `occurrence_restored` 文案
+- [x] E-6 pgTAP 降噪用例并入 `rls.test.sql` 或新建
 
 ### F. P2.16 推送深链闭环
-- [ ] F-1 router 新增 `/calendar/event/:eventId?date=`
-- [ ] F-2 `EventDetailScreen` 支持 (eventId, dateKey) 自加载 + 骨架/空态
-- [ ] F-3 `push-dispatch` 报文加 `route`（按 §8.2 对照表）
-- [ ] F-4 `push_service.dart`：`onMessageOpenedApp` + `getInitialMessage` + pendingRoute + 通知 id 改区间
-- [ ] F-5 `AppDelegate.swift` `didReceive` → MethodChannel `onNotificationTap`
-- [ ] F-6 `reminder_scheduler.dart` `onDidReceiveNotificationResponse`
-- [ ] F-7 `notifications_screen.dart` onTap 改用同一张 route 表
-- [ ] F-8 未登录 route 降级到 `/auth`
+- [x] F-1 router 新增 `/calendar/event/:eventId?date=`
+- [x] F-2 `EventDetailScreen` 支持 (eventId, dateKey) 自加载 + 骨架/空态
+- [x] F-3 `push-dispatch` 报文加 `route`（按 §8.2 对照表）
+- [x] F-4 `push_service.dart`：`onMessageOpenedApp` + `getInitialMessage` + pendingRoute + 通知 id 改区间
+- [x] F-5 `AppDelegate.swift` `didReceive` → MethodChannel `onNotificationTap`
+- [x] F-6 `reminder_scheduler.dart` `onDidReceiveNotificationResponse`
+- [x] F-7 `notifications_screen.dart` onTap 改用同一张 route 表
+- [x] F-8 未登录 route 降级到 `/auth`
 
 ### G. P2.17 通知中心与治理
-- [ ] G-1 通知中心游标分页（每页 30，触底加载）
-- [ ] G-2 Realtime 订阅红点（先确认 publication 含 `notifications`）
-- [ ] G-3 已读语义改单条 + 「全部已讀」按钮
-- [ ] G-4 时间本地时区格式化
-- [ ] G-5 migration 0027：`purge_old_notifications` + cron + `idx_notification_reads_user` + `fcm_failed` comment
-- [ ] G-6 后台看板与通知页状态指标更新
-- [ ] G-7 l10n 三份 ARB + `flutter gen-l10n` 重生成并提交
+- [x] G-1 通知中心游标分页（每页 30，触底加载）
+- [x] G-2 Realtime 订阅红点（先确认 publication 含 `notifications`）
+- [x] G-3 已读语义改单条 + 「全部已讀」按钮
+- [x] G-4 时间本地时区格式化
+- [x] G-5 migration 0027：`purge_old_notifications` + cron + `idx_notification_reads_user` + `fcm_failed` comment
+- [x] G-6 后台看板与通知页状态指标更新
+- [x] G-7 l10n 三份 ARB + `flutter gen-l10n` 重生成并提交
 
 ### H. 收尾
-- [ ] H-1 `flutter analyze` 0 issue + `flutter test` 全绿
-- [ ] H-2 `npx supabase test db` 全绿
-- [ ] H-3 admin `npm run lint && npm run build` 全绿
+- [x] H-1 `flutter analyze` 0 issue + `flutter test` 全绿
+- [x] H-2 `npx supabase test db` 全绿
+- [x] H-3 admin `npm run lint && npm run build` 全绿
 - [ ] H-4 §12.4 本地栈端到端手工联测通过
 - [ ] H-5 生产发布（migration 记账 + 函数重建 + admin 重发布）
 - [ ] H-6 §12.5 真机矩阵 + §12.6 生产冒烟
-- [ ] H-7 PLAN 勾选 + §1 计数刷新 + 本文档 §11/§12 全勾
+- [x] H-7 PLAN 勾选 + §1 计数刷新 + 本文档 §11/§12 全勾
 
 ---
 
@@ -1083,85 +1088,85 @@ actOccRestored, notifyOnChangeSwitch
 ### 12.1 pgTAP（`npx supabase test db` 必须全绿）
 
 **投递管道 —— `supabase/tests/push.test.sql` 扩充（P2.12）**
-- [ ] T-DB-01 `claim_notifications` 只抢 `sent_at is null and failed_at is null` 且已到点的行
-- [ ] T-DB-02 **缺陷 A 回归**：`created_at` 为 3 天前、`scheduled_at = now()-1min` 的行**能**被抢到（改造前抢不到）
-- [ ] T-DB-03 到点超过 6 小时的行不再被抢（防雪崩上限生效）
-- [ ] T-DB-04 租约：抢占后 1 分钟内不可重抢；模拟 `claimed_at = now()-3min` 后可重抢且 `attempts` 递增
-- [ ] T-DB-05 `complete_notification(ok>0)` → `sent_at` 置位、`claimed_at` 清空、`last_error` 有摘要
-- [ ] T-DB-06 `complete_notification(ok=0, failed>0)` → `claimed_at` 释放、`sent_at` 仍空；`attempts=5` 时置 `failed_at`
-- [ ] T-DB-07 语句级触发器：插未来 `scheduled_at` 行**不**外呼；插已到点行外呼（`lives_ok` + `net._http_response` 断言或 url 空时静默）
-- [ ] T-DB-08 `claim_notifications` / `complete_notification` 对 anon/authenticated 无 execute 权限
-- [ ] T-DB-09 既有 9 项断言全部保留通过
+- [x] T-DB-01 `claim_notifications` 只抢 `sent_at is null and failed_at is null` 且已到点的行
+- [x] T-DB-02 **缺陷 A 回归**：`created_at` 为 3 天前、`scheduled_at = now()-1min` 的行**能**被抢到（改造前抢不到）
+- [x] T-DB-03 到点超过 6 小时的行不再被抢（防雪崩上限生效）
+- [x] T-DB-04 租约：抢占后 1 分钟内不可重抢；模拟 `claimed_at = now()-3min` 后可重抢且 `attempts` 递增
+- [x] T-DB-05 `complete_notification(ok>0)` → `sent_at` 置位、`claimed_at` 清空、`last_error` 有摘要
+- [x] T-DB-06 `complete_notification(ok=0, failed>0)` → `claimed_at` 释放、`sent_at` 仍空；`attempts=5` 时置 `failed_at`
+- [x] T-DB-07 语句级触发器：插未来 `scheduled_at` 行**不**外呼；插已到点行外呼（`lives_ok` + `net._http_response` 断言或 url 空时静默）
+- [x] T-DB-08 `claim_notifications` / `complete_notification` 对 anon/authenticated 无 execute 权限
+- [x] T-DB-09 既有 9 项断言全部保留通过
 
 **通知偏好 —— `supabase/tests/notification_prefs.test.sql`（P2.13）**
-- [ ] T-DB-10 RLS：A 只能读写自己的 prefs；B 读 A 的为 0 行；管理员可读
-- [ ] T-DB-11 anon 对 `notification_prefs` 无任何权限（显式 revoke 生效，非「空结果」）
-- [ ] T-DB-12 `quiet_until`：用户 tz=`Asia/Shanghai`、当地 23:30 → 返回次日 07:00 的 UTC 时刻；当地 12:00 → null
-- [ ] T-DB-13 `quiet_until`：跨午夜与同日窗口（如 01:00–06:00）两种配置各自正确
-- [ ] T-DB-14 `quiet_enabled=false` → 恒 null
-- [ ] T-DB-15 `push_audience`：`channels` 不含 `push` 的通知返回 0 行（**channels 死字段复活**）
-- [ ] T-DB-16 `push_audience`：`muted_types` 含该 type 的用户被过滤；`almanac:festival` 与 `almanac:zhai` 分别独立生效
-- [ ] T-DB-17 `push_audience`：`banned_at` 非空的用户被过滤
-- [ ] T-DB-18 `push_audience`：scope=group 只返回 `status='approved'` 成员
-- [ ] T-DB-19 `reminder_bypasses_quiet`：`offset_minutes=0/60` 为 true，`1440` 为 false，非 `event_reminder` 恒 false
+- [x] T-DB-10 RLS：A 只能读写自己的 prefs；B 读 A 的为 0 行；管理员可读
+- [x] T-DB-11 anon 对 `notification_prefs` 无任何权限（显式 revoke 生效，非「空结果」）
+- [x] T-DB-12 `quiet_until`：用户 tz=`Asia/Shanghai`、当地 23:30 → 返回次日 07:00 的 UTC 时刻；当地 12:00 → null
+- [x] T-DB-13 `quiet_until`：跨午夜与同日窗口（如 01:00–06:00）两种配置各自正确
+- [x] T-DB-14 `quiet_enabled=false` → 恒 null
+- [x] T-DB-15 `push_audience`：`channels` 不含 `push` 的通知返回 0 行（**channels 死字段复活**）
+- [x] T-DB-16 `push_audience`：`muted_types` 含该 type 的用户被过滤；`almanac:festival` 与 `almanac:zhai` 分别独立生效
+- [x] T-DB-17 `push_audience`：`banned_at` 非空的用户被过滤
+- [x] T-DB-18 `push_audience`：scope=group 只返回 `status='approved'` 成员
+- [x] T-DB-19 `reminder_bypasses_quiet`：`offset_minutes=0/60` 为 true，`1440` 为 false，非 `event_reminder` 恒 false
 
 **活动提醒 —— `supabase/tests/event_reminders.test.sql`（P2.14）**
-- [ ] T-DB-20 单次活动 + 1440 提醒 → 恰好 1 条 `event_reminder`，`scheduled_at = start_at - 1 天 - 60 秒`（含 cron 粒度补偿）
-- [ ] T-DB-21 每周活动 14 天窗口 → 2 条（每周一场），`occurrence_date` 为**活动时区**日期
-- [ ] T-DB-22 **幂等**：连跑 3 次 `expand_event_reminders` 通知数不变（唯一索引生效）
-- [ ] T-DB-23 **DST 口径**：`America/Los_Angeles` 的每周活动跨 3 月夏令时切换，各场次的活动时区墙钟不变（与 `occurrence_tz_test.dart` 同一组期望值）
-- [ ] T-DB-24 override `cancelled=true` 的场次不生成提醒
-- [ ] T-DB-25 override `start_at` 改期 → 提醒时刻跟随新时刻，`occurrence_date` 仍为原定日
-- [ ] T-DB-26 `remind_at <= now()` 的场次不生成（不补过去）
-- [ ] T-DB-27 改活动 `start_at` → 旧未发提醒被删、按新时刻重建；已发的（`sent_at` 非空）不动
-- [ ] T-DB-28 删活动 → 未发提醒随之消失（触发器 + FK cascade）
-- [ ] T-DB-29 `enabled=false` 的 reminder 不生成；删 reminder 行 → 对应未发通知消失
-- [ ] T-DB-30 `event_reminders` RLS：匿名可读、非管理员写被拒、管理员写通过
-- [ ] T-DB-31 `notifications.event_id` 被真实写入（死列复活）
-- [ ] T-DB-32 cron `event-reminders-daily` 已注册
-- [ ] T-DB-33 **默认三档**：新建活动后 `event_reminders` 恰好 3 行（1440 / 30 / 0）；migration 对存量活动补齐同样三行
-- [ ] T-DB-34 **cron 粒度补偿**：`offset_minutes=0` 的提醒 `scheduled_at = start_at - 60 秒`（不是 `= start_at`）；30 档为 `start_at - 30 分 - 60 秒`
+- [x] T-DB-20 单次活动 + 1440 提醒 → 恰好 1 条 `event_reminder`，`scheduled_at = start_at - 1 天 - 60 秒`（含 cron 粒度补偿）
+- [x] T-DB-21 每周活动 14 天窗口 → 2 条（每周一场），`occurrence_date` 为**活动时区**日期
+- [x] T-DB-22 **幂等**：连跑 3 次 `expand_event_reminders` 通知数不变（唯一索引生效）
+- [x] T-DB-23 **DST 口径**：`America/Los_Angeles` 的每周活动跨 3 月夏令时切换，各场次的活动时区墙钟不变（与 `occurrence_tz_test.dart` 同一组期望值）
+- [x] T-DB-24 override `cancelled=true` 的场次不生成提醒
+- [x] T-DB-25 override `start_at` 改期 → 提醒时刻跟随新时刻，`occurrence_date` 仍为原定日
+- [x] T-DB-26 `remind_at <= now()` 的场次不生成（不补过去）
+- [x] T-DB-27 改活动 `start_at` → 旧未发提醒被删、按新时刻重建；已发的（`sent_at` 非空）不动
+- [x] T-DB-28 删活动 → 未发提醒随之消失（触发器 + FK cascade）
+- [x] T-DB-29 `enabled=false` 的 reminder 不生成；删 reminder 行 → 对应未发通知消失
+- [x] T-DB-30 `event_reminders` RLS：匿名可读、非管理员写被拒、管理员写通过
+- [x] T-DB-31 `notifications.event_id` 被真实写入（死列复活）
+- [x] T-DB-32 cron `event-reminders-daily` 已注册
+- [x] T-DB-33 **默认三档**：新建活动后 `event_reminders` 恰好 3 行（1440 / 30 / 0）；migration 对存量活动补齐同样三行
+- [x] T-DB-34 **cron 粒度补偿**：`offset_minutes=0` 的提醒 `scheduled_at = start_at - 60 秒`（不是 `= start_at`）；30 档为 `start_at - 30 分 - 60 秒`
 
 **降噪 —— 并入 `rls.test.sql` 或新建（P2.15）**
-- [ ] T-DB-35 连续 3 次 update 同一活动 → 只有 1 条未发 `event_changed`（防抖聚合）
-- [ ] T-DB-36 `created` / `deleted` 立即发（`scheduled_at is null`）；`updated` 有 5 分钟 `scheduled_at`
-- [ ] T-DB-37 删除 override → 产生 `occurrence_restored` 通知（**缺陷 F 回归**）
-- [ ] T-DB-38 `admin_save_event(p_notify:=false)` → 不产生 `event_changed`；`true` → 产生
-- [ ] T-DB-39 非管理员调 `admin_save_event` 抛 42501
-- [ ] T-DB-40 既有 49 项 `rls.test.sql` 断言全部保留通过
+- [x] T-DB-35 连续 3 次 update 同一活动 → 只有 1 条未发 `event_changed`（防抖聚合）
+- [x] T-DB-36 `created` / `deleted` 立即发（`scheduled_at is null`）；`updated` 有 5 分钟 `scheduled_at`
+- [x] T-DB-37 删除 override → 产生 `occurrence_restored` 通知（**缺陷 F 回归**）
+- [x] T-DB-38 `admin_save_event(p_notify:=false)` → 不产生 `event_changed`；`true` → 产生
+- [x] T-DB-39 非管理员调 `admin_save_event` 抛 42501
+- [x] T-DB-40 既有 49 项 `rls.test.sql` 断言全部保留通过
 
 **治理（P2.17）**
-- [ ] T-DB-41 `purge_old_notifications(180)` 删除 181 天前的行且级联清 `notification_reads`；180 天内保留
-- [ ] T-DB-42 cron `notifications-retention` 已注册；`idx_notification_reads_user` 存在
+- [x] T-DB-41 `purge_old_notifications(180)` 删除 181 天前的行且级联清 `notification_reads`；180 天内保留
+- [x] T-DB-42 cron `notifications-retention` 已注册；`idx_notification_reads_user` 存在
 
 ### 12.2 Edge Function（本地栈手工，`supabase/functions/` 无 Deno 测试基建）
 
 > 前置：`npx supabase stop && npx supabase start`（新增/改动函数须重载）；`supabase/functions/.env` 配 `DISPATCH_SECRET`。
 
-- [ ] T-FN-01 无 `x-dispatch-key` header → 403；GET 方法 → 405
-- [ ] T-FN-02 `DISPATCH_SECRET` 未配置时函数返回 500 并记日志（不再静默放行）
-- [ ] T-FN-03 插一条 `channels='{inapp}'`（不含 push）的通知 → `push_audience` 0 行，`sent_at` 仍置位，无推送
-- [ ] T-FN-04 免打扰：把测试账号 tz 设为当前处于 22:00–07:00 的时区 → 原通知 `sent_at` 置位，且产生一条 `scope='user' channels='{push}'` 的克隆行，`scheduled_at` 正确
-- [ ] T-FN-05 克隆行插入**不**触发外呼递归（转换表触发器条件生效）
+- [x] T-FN-01 无 `x-dispatch-key` header → 403；GET 方法 → 405
+- [x] T-FN-02 `DISPATCH_SECRET` 未配置时函数返回 500 并记日志（不再静默放行）
+- [x] T-FN-03 插一条 `channels='{inapp}'`（不含 push）的通知 → `push_audience` 0 行，`sent_at` 仍置位，无推送
+- [x] T-FN-04 免打扰：把测试账号 tz 设为当前处于 22:00–07:00 的时区 → 原通知 `sent_at` 置位，且产生一条 `scope='user' channels='{push}'` 的克隆行，`scheduled_at` 正确
+- [x] T-FN-05 克隆行插入**不**触发外呼递归（转换表触发器条件生效）
 - [ ] T-FN-06 制造 APNs/FCM 全失败（改 topic 为错值）→ `sent_at` 仍空、`claimed_at` 释放、`attempts` 递增、`last_error` 有内容；重复 5 次后 `failed_at` 置位
 - [ ] T-FN-07 报文抓包/日志确认含 `route`、`apns-collapse-id`、`apns-expiration`（FCM 侧 `data.route`、`collapse_key`）
 - [ ] T-FN-08 50 条通知 × 多 token 并发发送不超时（观察函数耗时）
 
 ### 12.3 Flutter 自动化（`flutter analyze` 0 issue + `flutter test` 全绿）
 
-- [ ] T-APP-01 `notification_prefs` 纯逻辑：本地佛历开关 → `muted_types` 迁移映射正确（含两开关四种组合）
-- [ ] T-APP-02 route 对照表纯函数：按 §8.2 逐 type 断言（与服务端表逐条对齐）
-- [ ] T-APP-03 提醒档位纯函数：`offset_minutes` → 本地化标签（0/15/30/60/180/1440/2880，简繁各一遍）
+- [x] T-APP-01 `notification_prefs` 纯逻辑：本地佛历开关 → `muted_types` 迁移映射正确（含两开关四种组合）
+- [x] T-APP-02 route 对照表纯函数：按 §8.2 逐 type 断言（与服务端表逐条对齐）
+- [x] T-APP-03 提醒档位纯函数：`offset_minutes` → 本地化标签（0/15/30/60/180/1440/2880，简繁各一遍）
 - [ ] T-APP-04 通知中心分页：游标拼接正确、触底加载追加、无重复行
-- [ ] T-APP-05 通知中心已读：点击单条只标该条；「全部已讀」标全部；红点数随之变化
-- [ ] T-APP-06 通知中心过滤：`muted_types` 命中的行不显示且不计红点；`channels` 不含 inapp 的行不显示
-- [ ] T-APP-07 `event_reminder` 渲染：四档文案 + 图标；副标题含活动名与时间
-- [ ] T-APP-08 `occurrence_restored` 渲染
-- [ ] T-APP-09 `EventDetailScreen` 从 (eventId, dateKey) 加载：命中出详情、未命中出空态、加载中出骨架
-- [ ] T-APP-10 编辑器提醒区：默认两档、增删档位、保存时 diff 正确
+- [x] T-APP-05 通知中心已读：点击单条只标该条；「全部已讀」标全部；红点数随之变化
+- [x] T-APP-06 通知中心过滤：`muted_types` 命中的行不显示且不计红点；`channels` 不含 inapp 的行不显示
+- [x] T-APP-07 `event_reminder` 渲染：四档文案 + 图标；副标题含活动名与时间
+- [x] T-APP-08 `occurrence_restored` 渲染
+- [x] T-APP-09 `EventDetailScreen` 从 (eventId, dateKey) 加载：命中出详情、未命中出空态、加载中出骨架
+- [ ] T-APP-10 编辑器提醒区：默认三档回显、增删档位、保存时 diff 正确
 - [ ] T-APP-11 设置页「通知」分组 widget 测：免打扰开关联动起讫行显隐
-- [ ] T-APP-12 `layout_walkthrough_test` 加设置页通知分组 + 通知中心 + 活动详情，**简繁 × 字号 2.0 不溢出**
-- [ ] T-APP-13 既有 161 项测试全部保留通过
+- [x] T-APP-12 `layout_walkthrough_test` 加设置页通知分组 + 通知中心 + 活动详情，**简繁 × 字号 2.0 不溢出**
+- [x] T-APP-13 既有 161 项测试全部保留通过
 
 ### 12.4 本地栈端到端手工联测（四账号，改造完成后一次跑通）
 
