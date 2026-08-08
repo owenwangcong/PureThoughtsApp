@@ -45,10 +45,17 @@ type NotifRow = {
   scheduled_at: string | null;
   sent_at: string | null;
   created_at: string;
+  failed_at: string | null;
+  attempts: number | null;
+  last_error: string | null;
 };
 
-/** 与 App 端 splitAdminNotifications 同口径 */
-function statusOf(n: NotifRow): "pending" | "backlog" | "sent" {
+/**
+ * 投递状态(v0.5.21 起有真实状态列,不再只靠两个时间戳推导)。
+ * failed = 重试用尽的终局失败(migration 0023:attempts 达 5 次仍全失败)。
+ */
+function statusOf(n: NotifRow): "pending" | "backlog" | "sent" | "failed" {
+  if (n.failed_at) return "failed";
   if (n.sent_at) return "sent";
   if (!n.scheduled_at) return "sent"; // 立即发、由触发器秒级投递
   return new Date(n.scheduled_at) > new Date() ? "pending" : "backlog";
@@ -163,7 +170,7 @@ function GeneralTable() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notifications")
-        .select("id, type, title, body, payload, scheduled_at, sent_at, created_at")
+        .select("id, type, title, body, payload, scheduled_at, sent_at, created_at, failed_at, attempts, last_error")
         .eq("type", "general")
         .eq("scope", "all")
         .order("created_at", { ascending: false })
@@ -216,6 +223,11 @@ function GeneralTable() {
                 {st === "pending" && <Badge variant="secondary">排程中</Badge>}
                 {st === "backlog" && <Badge variant="destructive">待投遞</Badge>}
                 {st === "sent" && <Badge variant="outline">已發佈</Badge>}
+                {st === "failed" && (
+                  <Badge variant="destructive" title={n.last_error ?? ""}>
+                    投遞失敗{n.attempts ? `(${n.attempts} 次)` : ""}
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>{fmtDateTime(n.scheduled_at)}</TableCell>
               <TableCell>{fmtDateTime(n.sent_at)}</TableCell>
@@ -254,7 +266,7 @@ function AllTable() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notifications")
-        .select("id, type, title, body, payload, scheduled_at, sent_at, created_at")
+        .select("id, type, title, body, payload, scheduled_at, sent_at, created_at, failed_at, attempts, last_error")
         .eq("scope", "all")
         .order("created_at", { ascending: false })
         .limit(50);

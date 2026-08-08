@@ -66,26 +66,34 @@ export default function DashboardPage() {
   const { data: counts } = useQuery({
     queryKey: ["dash-counts"],
     queryFn: async () => {
-      const [users, groups, backlog, pending] = await Promise.all([
+      const [users, groups, backlog, pending, failed] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase
           .from("groups")
           .select("*", { count: "exact", head: true })
           .is("deleted_at", null),
+        // 積壓 = 已到點未投遞**且未終局失敗**(v0.5.21:失敗有獨立狀態,不該再算積壓)
         supabase
           .from("notifications")
           .select("*", { count: "exact", head: true })
           .not("scheduled_at", "is", null)
           .is("sent_at", null)
+          .is("failed_at", null)
           .lte("scheduled_at", new Date().toISOString()),
         supabase
           .from("notifications")
           .select("*", { count: "exact", head: true })
           .not("scheduled_at", "is", null)
           .is("sent_at", null)
+          .is("failed_at", null)
           .gt("scheduled_at", new Date().toISOString()),
+        // 重試用盡的終局失敗(migration 0023)
+        supabase
+          .from("notifications")
+          .select("*", { count: "exact", head: true })
+          .not("failed_at", "is", null),
       ]);
-      for (const r of [users, groups, backlog, pending]) {
+      for (const r of [users, groups, backlog, pending, failed]) {
         if (r.error) throw r.error;
       }
       return {
@@ -93,6 +101,7 @@ export default function DashboardPage() {
         groups: groups.count ?? 0,
         backlog: backlog.count ?? 0,
         pending: pending.count ?? 0,
+        failed: failed.count ?? 0,
       };
     },
   });
@@ -126,13 +135,19 @@ export default function DashboardPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("push_tokens")
-        .select("platform, fcm_failed")
+        .select("platform")
         .limit(10000);
       if (error) throw error;
+      // v0.5.21:判據從 push_tokens.fcm_failed 換成 notification_prefs.push_unavailable。
+      // 大陸機拿不到 token,push_tokens 裡根本沒有那台設備的行可標記,舊欄位恆為 false。
+      const { count: unavailable, error: e2 } = await supabase
+        .from("notification_prefs")
+        .select("*", { count: "exact", head: true })
+        .eq("push_unavailable", true);
+      if (e2) throw e2;
       const apns = data.filter((t) => t.platform === "apns").length;
       const fcm = data.filter((t) => t.platform === "fcm").length;
-      const failed = data.filter((t) => t.fcm_failed).length;
-      return { apns, fcm, failed, total: data.length };
+      return { apns, fcm, unavailable: unavailable ?? 0, total: data.length };
     },
   });
 
@@ -176,9 +191,8 @@ export default function DashboardPage() {
             <div className="flex gap-8 text-sm">
               <span>APNs(iOS):{push.apns}</span>
               <span>FCM(海外 Android):{push.fcm}</span>
-              <span className={push.failed > 0 ? "text-destructive" : ""}>
-                投遞失敗標記:{push.failed}
-                {push.fcm > 0 && `(${Math.round((push.failed / Math.max(1, push.total)) * 100)}%)`}
+              <span className={push.unavailable > 0 ? "text-destructive" : ""}>
+                推送不可用(需郵件兜底):{push.unavailable}
               </span>
             </div>
           ) : (
@@ -193,6 +207,11 @@ export default function DashboardPage() {
       {counts && counts.backlog > 0 && (
         <p className="text-sm text-destructive">
           ⚠️ 有 {counts.backlog} 條通知已到點未投遞——檢查 pg_cron 兜底任務與 push-dispatch 函數(deploy 文檔 §11④)。
+        </p>
+      )}
+      {counts && counts.failed > 0 && (
+        <p className="text-sm text-destructive">
+          ⚠️ 有 {counts.failed} 條通知重試用盡、終局失敗——在「通知」頁看 last_error 明細。
         </p>
       )}
     </div>
