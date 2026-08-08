@@ -67,7 +67,10 @@ begin
   returning n.*;
 end $$;
 
+-- 客户端一律不可调;但 push-dispatch 经 PostgREST 以 service_role 调用,
+-- 而 revoke from public 会连 service_role 一起收走(它不是函数 owner)→ 必须显式 grant。
 revoke execute on function public.claim_notifications(int) from public, anon, authenticated;
+grant  execute on function public.claim_notifications(int) to service_role;
 
 -- ---------------------------------------------------------------- 完成 / 失败回写
 create or replace function public.complete_notification(
@@ -104,6 +107,8 @@ end $$;
 
 revoke execute on function public.complete_notification(uuid, int, int, int, text)
   from public, anon, authenticated;
+grant  execute on function public.complete_notification(uuid, int, int, int, text)
+  to service_role;
 
 -- ---------------------------------------------------------------- 触发器改转换表
 -- 原实现无条件外呼:插一条 scheduled_at 在未来的行(管理员定时、活动提醒、免打扰克隆)

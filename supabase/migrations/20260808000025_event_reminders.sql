@@ -183,7 +183,16 @@ end $$;
 
 drop trigger if exists trg_resync_reminders_events on public.events;
 create trigger trg_resync_reminders_events
-  after insert or update or delete on public.events
+  after insert or update on public.events
+  for each row execute function public.resync_event_reminders();
+
+-- ⚠️ 删除必须用 BEFORE:notifications.event_id 是 on delete set null,AFTER DELETE 时
+--    RI 已把该活动所有通知的 event_id 置空,`delete ... where event_id = v_event` 一条
+--    也删不到 → 未发的提醒会残留,到点仍推送「活动即将开始」但活动早已不存在
+--    (2026-08-08 pgTAP T-DB-28 实测暴露)。BEFORE DELETE 时行还在,清理才有效。
+drop trigger if exists trg_resync_reminders_events_del on public.events;
+create trigger trg_resync_reminders_events_del
+  before delete on public.events
   for each row execute function public.resync_event_reminders();
 
 drop trigger if exists trg_resync_reminders_overrides on public.event_overrides;

@@ -159,10 +159,12 @@ begin
     raise exception '活动类型不能为空';
   end if;
 
-  -- 事务级(local)设置,RPC 返回即失效;客户端无 set_config 权限,无法伪造
-  if not coalesce(p_notify, true) then
-    perform set_config('app.suppress_event_notify', 'on', true);
-  end if;
+  -- 事务级(local)设置,RPC 返回即失效;客户端无 set_config 权限,无法伪造。
+  -- ⚠️ 必须**无条件**写入而不是「只在 false 时设」:local 设置在整个事务内持续有效,
+  --    同一事务里先调一次 p_notify=false 会把后续所有保存一起静默掉
+  --    (2026-08-08 pgTAP T-DB-38b 实测暴露)。
+  perform set_config('app.suppress_event_notify',
+                     case when coalesce(p_notify, true) then 'off' else 'on' end, true);
 
   if v_id is null then
     insert into public.events (

@@ -180,5 +180,9 @@ begin
      );
 end $$;
 
+-- 同 0023:push-dispatch 经 PostgREST 以 service_role 调用,需在 revoke 后显式 grant
 revoke execute on function public.push_audience(uuid) from public, anon, authenticated;
+grant  execute on function public.push_audience(uuid) to service_role;
+
 revoke execute on function public.quiet_until(uuid) from public, anon, authenticated;
+grant  execute on function public.quiet_until(uuid) to service_role;
