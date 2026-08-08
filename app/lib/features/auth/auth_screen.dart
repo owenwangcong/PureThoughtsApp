@@ -68,6 +68,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           return;
       }
       await syncProfileFromPrefs(ref);
+      // 老版本的两个佛历开关是纯本地的,首次登录时迁进云端通知偏好(v0.5.21)
+      await migrateLegacyAlmanacPrefs(ref);
       if (mounted) context.go('/');
     } catch (e) {
       setState(() => _error = errText(l10n, e));

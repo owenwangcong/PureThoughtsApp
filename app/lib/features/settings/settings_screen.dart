@@ -14,6 +14,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../auth/profile_sync.dart';
 import '../events/events_providers.dart';
+import '../notifications/notification_prefs.dart';
 
 /// 设置页:显示名(登录后)、语言、字号、地区、登出。
 /// 偏好改动即时生效并本地持久化;登录态下同步云端 profiles(PRD §11)。
@@ -232,20 +233,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const Divider(height: 32),
 
-          // ---- 佛历提醒(PRD v0.5.15 §5.2:两类分别可关,默认开) ----
-          Text(l10n.almanacSection, style: Theme.of(context).textTheme.titleMedium),
-          SwitchListTile(
-            title: Text(l10n.almanacFestivalToggle),
-            value: ref.watch(almanacFestivalNotifyProvider),
-            onChanged: (v) =>
-                ref.read(almanacFestivalNotifyProvider.notifier).set(v),
-          ),
-          SwitchListTile(
-            title: Text(l10n.almanacZhaiToggle),
-            value: ref.watch(almanacZhaiNotifyProvider),
-            onChanged: (v) =>
-                ref.read(almanacZhaiNotifyProvider.notifier).set(v),
-          ),
+          // ---- 通知(PRD v0.5.21 §5/§5.2:免打扰时段 + 分类订阅,存云端跨设备同步)
+          // 原「佛历提醒」两个开关是纯本地的、服务端照推(关了仍收推送),
+          // 现并入本组一起上云,由 push-dispatch 在投递前就过滤。
+          const _NotifySection(),
 
           const Divider(height: 32),
 
@@ -375,5 +366,87 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }
+  }
+}
+
+/// 通知设置分组(PRD v0.5.21 §5/§5.2)。
+/// 免打扰时段与分类订阅都存 notification_prefs(跨设备同步),服务端投递时同源过滤 ——
+/// 改造前佛历两个开关只在客户端隐藏列表、服务端照推,用户关了仍会被推送吵醒。
+class _NotifySection extends ConsumerWidget {
+  const _NotifySection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final asyncPrefs = ref.watch(notificationPrefsProvider);
+    final loggedIn = ref.watch(currentUserProvider) != null;
+    final prefs = asyncPrefs.value ?? const NotificationPrefs();
+    // 未登录时偏好无处存(匿名也收不到推送),整组置灰
+    final enabled = loggedIn && asyncPrefs.hasValue;
+
+    Future<void> save(NotificationPrefs next) =>
+        saveNotificationPrefs(ref, next);
+
+    Future<void> pickTime(bool isStart) async {
+      final picked = await showTimePicker(
+        context: context,
+        initialTime: isStart ? prefs.quietStart : prefs.quietEnd,
+      );
+      if (picked == null) return;
+      await save(isStart
+          ? prefs.copyWith(quietStart: picked)
+          : prefs.copyWith(quietEnd: picked));
+    }
+
+    Widget categoryTile(NotifyCategory c, String label) => SwitchListTile(
+          title: Text(label),
+          value: prefs.enabledFor(c),
+          onChanged: enabled
+              ? (v) => save(prefs.copyWith(mutedTypes: prefs.toggled(c, v)))
+              : null,
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.notifySection,
+            style: Theme.of(context).textTheme.titleMedium),
+        SwitchListTile(
+          title: Text(l10n.notifyQuietTitle),
+          subtitle: Text(l10n.notifyQuietHint,
+              style: Theme.of(context).textTheme.bodySmall),
+          value: prefs.quietEnabled,
+          onChanged:
+              enabled ? (v) => save(prefs.copyWith(quietEnabled: v)) : null,
+        ),
+        if (prefs.quietEnabled)
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: Text(l10n.notifyQuietStart),
+                  trailing: Text(formatDbTime(prefs.quietStart)),
+                  onTap: enabled ? () => pickTime(true) : null,
+                ),
+              ),
+              Expanded(
+                child: ListTile(
+                  title: Text(l10n.notifyQuietEnd),
+                  trailing: Text(formatDbTime(prefs.quietEnd)),
+                  onTap: enabled ? () => pickTime(false) : null,
+                ),
+              ),
+            ],
+          ),
+        const SizedBox(height: 8),
+        Text(l10n.notifySubscribeHeader,
+            style: Theme.of(context).textTheme.bodySmall),
+        categoryTile(NotifyCategory.eventReminder, l10n.notifyTypeEventReminder),
+        categoryTile(NotifyCategory.eventChanged, l10n.notifyTypeEventChanged),
+        categoryTile(NotifyCategory.almanacFestival, l10n.almanacFestivalToggle),
+        categoryTile(NotifyCategory.almanacZhai, l10n.almanacZhaiToggle),
+        categoryTile(NotifyCategory.qaReply, l10n.notifyTypeQaReply),
+      ],
+    );
   }
 }

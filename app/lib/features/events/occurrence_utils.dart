@@ -127,3 +127,55 @@ List<Occurrence> expandOccurrences({
   out.sort((a, b) => a.startAt.compareTo(b.startAt));
   return out;
 }
+
+/// 按 (eventId, dateKey) 定位一场活动 —— 推送 / 通知中心深链用(P2.16)。
+///
+/// 列表点击走 `extra: Occurrence` 的快路径(零加载);深链只有 URL,必须自己展开。
+/// [dateKey] 是 occurrence_date(**活动时区**日期,与服务端 payload 同源);
+/// 为 null 时(如无场次信息的活动变更通知)取最近一场:优先未来最近,否则最后一场。
+Occurrence? resolveOccurrence({
+  required List<Map<String, dynamic>> events,
+  required List<Map<String, dynamic>> overrides,
+  required String eventId,
+  String? dateKey,
+  DateTime? now,
+}) {
+  final ev = [
+    for (final e in events)
+      if (e['id'] == eventId) e,
+  ];
+  if (ev.isEmpty) return null;
+  final ref = now ?? DateTime.now();
+
+  // 窄区间展开即可:dateKey 前后各留 2 天,覆盖活动时区与设备时区的日期差
+  final DateTime from;
+  final DateTime to;
+  if (dateKey != null) {
+    final d = DateTime.tryParse(dateKey);
+    if (d == null) return null;
+    from = d.subtract(const Duration(days: 2));
+    to = d.add(const Duration(days: 2));
+  } else {
+    from = ref.subtract(const Duration(days: 365));
+    to = ref.add(const Duration(days: 365));
+  }
+
+  final occ = expandOccurrences(
+    events: ev,
+    overrides: overrides,
+    rangeStart: from,
+    rangeEnd: to,
+  );
+  if (occ.isEmpty) return null;
+
+  if (dateKey != null) {
+    for (final o in occ) {
+      if (o.dateKey == dateKey) return o;
+    }
+    return null; // 该场次已不存在(活动改了循环规则等)
+  }
+  for (final o in occ) {
+    if (!o.startAt.isBefore(ref)) return o;
+  }
+  return occ.last;
+}

@@ -69,4 +69,23 @@ import UIKit
         center, willPresent: notification, withCompletionHandler: completionHandler)
     }
   }
+
+  /// 点击远程推送 → 把 payload 里的 route 交给 Dart 做深链(P2.16)。
+  /// 服务端把 route 放在 aps 同级(push-dispatch 的 sendApns)。
+  /// 三种场景同一条路径:前台点横幅、后台点通知、冷启动被通知唤醒。
+  /// 冷启动时 Dart 侧可能还没挂上 handler,PushService 会把 route 暂存,首页首帧再消费。
+  /// 本地通知(正念提醒等)不带 route,原样交回插件路径。
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    if response.notification.request.trigger is UNPushNotificationTrigger,
+       let route = response.notification.request.content.userInfo["route"] as? String,
+       !route.isEmpty {
+      pushChannel?.invokeMethod("onNotificationTap", arguments: route)
+    }
+    super.userNotificationCenter(
+      center, didReceive: response, withCompletionHandler: completionHandler)
+  }
 }

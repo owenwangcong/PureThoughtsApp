@@ -10,6 +10,7 @@ import '../../core/settings.dart';
 import '../../core/timezones.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'event_icons.dart';
+import 'event_reminder_options.dart';
 import 'events_providers.dart';
 
 /// 活动相关 provider 统一失效(新增/编辑/删除后刷新日历)。
@@ -74,6 +75,19 @@ Future<DateTime?> showEventEditor(BuildContext context, WidgetRef ref,
         }();
   final duration = existing?['duration_minutes'] as int? ?? 90;
   final hansLabel = locale.scriptCode == 'Hans';
+
+  // 提醒档位(PRD v0.5.21 §5):新建取默认三档,编辑回显现有设置
+  var reminders = <int>[...defaultReminderOffsets];
+  if (existing != null) {
+    try {
+      reminders = [
+        ...await ref.read(eventRemindersProvider(existing['id'] as String).future)
+      ];
+    } catch (_) {} // 取不到就按默认三档显示,保存时按所选 diff
+    if (!context.mounted) return null;
+  }
+  // 本次改动是否通知全体(降噪:管理员可关掉,避免小修小补也惊动全站)
+  var notifyAll = true;
 
   final ok = await showDialog<bool>(
     context: context,
@@ -168,6 +182,34 @@ Future<DateTime?> showEventEditor(BuildContext context, WidgetRef ref,
                 value: weekly,
                 onChanged: (v) => setState(() => weekly = v),
               ),
+              const SizedBox(height: 8),
+              Text(l10n.reminderSectionTitle,
+                  style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final m in reminderOffsetOptions)
+                    FilterChip(
+                      label: Text(reminderOffsetLabel(l10n, m)),
+                      selected: reminders.contains(m),
+                      onSelected: (sel) => setState(() {
+                        if (sel) {
+                          reminders.add(m);
+                        } else {
+                          reminders.remove(m);
+                        }
+                      }),
+                    ),
+                ],
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.notifyOnChangeSwitch),
+                value: notifyAll,
+                onChanged: (v) => setState(() => notifyAll = v),
+              ),
               TextField(
                 controller: youtube,
                 decoration: const InputDecoration(labelText: 'YouTube URL'),
@@ -213,22 +255,46 @@ Future<DateTime?> showEventEditor(BuildContext context, WidgetRef ref,
     'content': content.text.trim().isEmpty ? null : content.text.trim(),
   };
   try {
-    if (existing == null) {
-      await Supabase.instance.client.from('events').insert({
+    // 走 RPC 而不是直写 events:触发器感知不到「本次不通知全体」这个 UI 意图,
+    // 经 definer RPC 设事务级会话变量传递(客户端无法伪造),见 migration 0026。
+    final eventId = await Supabase.instance.client.rpc('admin_save_event', params: {
+      'p_event': {
         ...payload,
-        'created_by': Supabase.instance.client.auth.currentUser!.id,
-      });
-    } else {
-      await Supabase.instance.client
-          .from('events')
-          .update(payload)
-          .eq('id', existing['id'] as String);
-    }
+        if (existing != null) 'id': existing['id'],
+      },
+      'p_notify': notifyAll,
+    }) as String;
+    await _syncReminders(eventId, reminders);
     invalidateEvents(ref);
+    ref.invalidate(eventRemindersProvider(eventId));
     messenger.showSnackBar(SnackBar(content: Text(l10n.saved)));
     return startAtUtc.toLocal(); // 设备本地开始时间,供日历跳到该日
   } catch (e) {
     messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
   }
   return null;
+}
+
+/// 把编辑器里选中的提醒档位同步到 event_reminders(增删差集)。
+/// 新建活动时 DB 触发器已补了默认三档,这里只处理管理员的增删。
+Future<void> _syncReminders(String eventId, List<int> wanted) async {
+  final client = Supabase.instance.client;
+  final rows = await client
+      .from('event_reminders')
+      .select('offset_minutes')
+      .eq('event_id', eventId);
+  final current = [for (final r in rows) (r['offset_minutes'] as num).toInt()];
+  final d = diffReminders(current: current, wanted: wanted);
+  if (d.toAdd.isNotEmpty) {
+    await client.from('event_reminders').insert([
+      for (final m in d.toAdd) {'event_id': eventId, 'offset_minutes': m}
+    ]);
+  }
+  if (d.toRemove.isNotEmpty) {
+    await client
+        .from('event_reminders')
+        .delete()
+        .eq('event_id', eventId)
+        .inFilter('offset_minutes', d.toRemove);
+  }
 }

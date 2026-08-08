@@ -137,7 +137,7 @@ class _AdminNotifyScreenState extends ConsumerState<AdminNotifyScreen> {
         _when = null;
       });
       ref.invalidate(adminGeneralNotificationsProvider);
-      ref.invalidate(myNotificationsProvider);
+      ref.invalidate(notificationFeedProvider);
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     } finally {
@@ -173,7 +173,7 @@ class _AdminNotifyScreenState extends ConsumerState<AdminNotifyScreen> {
       await Supabase.instance.client.rpc('admin_cancel_notification',
           params: {'p_id': row['id']});
       ref.invalidate(adminGeneralNotificationsProvider);
-      ref.invalidate(myNotificationsProvider);
+      ref.invalidate(notificationFeedProvider);
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }

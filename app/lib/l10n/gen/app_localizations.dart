@@ -2239,6 +2239,162 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'有新的學修提問'**
   String get notifQaQuestion;
+
+  /// No description provided for @notifySection.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'通知'**
+  String get notifySection;
+
+  /// No description provided for @notifyQuietTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'免打擾時段'**
+  String get notifyQuietTitle;
+
+  /// No description provided for @notifyQuietHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'此時段內不發手機推送,順延到結束後發送;活動開始前的提醒不受限。'**
+  String get notifyQuietHint;
+
+  /// No description provided for @notifyQuietStart.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'開始'**
+  String get notifyQuietStart;
+
+  /// No description provided for @notifyQuietEnd.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'結束'**
+  String get notifyQuietEnd;
+
+  /// No description provided for @notifySubscribeHeader.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'接收以下通知'**
+  String get notifySubscribeHeader;
+
+  /// No description provided for @notifyTypeEventReminder.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動提醒'**
+  String get notifyTypeEventReminder;
+
+  /// No description provided for @notifyTypeEventChanged.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動變動'**
+  String get notifyTypeEventChanged;
+
+  /// No description provided for @notifyTypeQaReply.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'學修問答回覆'**
+  String get notifyTypeQaReply;
+
+  /// No description provided for @notifyMarkAllRead.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'全部已讀'**
+  String get notifyMarkAllRead;
+
+  /// No description provided for @notifyOnChangeSwitch.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'通知所有人'**
+  String get notifyOnChangeSwitch;
+
+  /// No description provided for @notifEventReminderEve.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動預告'**
+  String get notifEventReminderEve;
+
+  /// No description provided for @notifEventReminderSoon.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動即將開始'**
+  String get notifEventReminderSoon;
+
+  /// No description provided for @notifEventReminderNow.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動開始了'**
+  String get notifEventReminderNow;
+
+  /// No description provided for @notifEventReminderInHours.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'{n} 小時後開始'**
+  String notifEventReminderInHours(int n);
+
+  /// No description provided for @notifEventReminderInMinutes.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'{n} 分鐘後開始'**
+  String notifEventReminderInMinutes(int n);
+
+  /// No description provided for @notifEventReminderEnter.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'點擊進入'**
+  String get notifEventReminderEnter;
+
+  /// No description provided for @actOccRestored.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'單次恢復'**
+  String get actOccRestored;
+
+  /// No description provided for @reminderSectionTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提醒'**
+  String get reminderSectionTitle;
+
+  /// No description provided for @reminderAddButton.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'新增提醒'**
+  String get reminderAddButton;
+
+  /// No description provided for @reminderListLabel.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已設提醒'**
+  String get reminderListLabel;
+
+  /// No description provided for @reminderOffsetAtStart.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'活動開始時'**
+  String get reminderOffsetAtStart;
+
+  /// No description provided for @reminderOffsetOneDay.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提前一天'**
+  String get reminderOffsetOneDay;
+
+  /// No description provided for @reminderOffsetTwoDays.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提前兩天'**
+  String get reminderOffsetTwoDays;
+
+  /// No description provided for @reminderOffsetMinutes.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提前 {n} 分鐘'**
+  String reminderOffsetMinutes(int n);
+
+  /// No description provided for @reminderOffsetHours.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'提前 {n} 小時'**
+  String reminderOffsetHours(int n);
 }
 
 class _AppLocalizationsDelegate
