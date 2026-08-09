@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_thoughts/core/almanac/almanac.dart';
-import 'package:pure_thoughts/features/notifications/notifications_providers.dart';
+import 'package:pure_thoughts/features/notifications/notification_prefs.dart';
 
 void main() {
   // 迷你年度数据:2026 年(仅首 3 天)+ 一个节日 + 一个十斋日
@@ -78,29 +78,58 @@ void main() {
     });
   });
 
-  group('通知开关过滤 almanacNotificationVisible', () {
+  // v0.5.21:佛历两个开关从本地 SharedPreferences 迁到云端 notification_prefs.muted_types,
+  // 过滤逻辑随之从 almanacNotificationVisible 换成通用的 isNotificationMuted。
+  group('通知静音过滤 isNotificationMuted', () {
     Map<String, dynamic> n(String type, [String? kind]) => {
           'type': type,
           if (kind != null) 'payload': {'kind': kind},
         };
 
-    test('非佛历通知不受开关影响', () {
-      expect(almanacNotificationVisible(n('proxy_log'), false, false), true);
+    test('muted 为空时一律不静音', () {
+      expect(isNotificationMuted(n('almanac', 'zhai'), const []), false);
+      expect(isNotificationMuted(n('proxy_log'), const []), false);
     });
 
-    test('节日类(festival/festival_eve)跟节日开关', () {
-      expect(almanacNotificationVisible(n('almanac', 'festival'), true, false),
+    test('裸 type 匹配', () {
+      expect(isNotificationMuted(n('event_changed'), const ['event_changed']),
           true);
-      expect(almanacNotificationVisible(n('almanac', 'festival'), false, true),
-          false);
-      expect(
-          almanacNotificationVisible(n('almanac', 'festival_eve'), false, true),
+      expect(isNotificationMuted(n('event_reminder'), const ['event_changed']),
           false);
     });
 
-    test('十斋日类跟斋日开关', () {
-      expect(almanacNotificationVisible(n('almanac', 'zhai'), false, true), true);
-      expect(almanacNotificationVisible(n('almanac', 'zhai'), true, false), false);
+    test('type:kind 只静音该 kind,同 type 其它 kind 不受影响', () {
+      const muted = ['almanac:zhai'];
+      expect(isNotificationMuted(n('almanac', 'zhai'), muted), true);
+      expect(isNotificationMuted(n('almanac', 'festival'), muted), false);
+    });
+
+    test('节日开关同时覆盖当天节日与次日预告', () {
+      final muted = legacyAlmanacMuted(showFestival: false, showZhai: true);
+      expect(isNotificationMuted(n('almanac', 'festival'), muted), true);
+      expect(isNotificationMuted(n('almanac', 'festival_eve'), muted), true);
+      expect(isNotificationMuted(n('almanac', 'zhai'), muted), false);
+    });
+
+    test('非佛历通知不受佛历开关影响', () {
+      final muted = legacyAlmanacMuted(showFestival: false, showZhai: false);
+      expect(isNotificationMuted(n('proxy_log'), muted), false);
+    });
+  });
+
+  group('老本地开关 → muted_types 迁移映射', () {
+    test('两个都开 → 不静音任何类别', () {
+      expect(legacyAlmanacMuted(showFestival: true, showZhai: true), isEmpty);
+    });
+
+    test('两个都关 → 三个 key 全静音', () {
+      expect(legacyAlmanacMuted(showFestival: false, showZhai: false),
+          ['almanac:festival', 'almanac:festival_eve', 'almanac:zhai']);
+    });
+
+    test('只关斋日', () {
+      expect(legacyAlmanacMuted(showFestival: true, showZhai: false),
+          ['almanac:zhai']);
     });
   });
 }

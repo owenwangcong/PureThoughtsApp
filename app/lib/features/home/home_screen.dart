@@ -41,6 +41,21 @@ class HomeScreen extends ConsumerWidget {
     if (user != null) scheduleOfflineFlush(context, ref);
     // 推送 token 注册(每会话一次,幂等;P2.1)
     if (user != null) PushService.instance.register();
+    // 新通知即时反映到铃铛红点(P2.17;此前只有冷启动/下拉刷新才更新)
+    if (user != null) ref.watch(notificationRealtimeProvider);
+
+    // 推送深链(P2.16):点通知打开 App → 服务端报文里的 route 落到这里。
+    // 冷启动时 PushService 先把 route 暂存(那时 router 还没就绪),首帧再消费。
+    PushService.instance.onRoute = (route) {
+      if (!context.mounted) return;
+      // 账号类页面需要登录;未登录先去登录页(router 本身不做守卫)
+      const needAuth = ['/dashboard', '/study-qa', '/groups', '/notifications'];
+      final target = user == null && needAuth.any(route.startsWith) ? '/auth' : route;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => context.push(target));
+    };
+    final pending = PushService.instance.takePendingRoute();
+    if (pending != null) PushService.instance.onRoute?.call(pending);
 
     return Scaffold(
       appBar: AppBar(

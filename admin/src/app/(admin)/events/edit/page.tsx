@@ -64,6 +64,46 @@ type EventRecord = {
   content: string | null;
 };
 
+// 提醒檔位(PRD v0.5.21 §5)。DEFAULT_REMINDERS 必須與 DB 觸發器
+// default_event_reminders(migration 0025)及 App 端 defaultReminderOffsets 三處一致。
+const REMINDER_OPTIONS = [0, 10, 15, 30, 60, 180, 1440, 2880];
+const DEFAULT_REMINDERS = [1440, 30, 0];
+
+function reminderLabel(m: number): string {
+  if (m <= 0) return "活動開始時";
+  if (m === 1440) return "提前一天";
+  if (m === 2880) return "提前兩天";
+  if (m % 60 === 0) return `提前 ${m / 60} 小時`;
+  return `提前 ${m} 分鐘`;
+}
+
+/** 把選中的檔位同步到 event_reminders(增刪差集) */
+async function syncReminders(eventId: string, wanted: number[]) {
+  const { data, error } = await supabase
+    .from("event_reminders")
+    .select("offset_minutes")
+    .eq("event_id", eventId);
+  if (error) throw error;
+  const have = new Set(data.map((r) => r.offset_minutes));
+  const want = new Set(wanted);
+  const toAdd = [...want].filter((m) => !have.has(m));
+  const toRemove = [...have].filter((m) => !want.has(m));
+  if (toAdd.length) {
+    const { error: e } = await supabase
+      .from("event_reminders")
+      .insert(toAdd.map((m) => ({ event_id: eventId, offset_minutes: m })));
+    if (e) throw e;
+  }
+  if (toRemove.length) {
+    const { error: e } = await supabase
+      .from("event_reminders")
+      .delete()
+      .eq("event_id", eventId)
+      .in("offset_minutes", toRemove);
+    if (e) throw e;
+  }
+}
+
 function useEvent(id: string | null) {
   return useQuery({
     queryKey: ["event", id],
@@ -151,6 +191,26 @@ function EventFormInner({
   const [youtube, setYoutube] = useState(event?.youtube_url ?? "");
   const [webex, setWebex] = useState(event?.webex_url ?? "");
   const [content, setContent] = useState(event?.content ?? "");
+  // 提醒檔位(PRD v0.5.21 §5;新建預設三檔,與 DB 觸發器 default_event_reminders 一致)
+  const { data: savedReminders } = useQuery({
+    queryKey: ["event-reminders", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_reminders")
+        .select("offset_minutes")
+        .eq("event_id", id!)
+        .eq("enabled", true);
+      if (error) throw error;
+      return data.map((r) => r.offset_minutes);
+    },
+  });
+  // 派生而非 effect 同步:未編輯過就顯示庫裡的值,編輯過以本地為準
+  // (React 19 的 react-hooks/set-state-in-effect 禁止在 effect 裡 setState)
+  const [remindersEdit, setRemindersEdit] = useState<number[] | null>(null);
+  const reminders = remindersEdit ?? savedReminders ?? DEFAULT_REMINDERS;
+  // 本次改動是否通知全體(降噪:小修小補不必驚動全站)
+  const [notifyAll, setNotifyAll] = useState(true);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -171,25 +231,21 @@ function EventFormInner({
         webex_url: webex.trim() || null,
         content: content.trim() || null,
       };
-      if (id) {
-        const { error } = await supabase
-          .from("events")
-          .update(payload)
-          .eq("id", id);
-        if (error) throw error;
-        return id;
-      }
-      const { data: session } = await supabase.auth.getSession();
-      const { data, error } = await supabase
-        .from("events")
-        .insert({ ...payload, created_by: session.session?.user.id })
-        .select("id")
-        .single();
+      // v0.5.21:走 admin_save_event RPC 而不是直寫 events —— 觸發器感知不到
+      // 「本次是否通知全體」這個 UI 意圖,經 definer RPC 設事務級會話變量傳遞
+      // (客戶端無法偽造),見 migration 0026。
+      const { data, error } = await supabase.rpc("admin_save_event", {
+        p_event: { ...payload, ...(id ? { id } : {}) },
+        p_notify: notifyAll,
+      });
       if (error) throw error;
-      return data.id as string;
+      const savedId = data as string;
+      await syncReminders(savedId, reminders);
+      return savedId;
     },
     onSuccess: (savedId) => {
-      toast.success("已儲存(會生成全員變更通知)");
+      toast.success(notifyAll ? "已儲存(會生成全員變更通知)" : "已儲存(本次未通知)");
+      void queryClient.invalidateQueries({ queryKey: ["event-reminders", savedId] });
       void queryClient.invalidateQueries({ queryKey: ["events"] });
       void queryClient.invalidateQueries({ queryKey: ["event", savedId] });
       if (!id) router.replace(`/events/edit?id=${savedId}`);
@@ -271,6 +327,36 @@ function EventFormInner({
           <div className="flex items-center gap-3 pt-6">
             <Switch checked={weekly} onCheckedChange={setWeekly} />
             <Label>每週重複(星期與時刻由開始時間決定)</Label>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>提醒</Label>
+            <div className="flex flex-wrap gap-2">
+              {REMINDER_OPTIONS.map((m) => {
+                const on = reminders.includes(m);
+                return (
+                  <Button
+                    key={m}
+                    type="button"
+                    size="sm"
+                    variant={on ? "default" : "outline"}
+                    onClick={() =>
+                      setRemindersEdit(
+                        on ? reminders.filter((x) => x !== m) : [...reminders, m],
+                      )
+                    }
+                  >
+                    {reminderLabel(m)}
+                  </Button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              預設三檔:提前一天(大陸 Android 唯一能看到的一檔)· 提前 30 分鐘 · 活動開始時。
+            </p>
+          </div>
+          <div className="flex items-center gap-3 md:col-span-2">
+            <Switch checked={notifyAll} onCheckedChange={setNotifyAll} />
+            <Label>本次改動通知所有人</Label>
           </div>
           <div className="space-y-2">
             <Label>YouTube 連結(可空)</Label>

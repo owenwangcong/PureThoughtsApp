@@ -350,7 +350,7 @@ void main() {
       allPracticeTypesMapProvider.overrideWith((ref) async => {}),
       myGroupsProvider.overrideWith((ref) async => []),
       // 已读(notification_reads 非空)→ 不触发标记已读的触网路径
-      myNotificationsProvider.overrideWith((ref) async => [
+      notificationFeedProvider.overrideWith(() => StubNotificationFeed([
             {
               'id': 'n1',
               'scope': 'user',
@@ -377,7 +377,7 @@ void main() {
                 {'read_at': '2026-07-30T09:01:00'}
               ],
             },
-          ]),
+          ])),
     ]);
     expect(find.text('您的提問有新回覆'), findsOneWidget);
     expect(find.text('有新的學修提問'), findsOneWidget);

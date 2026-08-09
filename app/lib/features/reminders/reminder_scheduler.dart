@@ -6,6 +6,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../core/push_service.dart';
 import 'mindfulness_model.dart';
 
 /// OS 级正念提醒的调度封装(design §4/§10.1)。
@@ -51,6 +52,14 @@ class ReminderScheduler {
       );
       await _plugin.initialize(
         settings: const InitializationSettings(android: android, iOS: darwin),
+        // 点击本地通知(含 FCM 前台横幅镜像)→ 深链(P2.16)。
+        // 正念提醒自身的 payload 是 'mindfulness',不以 '/' 开头 → 不会被当成路由。
+        onDidReceiveNotificationResponse: (response) {
+          final payload = response.payload;
+          if (payload != null && payload.startsWith('/')) {
+            PushService.instance.handleRoute(payload);
+          }
+        },
       );
       _initialized = true;
     } catch (e) {

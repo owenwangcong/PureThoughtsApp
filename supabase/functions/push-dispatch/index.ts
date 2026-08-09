@@ -1,10 +1,23 @@
-// 推送投递(PRD §5.1 / §12.4,PLAN P2.1-3)
+// 推送投递(PRD v0.5.21 §5.1/§5.4/§12.4,设计 docs/design/notification-overhaul.md,PLAN P2.12–P2.16)
 // 职责:把 notifications 表中待发的行投递到 APNs(全部 iOS,含大陆)与 FCM(海外 Android)。
-// 触发:notifications insert 触发器 + pg_cron 每分钟兜底(经 pg_net,见 migration 0014);
-//       也可手动 curl 调用。幂等:以 sent_at 抢占,重复调用不重发。
-// 免打扰时段/分类订阅在阶段 C 补(先保证可达性)。
+// 触发:notifications insert 语句级触发器(仅当本批含已到点行)+ pg_cron 每分钟兜底,
+//       经 pg_net 外呼(migration 0023);也可手动 curl(须带 x-dispatch-key)。
+//
+// v0.5.21 改造(逐条对应 PLAN §7 登记的缺陷):
+//   · 抢占改租约式 RPC claim_notifications:原实现在发送**之前**就写 sent_at,失败不回滚
+//     不重试不留痕 → 一次网络抖动即静默丢失(缺陷 B)。现在结果经 complete_notification
+//     回写,全失败则释放租约由每分钟 cron 自动重投,5 次用尽记 failed_at。
+//   · 受众解析下沉为 push_audience RPC:一次取齐 token/平台/语言/免打扰顺延时刻,
+//     内含 channels、分类订阅、封禁、scope 四道过滤(缺陷 D)。
+//   · 免打扰顺延:命中时段的用户不即时推,克隆一条 scope=user + channels={push} 的
+//     通知排到其本地时段结束(缺陷 C)。克隆只推不进通知中心,原通知已在列表里。
+//   · 报文携带 data.route 深链(缺陷 G)+ apns-collapse-id / collapse_key 折叠 + 过期时间。
+//   · 鉴权:DISPATCH_SECRET 必须配置(原实现未配置时静默放行);仅接受 POST。
+//   · 逐 token 串行改并发 20,全流程 try/catch(原实现 fetch 未包异常,handler 500 时
+//     该批已被标记已发送)。
+//
 // 环境变量:APNS_KEY_P8 / APNS_KEY_ID / APPLE_TEAM_ID / APNS_TOPIC(缺省 bundle id)
-//           FCM_SERVICE_ACCOUNT(服务账号 JSON 全文) / DISPATCH_SECRET(可选共享密钥)
+//           FCM_SERVICE_ACCOUNT(服务账号 JSON 全文) / DISPATCH_SECRET(必填共享密钥)
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const admin = createClient(
@@ -14,6 +27,38 @@ const admin = createClient(
 
 const APNS_TOPIC = Deno.env.get("APNS_TOPIC") ?? "com.aeonlectron.purethoughts";
 const BATCH = 50;
+const CONCURRENCY = 20;
+
+/// 一条待投递的推送:文案 + 深链 + 折叠/过期控制
+type PushMsg = {
+  title: string;
+  body: string;
+  route: string;
+  collapseId: string | null;
+  expiration: number | null; // unix 秒;APNs 过期后不再尝试送达
+};
+
+/// 有并发上限的 map(逐 token 串行在 scope=all 时会超时)
+async function mapLimit<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let cursor = 0;
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (true) {
+        const i = cursor++;
+        if (i >= items.length) return;
+        out[i] = await fn(items[i]);
+      }
+    },
+  );
+  await Promise.all(workers);
+  return out;
+}
 
 // ---------------------------------------------------------------- 工具:PEM → CryptoKey
 function pemToDer(pem: string): Uint8Array {
@@ -77,21 +122,34 @@ async function getApnsJwt(): Promise<string | null> {
 }
 
 /// 返回 'ok' | 'invalid'(应删 token)| 'error'
-async function sendApns(token: string, title: string, body: string): Promise<string> {
+async function sendApns(token: string, msg: PushMsg): Promise<string> {
   const jwt = await getApnsJwt();
   if (!jwt) return "error";
-  const payload = JSON.stringify({ aps: { alert: { title, body }, sound: "default" } });
+  // route 与 aps 同级,客户端点击通知时据此深链(iOS 走 AppDelegate.didReceive)
+  const payload = JSON.stringify({
+    aps: {
+      alert: { title: msg.title, body: msg.body },
+      sound: "default",
+      ...(msg.collapseId ? { "thread-id": msg.collapseId } : {}),
+    },
+    route: msg.route,
+  });
+  const headers: Record<string, string> = {
+    authorization: `bearer ${jwt}`,
+    "apns-topic": APNS_TOPIC,
+    "apns-push-type": "alert",
+    "apns-priority": "10",
+  };
+  // 同一活动的连续变更在通知栏折叠成一条(也兜住整条重试可能的重复推送)
+  if (msg.collapseId) headers["apns-collapse-id"] = msg.collapseId;
+  if (msg.expiration) headers["apns-expiration"] = String(msg.expiration);
+
   // TestFlight/App Store 走生产 APNs;本机调试构建的 token 属沙盒 → 生产报
   // BadDeviceToken 时再试沙盒,两边都无效才判失效
   for (const host of ["api.push.apple.com", "api.sandbox.push.apple.com"]) {
     const res = await fetch(`https://${host}/3/device/${token}`, {
       method: "POST",
-      headers: {
-        authorization: `bearer ${jwt}`,
-        "apns-topic": APNS_TOPIC,
-        "apns-push-type": "alert",
-        "apns-priority": "10",
-      },
+      headers,
       body: payload,
     });
     if (res.ok) return "ok";
@@ -133,7 +191,7 @@ async function getFcmAccessToken(): Promise<{ token: string; project: string } |
   return { token: fcmAuth.token, project: sa.project_id };
 }
 
-async function sendFcm(token: string, title: string, body: string): Promise<string> {
+async function sendFcm(token: string, msg: PushMsg): Promise<string> {
   const auth = await getFcmAccessToken();
   if (!auth) return "error";
   const res = await fetch(
@@ -141,7 +199,17 @@ async function sendFcm(token: string, title: string, body: string): Promise<stri
     {
       method: "POST",
       headers: { authorization: `Bearer ${auth.token}`, "content-type": "application/json" },
-      body: JSON.stringify({ message: { token, notification: { title, body } } }),
+      body: JSON.stringify({
+        message: {
+          token,
+          notification: { title: msg.title, body: msg.body },
+          data: { route: msg.route }, // 客户端 onMessageOpenedApp / getInitialMessage 读取
+          android: {
+            priority: "high",
+            ...(msg.collapseId ? { collapse_key: msg.collapseId } : {}),
+          },
+        },
+      }),
     },
   );
   if (res.ok) return "ok";
@@ -169,10 +237,58 @@ function lunarText(m: number, d: number, leap: boolean, hans: boolean): string {
   return (hans ? "农历" : "農曆") + month + (LUNAR_DAYS[d - 1] ?? "");
 }
 
+/// 在**活动时区**渲染日期时间:提前一天的预告必须说清是哪天几点,
+/// 且要用活动当地时间(与客户端详情页「活動當地時間」口径一致)。
+function localTime(iso: string, tz: string, hans: boolean): string {
+  try {
+    return new Intl.DateTimeFormat(hans ? "zh-CN" : "zh-TW", {
+      timeZone: tz || "Asia/Shanghai",
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
 // deno-lint-ignore no-explicit-any
 function renderText(n: any, hans: boolean): { title: string; body: string } {
   const p = n.payload ?? {};
   switch (n.type) {
+    // 活动提醒(PRD v0.5.21 §5,默认三档 1440/30/0)
+    case "event_reminder": {
+      const ofs = Number(p.offset_minutes ?? 0);
+      const name = String(p.title ?? "");
+      if (ofs >= 1440) {
+        const when = localTime(String(p.start_at ?? ""), String(p.timezone ?? ""), hans);
+        return {
+          title: hans ? "活动预告" : "活動預告",
+          body: when ? `${name} · ${when}` : name,
+        };
+      }
+      if (ofs >= 60) {
+        const h = Math.round(ofs / 60);
+        return {
+          title: hans ? "活动即将开始" : "活動即將開始",
+          body: hans ? `${name} · ${h} 小时后开始` : `${name} · ${h} 小時後開始`,
+        };
+      }
+      if (ofs >= 1) {
+        return {
+          title: hans ? "活动即将开始" : "活動即將開始",
+          body: hans ? `${name} · ${ofs} 分钟后开始` : `${name} · ${ofs} 分鐘後開始`,
+        };
+      }
+      const hasLink = p.has_webex === true || p.has_youtube === true;
+      return {
+        title: hans ? "活动开始了" : "活動開始了",
+        body: hasLink ? (hans ? `${name} · 点击进入` : `${name} · 點擊進入`) : name,
+      };
+    }
     case "almanac": {
       const names: string[] = (hans ? p.names_hans : p.names_hant) ?? [];
       const lunar = lunarText(p.lunar_month ?? 1, p.lunar_day ?? 1, p.is_leap_month === true, hans);
@@ -188,6 +304,7 @@ function renderText(n: any, hans: boolean): { title: string; body: string } {
       const word: Record<string, [string, string]> = {
         created: ["新增", "新增"], updated: ["更新", "更新"], deleted: ["已取消", "已取消"],
         occurrence_cancelled: ["单次取消", "單次取消"], occurrence_changed: ["单次改期", "單次改期"],
+        occurrence_restored: ["单次恢复", "單次恢復"],
       };
       const w = word[p.action as string] ?? ["变动", "異動"];
       return { title: hans ? "活动变动" : "活動異動", body: `${hans ? w[0] : w[1]} · ${p.title ?? ""}` };
@@ -206,65 +323,214 @@ function renderText(n: any, hans: boolean): { title: string; body: string } {
   }
 }
 
+// ---------------------------------------------------------------- 深链 / 折叠 / 过期
+/// 点击通知的落地路由。⚠️ 必须与客户端 notifications_screen.dart 的 routeOfNotification
+/// 保持一致(跨语言无法共享常量,两端改动必须成对;对照表见设计文档 §8.2)。
+// deno-lint-ignore no-explicit-any
+function routeOf(n: any, p: any): string {
+  const eid = p.event_id ?? n.event_id;
+  switch (n.type) {
+    case "event_reminder":
+    case "event_changed": {
+      // 活动已删(action=deleted)时不带 event_id → 深链过去只会看到空态,退化到日历
+      if (!eid) return "/calendar";
+      const d = p.occurrence_date ?? p.date;
+      return d ? `/calendar/event/${eid}?date=${d}` : `/calendar/event/${eid}`;
+    }
+    case "almanac":
+      return "/calendar";
+    case "live_started":
+      return "/live";
+    case "qa_reply":
+      return p.thread_id ? `/study-qa/${p.thread_id}` : "/study-qa";
+    case "qa_question":
+      return p.thread_id ? `/study-qa/${p.thread_id}?as=admin` : "/study-qa";
+    case "announcement":
+      return n.target_id ? `/groups/${n.target_id}` : "/groups";
+    case "proxy_log":
+      return "/dashboard";
+    default:
+      return "/notifications";
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+function collapseOf(n: any, p: any): string | null {
+  const eid = p.event_id ?? n.event_id;
+  if (!eid) return null;
+  // 同一活动的连续变更折叠成一条
+  if (n.type === "event_changed") return `evt:${eid}`;
+  // 提醒按档位分别折叠:预告与开场是两条独立信息,不该互相覆盖;
+  // 但同一档位的重投(整条重试)要折叠掉。
+  if (n.type === "event_reminder") return `evtr:${eid}:${p.offset_minutes ?? 0}`;
+  return null;
+}
+
+// deno-lint-ignore no-explicit-any
+function expirationOf(n: any, p: any): number {
+  // 活动提醒过了开场就没意义了(设备关机数小时后再收到「即将开始」只会造成困惑),
+  // 给到开场后 1 小时;其余通知 24 小时。
+  if (n.type === "event_reminder" && p.start_at) {
+    const t = Date.parse(String(p.start_at));
+    if (!Number.isNaN(t)) return Math.floor(t / 1000) + 3600;
+  }
+  return Math.floor(Date.now() / 1000) + 24 * 3600;
+}
+
+// deno-lint-ignore no-explicit-any
+function renderPush(n: any, hans: boolean): PushMsg {
+  const p = n.payload ?? {};
+  const { title, body } = renderText(n, hans);
+  return {
+    title,
+    body,
+    route: routeOf(n, p),
+    collapseId: collapseOf(n, p),
+    expiration: expirationOf(n, p),
+  };
+}
+
 // ---------------------------------------------------------------- 主流程
+type Audience = {
+  token: string;
+  platform: string;
+  locale: string | null;
+  quiet_until: string | null;
+  user_id: string;
+};
+
+/// 免打扰顺延:为命中时段的用户克隆一条「只推不进通知中心」的通知,排到其本地时段结束。
+/// 原通知已经在通知中心里,克隆用 channels={push} 避免列表出现重复条目(设计 §5.4)。
+/// 先删旧克隆再插:整条重试时不会堆出多份。
+// deno-lint-ignore no-explicit-any
+async function cloneDeferred(n: any, deferred: Audience[]): Promise<void> {
+  const byUser = new Map<string, string>();
+  for (const d of deferred) {
+    if (d.quiet_until && !byUser.has(d.user_id)) byUser.set(d.user_id, d.quiet_until);
+  }
+  if (!byUser.size) return;
+
+  await admin.from("notifications").delete()
+    .eq("scope", "user")
+    .is("sent_at", null)
+    .filter("payload->>deferred_from", "eq", n.id);
+
+  await admin.from("notifications").insert(
+    [...byUser].map(([uid, until]) => ({
+      scope: "user",
+      target_id: uid,
+      type: n.type,
+      title: n.title,
+      body: n.body,
+      event_id: n.event_id ?? null,
+      payload: { ...(n.payload ?? {}), deferred_from: n.id },
+      channels: ["push"],
+      scheduled_at: until,
+    })),
+  );
+}
+
 Deno.serve(async (req) => {
   const headers = { "Content-Type": "application/json" };
-  // 可选共享密钥(与 app_settings.push_dispatch_key 对应,防匿名滥调;未配置则跳过)
+
+  // 鉴权:原实现「未配置密钥则跳过校验」等于对公网敞开,改为必须配置
   const secret = Deno.env.get("DISPATCH_SECRET");
-  if (secret && req.headers.get("x-dispatch-key") !== secret) {
+  if (!secret) {
+    console.error("DISPATCH_SECRET 未配置,拒绝服务(部署见 infra/deploy-aws-ec2.md §11)");
+    return new Response(JSON.stringify({ error: "not_configured" }), { status: 500, headers });
+  }
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "method_not_allowed" }), { status: 405, headers });
+  }
+  if (req.headers.get("x-dispatch-key") !== secret) {
     return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers });
   }
 
-  // 1. 抢占待发通知(近一天内、到点的;sent_at 置位后重复调用不重发)
-  const { data: pending } = await admin
-    .from("notifications")
-    .select("id")
-    .is("sent_at", null)
-    .gt("created_at", new Date(Date.now() - 24 * 3600e3).toISOString())
-    .or(`scheduled_at.is.null,scheduled_at.lte.${new Date().toISOString()}`)
-    .limit(BATCH);
-  if (!pending?.length) return new Response(JSON.stringify({ sent: 0 }), { headers });
-
-  const { data: claimed } = await admin
-    .from("notifications")
-    .update({ sent_at: new Date().toISOString() })
-    .in("id", pending.map((r) => r.id))
-    .is("sent_at", null)
-    .select("id, scope, target_id, type, title, body, payload");
+  // 1. 租约式抢占(FOR UPDATE SKIP LOCKED + attempts++,见 migration 0023)
+  const { data: claimed, error: claimErr } = await admin
+    .rpc("claim_notifications", { p_limit: BATCH });
+  if (claimErr) {
+    console.error("claim_notifications 失败", claimErr.message);
+    return new Response(JSON.stringify({ error: "claim_failed" }), { status: 500, headers });
+  }
   if (!claimed?.length) return new Response(JSON.stringify({ sent: 0 }), { headers });
 
-  let ok = 0, invalid = 0, failed = 0;
-  for (const n of claimed) {
-    // 2. 解析受众 → tokens(带用户语言)
-    let q = admin.from("push_tokens").select("token, platform, user_id, profiles(locale)");
-    if (n.scope === "user") q = q.eq("user_id", n.target_id);
-    else if (n.scope === "group") {
-      const { data: members } = await admin
-        .from("group_members").select("user_id")
-        .eq("group_id", n.target_id).eq("status", "approved");
-      const ids = (members ?? []).map((m) => m.user_id);
-      if (!ids.length) continue;
-      q = q.in("user_id", ids);
-    }
-    const { data: tokens } = await q;
+  let ok = 0, invalid = 0, failed = 0, deferredTotal = 0;
 
-    // 3. 逐 token 投递(按用户语言渲染;失效 token 即删)
-    for (const t of tokens ?? []) {
-      // deno-lint-ignore no-explicit-any
-      const hans = ((t as any).profiles?.locale ?? "zh_Hant") === "zh_Hans";
-      const { title, body } = renderText(n, hans);
-      const result = t.platform === "apns"
-        ? await sendApns(t.token, title, body)
-        : await sendFcm(t.token, title, body);
-      if (result === "ok") ok++;
-      else if (result === "invalid") {
-        invalid++;
-        await admin.from("push_tokens").delete().eq("token", t.token);
-      } else failed++;
+  for (const n of claimed) {
+    let nOk = 0, nInvalid = 0, nFailed = 0;
+    let nErr: string | null = null;
+
+    try {
+      // 2. 受众解析:channels / 分类订阅 / 封禁 / scope 四道过滤 + 免打扰顺延时刻
+      const { data: audience, error: audErr } = await admin
+        .rpc("push_audience", { p_notification_id: n.id });
+      if (audErr) throw new Error(`push_audience: ${audErr.message}`);
+
+      const list = (audience ?? []) as Audience[];
+      const deferred = list.filter((a) => a.quiet_until);
+      const sendNow = list.filter((a) => !a.quiet_until);
+
+      // 3. 免打扰顺延(克隆失败不应让原通知整条重试 → 单独捕获)
+      if (deferred.length) {
+        try {
+          await cloneDeferred(n, deferred);
+          deferredTotal += deferred.length;
+        } catch (e) {
+          console.error("免打扰克隆失败", n.id, String(e));
+          nErr = `defer: ${String(e)}`;
+        }
+      }
+
+      // 4. 并发投递(按用户 locale 简繁渲染;失效 token 即删)
+      const results = await mapLimit(sendNow, CONCURRENCY, async (t) => {
+        const msg = renderPush(n, (t.locale ?? "zh_Hant") === "zh_Hans");
+        try {
+          const r = t.platform === "apns"
+            ? await sendApns(t.token, msg)
+            : await sendFcm(t.token, msg);
+          if (r === "invalid") {
+            await admin.from("push_tokens").delete().eq("token", t.token);
+          }
+          return r;
+        } catch (e) {
+          // 原实现 fetch 未包异常:一次网络错误会让整个 handler 500,
+          // 而此时该批通知已被标记「已发送」→ 永久丢失
+          console.error("投递异常", t.platform, String(e));
+          return "error";
+        }
+      });
+
+      for (const r of results) {
+        if (r === "ok") nOk++;
+        else if (r === "invalid") nInvalid++;
+        else nFailed++;
+      }
+    } catch (e) {
+      nErr = String(e);
+      nFailed++;
+      console.error("通知处理失败", n.id, nErr);
     }
+
+    // 5. 结果回写:成功置 sent_at;全失败释放租约等 cron 重投,5 次用尽记 failed_at
+    const { error: doneErr } = await admin.rpc("complete_notification", {
+      p_id: n.id, p_ok: nOk, p_invalid: nInvalid, p_failed: nFailed, p_error: nErr,
+    });
+    if (doneErr) console.error("complete_notification 失败", n.id, doneErr.message);
+
+    ok += nOk;
+    invalid += nInvalid;
+    failed += nFailed;
   }
+
   return new Response(
-    JSON.stringify({ notifications: claimed.length, ok, invalid, failed }),
+    JSON.stringify({
+      notifications: claimed.length,
+      ok,
+      invalid,
+      failed,
+      deferred: deferredTotal,
+    }),
     { headers },
   );
 });

@@ -220,6 +220,38 @@ export type Database = {
           },
         ]
       }
+      event_reminders: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          event_id: string
+          id: string
+          offset_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          event_id: string
+          id?: string
+          offset_minutes: number
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          event_id?: string
+          id?: string
+          offset_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_reminders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_types: {
         Row: {
           active: boolean
@@ -488,6 +520,44 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_prefs: {
+        Row: {
+          muted_types: string[]
+          push_unavailable: boolean
+          quiet_enabled: boolean
+          quiet_end: string
+          quiet_start: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          muted_types?: string[]
+          push_unavailable?: boolean
+          quiet_enabled?: boolean
+          quiet_end?: string
+          quiet_start?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          muted_types?: string[]
+          push_unavailable?: boolean
+          quiet_enabled?: boolean
+          quiet_end?: string
+          quiet_start?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_prefs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_reads: {
         Row: {
           notification_id: string
@@ -523,11 +593,15 @@ export type Database = {
       }
       notifications: {
         Row: {
+          attempts: number
           body: string | null
           channels: string[]
+          claimed_at: string | null
           created_at: string
           event_id: string | null
+          failed_at: string | null
           id: string
+          last_error: string | null
           payload: Json
           scheduled_at: string | null
           scope: Database["public"]["Enums"]["notification_scope"]
@@ -537,11 +611,15 @@ export type Database = {
           type: string
         }
         Insert: {
+          attempts?: number
           body?: string | null
           channels?: string[]
+          claimed_at?: string | null
           created_at?: string
           event_id?: string | null
+          failed_at?: string | null
           id?: string
+          last_error?: string | null
           payload?: Json
           scheduled_at?: string | null
           scope: Database["public"]["Enums"]["notification_scope"]
@@ -551,11 +629,15 @@ export type Database = {
           type?: string
         }
         Update: {
+          attempts?: number
           body?: string | null
           channels?: string[]
+          claimed_at?: string | null
           created_at?: string
           event_id?: string | null
+          failed_at?: string | null
           id?: string
+          last_error?: string | null
           payload?: Json
           scheduled_at?: string | null
           scope?: Database["public"]["Enums"]["notification_scope"]
@@ -1219,9 +1301,54 @@ export type Database = {
         Args: { p_body?: string; p_scheduled_at?: string; p_title: string }
         Returns: string
       }
+      admin_save_event: {
+        Args: { p_event: Json; p_notify?: boolean }
+        Returns: string
+      }
+      claim_notifications: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          body: string | null
+          channels: string[]
+          claimed_at: string | null
+          created_at: string
+          event_id: string | null
+          failed_at: string | null
+          id: string
+          last_error: string | null
+          payload: Json
+          scheduled_at: string | null
+          scope: Database["public"]["Enums"]["notification_scope"]
+          sent_at: string | null
+          target_id: string | null
+          title: string
+          type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      complete_notification: {
+        Args: {
+          p_error?: string
+          p_failed: number
+          p_id: string
+          p_invalid: number
+          p_ok: number
+        }
+        Returns: undefined
+      }
       create_qa_thread: { Args: { p_body: string }; Returns: string }
       delete_practice_log: { Args: { p_log_id: string }; Returns: undefined }
       dissolve_group: { Args: { p_group_id: string }; Returns: undefined }
+      expand_event_reminders: {
+        Args: { p_days?: number; p_event_id?: string }
+        Returns: number
+      }
       gen_join_code: { Args: never; Returns: string }
       generate_almanac_notifications: { Args: never; Returns: undefined }
       get_group_join_code: { Args: { p_group_id: string }; Returns: string }
@@ -1236,7 +1363,32 @@ export type Database = {
         Returns: string
       }
       mark_qa_thread_read: { Args: { p_thread_id: string }; Returns: undefined }
+      purge_old_notifications: { Args: { p_days?: number }; Returns: number }
+      push_audience: {
+        Args: { p_notification_id: string }
+        Returns: {
+          locale: string
+          platform: Database["public"]["Enums"]["push_platform"]
+          quiet_until: string
+          token: string
+          user_id: string
+        }[]
+      }
       qa_thread_owner: { Args: { tid: string }; Returns: string }
+      quiet_until: { Args: { p_user: string }; Returns: string }
+      quiet_until_for: {
+        Args: {
+          p_enabled: boolean
+          p_end: string
+          p_start: string
+          p_tz: string
+        }
+        Returns: string
+      }
+      reminder_bypasses_quiet: {
+        Args: { p_payload: Json; p_type: string }
+        Returns: boolean
+      }
       reset_group_join_code: { Args: { p_group_id: string }; Returns: string }
       transfer_group_ownership: {
         Args: { p_group_id: string; p_new_owner: string }

@@ -9,14 +9,20 @@ import 'package:pure_thoughts/features/events/calendar_screen.dart';
 import 'package:pure_thoughts/features/moderation/admin_notify_screen.dart';
 import 'package:pure_thoughts/features/events/event_agenda_editor.dart';
 import 'package:pure_thoughts/features/events/event_detail_models.dart';
+import 'package:pure_thoughts/features/dashboard/dashboard_providers.dart';
 import 'package:pure_thoughts/features/events/event_detail_screen.dart';
 import 'package:pure_thoughts/features/events/events_providers.dart';
+import 'package:pure_thoughts/features/groups/groups_providers.dart';
 import 'package:pure_thoughts/features/events/occurrence_utils.dart';
+import 'package:pure_thoughts/features/notifications/notification_prefs.dart';
+import 'package:pure_thoughts/features/notifications/notifications_providers.dart';
+import 'package:pure_thoughts/features/notifications/notifications_screen.dart';
 import 'package:pure_thoughts/features/onboarding/onboarding_screen.dart';
 import 'package:pure_thoughts/features/qa/qa_detail_screen.dart';
 import 'package:pure_thoughts/features/qa/qa_models.dart';
 import 'package:pure_thoughts/features/study_qa/study_qa_list_screen.dart';
 import 'package:pure_thoughts/features/study_qa/study_qa_providers.dart';
+import 'package:pure_thoughts/features/settings/settings_screen.dart';
 import 'package:pure_thoughts/features/study_qa/study_qa_thread_screen.dart';
 import 'package:pure_thoughts/l10n/gen/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -297,6 +303,85 @@ void main() {
                   'created_at': '2026-07-18T00:00:00Z',
                 },
               ]),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 通知中心(P2.17 改造:三档提醒文案 + 全部已讀按钮 + 本地时间行)
+    testWidgets('通知中心 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      Map<String, dynamic> row(String id, String type,
+              Map<String, dynamic> payload) =>
+          {
+            'id': id,
+            'scope': 'all',
+            'target_id': null,
+            'title': '',
+            'body': null,
+            'type': type,
+            'event_id': 'e1',
+            'payload': payload,
+            'created_at': '2026-08-14T10:00:00Z',
+            'notification_reads': const [],
+          };
+
+      await pumpScreen(
+        tester,
+        const NotificationsScreen(),
+        locale,
+        overrides: [
+          currentUserProvider.overrideWith((ref) => null),
+          allPracticeTypesMapProvider.overrideWith((ref) async => {}),
+          myGroupsProvider.overrideWith((ref) async => []),
+          notificationFeedProvider.overrideWith(() => StubNotificationFeed([
+                row('n1', 'event_reminder', {
+                  'event_id': 'e1',
+                  'occurrence_date': '2026-08-15',
+                  'offset_minutes': 1440,
+                  'title': '週六共修迴向法會',
+                  'start_at': '2026-08-15T11:30:00Z',
+                  'timezone': 'Asia/Shanghai',
+                  'has_youtube': true,
+                }),
+                row('n2', 'event_reminder', {
+                  'event_id': 'e1',
+                  'occurrence_date': '2026-08-15',
+                  'offset_minutes': 30,
+                  'title': '週六共修迴向法會',
+                  'start_at': '2026-08-15T11:30:00Z',
+                  'timezone': 'Asia/Shanghai',
+                }),
+                row('n3', 'event_changed', {
+                  'action': 'occurrence_restored',
+                  'title': '週六共修迴向法會',
+                  'event_id': 'e1',
+                  'date': '2026-08-15',
+                }),
+              ])),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    // 设置页「通知」分组(免打扰起讫 + 5 个分类开关)
+    testWidgets('设置页通知分组 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      await pumpScreen(
+        tester,
+        const SettingsScreen(),
+        locale,
+        overrides: [
+          currentUserProvider.overrideWith((ref) => null),
+          myProfileProvider.overrideWith((ref) async => null),
+          notificationPrefsProvider
+              .overrideWith((ref) async => const NotificationPrefs()),
         ],
       );
       expect(tester.takeException(), isNull);

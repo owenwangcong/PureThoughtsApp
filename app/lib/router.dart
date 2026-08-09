@@ -91,10 +91,21 @@ final routerProvider = Provider<GoRouter>((ref) {
             EventDetailScreen(occ: state.extra as Occurrence?),
       ),
       // 管理员编辑时间表/资料(经 extra 传 event map)
+      // ⚠️ 必须声明在下面的 :eventId 之前,否则 'agenda' 会被当成活动 id
       GoRoute(
         path: '/calendar/event/agenda',
         builder: (context, state) =>
             EventAgendaEditorScreen(event: state.extra as Map<String, dynamic>?),
+      ),
+      // 可 URL 化的活动详情(P2.16):推送 / 通知中心深链走这条。
+      // 上面那条只吃内存里的 Occurrence 对象,无法用 URL 表达,推送点开只能落到日历。
+      // date = occurrence_date(活动时区日期),用来定位循环活动的具体某一场。
+      GoRoute(
+        path: '/calendar/event/:eventId',
+        builder: (context, state) => EventDetailScreen(
+          eventId: state.pathParameters['eventId'],
+          dateKey: state.uri.queryParameters['date'],
+        ),
       ),
       GoRoute(path: '/live', builder: (context, state) => const LiveScreen()),
       GoRoute(

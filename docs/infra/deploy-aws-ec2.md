@@ -394,3 +394,59 @@ values ('all', 'general', '推送测试', '看到即链路畅通', '{inapp}');
 
 **④ 失败排查**:`select * from net._http_response order by id desc limit 3;`(pg_net 外呼结果)
 + 函数容器日志 `sudo docker logs --tail 50 supabase-edge-functions`。
+
+---
+
+### 11.1 通知系统改造上生产(P2.12–P2.17,migration 0023–0027)
+
+> 设计与验收清单见 [`../design/notification-overhaul.md`](../design/notification-overhaul.md)。
+
+**① `DISPATCH_SECRET` 现在是必填项**(v0.5.21 起)。原实现「未配置则跳过校验」等于把函数
+对公网敞开,改为**未配置直接返回 500 并拒绝服务**。升级前务必确认 `.env` 里有该变量、
+且与 `app_secrets.push_dispatch_key` 一致,否则全站通知会静默停摆:
+
+```sql
+select key, (value <> '') as configured from app_secrets;   -- 两项都应为 t
+```
+
+**② 函数改动后必须重建容器**(不是 restart —— 环境变量在容器创建时注入,
+`docker restart` 不会重读 `.env`,2026-08-08 本地实测踩过):
+
+```sh
+cd ~/purethoughts && sudo docker compose up -d --force-recreate functions
+```
+
+**③ 新增三项服务端设施**,推完 migration 后逐项确认:
+
+```sql
+-- 三个 cron job(event-reminders-daily 15:00 UTC / almanac-daily 16:05 / retention 17:00)
+select jobname, schedule from cron.job order by jobname;
+
+-- push-dispatch 经 PostgREST 以 service_role 调这两个 RPC;
+-- revoke from public 会连 service_role 一起收走(它不是函数 owner),必须有 grant
+select has_function_privilege('service_role', 'public.claim_notifications(int)', 'execute');
+
+-- 通知中心红点靠订阅 notifications 的 INSERT;不在 publication 里则订阅建得起来但收不到事件
+select count(*) from pg_publication_tables
+ where pubname = 'supabase_realtime' and tablename = 'notifications';   -- 应为 1
+```
+
+**④ 安全回归**(同 0016 教训:生产库新表默认授权会覆盖最小授权):
+
+```sh
+# 两张新表对 anon 都应 401/权限拒绝,而不是返回空数组
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H "apikey: $ANON_KEY" 'https://api.pure-thoughts.com/rest/v1/notification_prefs?select=*'
+```
+
+**⑤ 投递失败排查**(改造后失败有痕迹了,不用再靠猜):
+
+```sql
+select id, type, attempts, failed_at, left(last_error, 120) as err
+  from notifications
+ where failed_at is not null or (sent_at is null and attempts > 0)
+ order by created_at desc limit 20;
+```
+
+`attempts` 递增但 `sent_at` 仍空 = 正在重投(每分钟 cron 自动重试,5 次用尽记 `failed_at`)。
+后台「通知」页与看板也会直接显示这两个状态。

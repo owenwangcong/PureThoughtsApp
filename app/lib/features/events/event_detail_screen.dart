@@ -16,6 +16,7 @@ import '../auth/auth_providers.dart';
 import '../live/webex.dart';
 import 'event_detail_models.dart';
 import 'event_edit.dart';
+import 'event_reminder_options.dart';
 import 'events_providers.dart';
 import 'occurrence_utils.dart';
 
@@ -23,30 +24,84 @@ import 'occurrence_utils.dart';
 /// 取代原 bottom sheet —— 简介 + 时间表(按天分组、行内经文链接) + 相关资料(PDF 下载)
 /// + YouTube/Webex + 管理员操作;右上角「分享」把整张时间表转成纯文本发 Line/微信。
 /// 经 go_router `extra` 传 Occurrence;冷启动无 extra → 回日历(同 QA 详情做法)。
+/// 两种入口:
+/// - 日历列表点击 → [occ] 直传内存对象(零加载);
+/// - 推送 / 通知中心深链 → [eventId] + [dateKey],自行拉活动并展开定位那一场(P2.16)。
 class EventDetailScreen extends ConsumerWidget {
-  const EventDetailScreen({super.key, this.occ});
+  const EventDetailScreen({super.key, this.occ, this.eventId, this.dateKey});
 
   final Occurrence? occ;
+
+  /// 深链入口:活动 id
+  final String? eventId;
+
+  /// 深链入口:occurrence_date(活动时区日期);null 表示取最近一场
+  final String? dateKey;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final o = occ;
+    if (o != null) return _EventDetailBody(occ: o);
+    if (eventId == null) return const _EventNotFound();
+
+    final eventsAsync = ref.watch(eventsProvider);
+    final overridesAsync = ref.watch(eventOverridesProvider);
+
+    if (eventsAsync.isLoading || overridesAsync.isLoading) {
+      return Scaffold(appBar: AppBar(), body: const SkeletonList());
+    }
+    if (eventsAsync.hasError || overridesAsync.hasError) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: ErrorRetry(onRetry: () {
+          ref.invalidate(eventsProvider);
+          ref.invalidate(eventOverridesProvider);
+        }),
+      );
+    }
+
+    final resolved = resolveOccurrence(
+      events: eventsAsync.value ?? const [],
+      overrides: overridesAsync.value ?? const [],
+      eventId: eventId!,
+      dateKey: dateKey,
+    );
+    if (resolved == null) return const _EventNotFound();
+    return _EventDetailBody(occ: resolved);
+  }
+}
+
+/// 活动/场次不存在(已删除、循环规则已改等)
+class _EventNotFound extends StatelessWidget {
+  const _EventNotFound();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(),
+      body: EmptyState(
+        icon: Icons.event_busy,
+        title: l10n.emptyList,
+        action: FilledButton.tonal(
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/calendar'),
+          child: Text(l10n.calendarTitle),
+        ),
+      ),
+    );
+  }
+}
+
+class _EventDetailBody extends ConsumerWidget {
+  const _EventDetailBody({required this.occ});
+
+  final Occurrence occ;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final o = occ;
-    if (o == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: EmptyState(
-          icon: Icons.event_busy,
-          title: l10n.emptyList,
-          action: FilledButton.tonal(
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.go('/calendar'),
-            child: Text(l10n.calendarTitle),
-          ),
-        ),
-      );
-    }
-
     final hans = ref.watch(localeProvider).scriptCode == 'Hans';
     final isAdmin = ref.watch(myProfileProvider).value?['is_app_admin'] == true;
     final eventId = o.event['id'] as String;
@@ -109,6 +164,27 @@ class EventDetailScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
+                // 已设提醒(只读):让用户知道自己会在什么时候被提醒(PRD v0.5.21 §5)
+                if (!o.cancelled)
+                  ref.watch(eventRemindersProvider(eventId)).maybeWhen(
+                        data: (offsets) => offsets.isEmpty
+                            ? const SizedBox.shrink()
+                            : Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  '${l10n.reminderListLabel}:'
+                                  '${offsets.map((m) => reminderOffsetLabel(l10n, m)).join(' · ')}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
+                                ),
+                              ),
+                        orElse: () => const SizedBox.shrink(),
+                      ),
                 if (o.event['content'] != null) ...[
                   const SizedBox(height: 12),
                   Text(o.event['content'] as String),

@@ -30,6 +30,18 @@ final defaultEventTimezoneProvider = FutureProvider<String>((ref) async {
   return (row?['value'] as String?) ?? 'Asia/Shanghai';
 });
 
+/// 某活动的提醒档位(分钟,降序;匿名可读,与 events 同口径;PRD v0.5.21 §5)
+final eventRemindersProvider =
+    FutureProvider.family<List<int>, String>((ref, eventId) async {
+  final rows = await Supabase.instance.client
+      .from('event_reminders')
+      .select('offset_minutes')
+      .eq('event_id', eventId)
+      .eq('enabled', true)
+      .order('offset_minutes', ascending: false);
+  return [for (final r in rows) (r['offset_minutes'] as num).toInt()];
+});
+
 /// 单次修改(改期/取消)
 final eventOverridesProvider =
     FutureProvider<List<Map<String, dynamic>>>((ref) async {

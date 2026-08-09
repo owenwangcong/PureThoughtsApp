@@ -8,7 +8,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(49);
+select plan(50);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -257,22 +257,39 @@ select throws_ok($$
 $$, 'P0001', 'not allowed to change admin/ban fields', '用户不能自封管理员');
 
 -- ---------------------------------------------------------------- 活动变更通知(v0.5.7)
+-- v0.5.21 降噪(migration 0026):编辑类变更走 5 分钟防抖窗口,窗口内反复编辑只更新
+-- 同一条未发通知;「刚新建又编辑」保持「新增」语义、只刷新标题,不再多发一条。
 select tests_logout();
 insert into public.events (title, event_type_id, start_at)
 values ('測試活動通知',
         (select id from public.event_types where name_hans = '共修'),
         now() + interval '1 day');
-update public.events set title = '測試活動通知(改)' where title = '測試活動通知';
 select tests_login('00000000-0000-0000-0000-00000000000c');
 select is(
   (select count(*)::int from public.notifications
    where type = 'event_changed' and payload->>'action' = 'created'
      and payload->>'title' = '測試活動通知'),
   1, '新增活动生成全员通知');
+
+-- 新建后立即编辑 → 聚合进上面那条(不新增,action 仍为 created,标题刷新)
+select tests_logout();
+update public.events set title = '測試活動通知(改)' where title = '測試活動通知';
+select tests_login('00000000-0000-0000-0000-00000000000c');
+-- 只数本测试活动的通知(seed 的週六共修/週三打坐各有一条 created)
+select is(
+  (select count(*)::int from public.notifications
+   where type = 'event_changed' and payload->>'title' like '測試活動通知%'),
+  1, '新建后立即编辑被防抖聚合,不额外产生通知');
+
+-- 上一条已投递后再改 → 才产生独立的「更新」通知
+select tests_logout();
+update public.notifications set sent_at = now() where type = 'event_changed';
+update public.events set title = '測試活動通知(再改)' where title = '測試活動通知(改)';
+select tests_login('00000000-0000-0000-0000-00000000000c');
 select is(
   (select count(*)::int from public.notifications
    where type = 'event_changed' and payload->>'action' = 'updated'
-     and payload->>'title' = '測試活動通知(改)'),
+     and payload->>'title' = '測試活動通知(再改)'),
   1, '修改活动生成全员通知');
 select tests_logout();
 select tests_login('00000000-0000-0000-0000-00000000000a');

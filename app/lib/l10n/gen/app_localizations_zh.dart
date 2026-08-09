@@ -1093,6 +1093,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notifQaQuestion => '有新的學修提問';
+
+  @override
+  String get notifySection => '通知';
+
+  @override
+  String get notifyQuietTitle => '免打擾時段';
+
+  @override
+  String get notifyQuietHint => '此時段內不發手機推送,順延到結束後發送;活動開始前的提醒不受限。';
+
+  @override
+  String get notifyQuietStart => '開始';
+
+  @override
+  String get notifyQuietEnd => '結束';
+
+  @override
+  String get notifySubscribeHeader => '接收以下通知';
+
+  @override
+  String get notifyTypeEventReminder => '活動提醒';
+
+  @override
+  String get notifyTypeEventChanged => '活動變動';
+
+  @override
+  String get notifyTypeQaReply => '學修問答回覆';
+
+  @override
+  String get notifyMarkAllRead => '全部已讀';
+
+  @override
+  String get notifyOnChangeSwitch => '通知所有人';
+
+  @override
+  String get notifEventReminderEve => '活動預告';
+
+  @override
+  String get notifEventReminderSoon => '活動即將開始';
+
+  @override
+  String get notifEventReminderNow => '活動開始了';
+
+  @override
+  String notifEventReminderInHours(int n) {
+    return '$n 小時後開始';
+  }
+
+  @override
+  String notifEventReminderInMinutes(int n) {
+    return '$n 分鐘後開始';
+  }
+
+  @override
+  String get notifEventReminderEnter => '點擊進入';
+
+  @override
+  String get actOccRestored => '單次恢復';
+
+  @override
+  String get reminderSectionTitle => '提醒';
+
+  @override
+  String get reminderAddButton => '新增提醒';
+
+  @override
+  String get reminderListLabel => '已設提醒';
+
+  @override
+  String get reminderOffsetAtStart => '活動開始時';
+
+  @override
+  String get reminderOffsetOneDay => '提前一天';
+
+  @override
+  String get reminderOffsetTwoDays => '提前兩天';
+
+  @override
+  String reminderOffsetMinutes(int n) {
+    return '提前 $n 分鐘';
+  }
+
+  @override
+  String reminderOffsetHours(int n) {
+    return '提前 $n 小時';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2184,6 +2270,92 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get notifQaQuestion => '有新的学修提问';
+
+  @override
+  String get notifySection => '通知';
+
+  @override
+  String get notifyQuietTitle => '免打扰时段';
+
+  @override
+  String get notifyQuietHint => '此时段内不发手机推送,顺延到结束后发送;活动开始前的提醒不受限。';
+
+  @override
+  String get notifyQuietStart => '开始';
+
+  @override
+  String get notifyQuietEnd => '结束';
+
+  @override
+  String get notifySubscribeHeader => '接收以下通知';
+
+  @override
+  String get notifyTypeEventReminder => '活动提醒';
+
+  @override
+  String get notifyTypeEventChanged => '活动变动';
+
+  @override
+  String get notifyTypeQaReply => '学修问答回复';
+
+  @override
+  String get notifyMarkAllRead => '全部已读';
+
+  @override
+  String get notifyOnChangeSwitch => '通知所有人';
+
+  @override
+  String get notifEventReminderEve => '活动预告';
+
+  @override
+  String get notifEventReminderSoon => '活动即将开始';
+
+  @override
+  String get notifEventReminderNow => '活动开始了';
+
+  @override
+  String notifEventReminderInHours(int n) {
+    return '$n 小时后开始';
+  }
+
+  @override
+  String notifEventReminderInMinutes(int n) {
+    return '$n 分钟后开始';
+  }
+
+  @override
+  String get notifEventReminderEnter => '点击进入';
+
+  @override
+  String get actOccRestored => '单次恢复';
+
+  @override
+  String get reminderSectionTitle => '提醒';
+
+  @override
+  String get reminderAddButton => '新增提醒';
+
+  @override
+  String get reminderListLabel => '已设提醒';
+
+  @override
+  String get reminderOffsetAtStart => '活动开始时';
+
+  @override
+  String get reminderOffsetOneDay => '提前一天';
+
+  @override
+  String get reminderOffsetTwoDays => '提前两天';
+
+  @override
+  String reminderOffsetMinutes(int n) {
+    return '提前 $n 分钟';
+  }
+
+  @override
+  String reminderOffsetHours(int n) {
+    return '提前 $n 小时';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3275,4 +3447,90 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get notifQaQuestion => '有新的學修提問';
+
+  @override
+  String get notifySection => '通知';
+
+  @override
+  String get notifyQuietTitle => '免打擾時段';
+
+  @override
+  String get notifyQuietHint => '此時段內不發手機推送,順延到結束後發送;活動開始前的提醒不受限。';
+
+  @override
+  String get notifyQuietStart => '開始';
+
+  @override
+  String get notifyQuietEnd => '結束';
+
+  @override
+  String get notifySubscribeHeader => '接收以下通知';
+
+  @override
+  String get notifyTypeEventReminder => '活動提醒';
+
+  @override
+  String get notifyTypeEventChanged => '活動變動';
+
+  @override
+  String get notifyTypeQaReply => '學修問答回覆';
+
+  @override
+  String get notifyMarkAllRead => '全部已讀';
+
+  @override
+  String get notifyOnChangeSwitch => '通知所有人';
+
+  @override
+  String get notifEventReminderEve => '活動預告';
+
+  @override
+  String get notifEventReminderSoon => '活動即將開始';
+
+  @override
+  String get notifEventReminderNow => '活動開始了';
+
+  @override
+  String notifEventReminderInHours(int n) {
+    return '$n 小時後開始';
+  }
+
+  @override
+  String notifEventReminderInMinutes(int n) {
+    return '$n 分鐘後開始';
+  }
+
+  @override
+  String get notifEventReminderEnter => '點擊進入';
+
+  @override
+  String get actOccRestored => '單次恢復';
+
+  @override
+  String get reminderSectionTitle => '提醒';
+
+  @override
+  String get reminderAddButton => '新增提醒';
+
+  @override
+  String get reminderListLabel => '已設提醒';
+
+  @override
+  String get reminderOffsetAtStart => '活動開始時';
+
+  @override
+  String get reminderOffsetOneDay => '提前一天';
+
+  @override
+  String get reminderOffsetTwoDays => '提前兩天';
+
+  @override
+  String reminderOffsetMinutes(int n) {
+    return '提前 $n 分鐘';
+  }
+
+  @override
+  String reminderOffsetHours(int n) {
+    return '提前 $n 小時';
+  }
 }
