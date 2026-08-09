@@ -1006,7 +1006,7 @@ actOccRestored, notifyOnChangeSwitch
 > 重建，鉴权 405/403/403、`invoke_push_dispatch` 外呼 200 均验证通过）。
 > 自动化底线全绿：`npx supabase test db` **198**（原 124 + 本次 74）· `flutter analyze` **0 issue**
 > · `flutter test` **194**（原 161 + 本次 33）· admin `lint` + `build`（14 路由）。
-> 剩余：H-4 App UI 端到端走查、H-6 真机矩阵 + 生产冒烟（§12.4/§12.5/§12.6）、admin 站重发布。
+> 剩余：H-4 App UI 端到端走查、H-6 真机矩阵 + 生产冒烟（§12.4/§12.5/§12.6）。
 >
 > **生产发布记录（2026-08-08）**：发布前打了快照 `~/pre-notification-overhaul-20260808-2357.dump`
 > （1.3M，`pg_restore -l` 校验可读）—— ⚠️ 发现生产的每日定时备份**从未运行**（`pt-backup.sh`
@@ -1082,7 +1082,7 @@ actOccRestored, notifyOnChangeSwitch
 - [x] H-2 `npx supabase test db` 全绿
 - [x] H-3 admin `npm run lint && npm run build` 全绿
 - [ ] H-4 §12.4 本地栈端到端手工联测通过
-- [x] H-5 生产发布（migration 0023–0027 已推并记账 2026-08-08；push-dispatch 已重建部署并验证；admin 站待重发布）
+- [x] H-5 生产发布（migration 0023–0027 已推并记账 2026-08-08；push-dispatch 已重建部署并验证；admin 站已重发布 2026-08-09,14 路由全 200）
 - [ ] H-6 §12.5 真机矩阵 + §12.6 生产冒烟
 - [x] H-7 PLAN 勾选 + §1 计数刷新 + 本文档 §11/§12 全勾
 

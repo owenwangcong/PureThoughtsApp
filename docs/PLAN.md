@@ -158,9 +158,12 @@ publication 含 notifications、anon 读 `notification_prefs` 为 401、存量 2
 crontab 为空)——本次发布前手工打了快照 `~/pre-notification-overhaul-20260808-2357.dump`;
 **这是 P0.4 未竟项,需尽快补 crontab 与恢复演练**。
 
-**余 ⏳**:①App UI 端到端走查(设计 §12.4 十二项);②admin 站重发布(看板/通知页/
-活动编辑页有改动);③真机矩阵四场景 + 生产冒烟(设计 §12.5/§12.6)——可与 P2.1-4
-iOS TestFlight、P8.5 的 T-PROD-02 真机通知闭环**同批做**。
+**admin 站已重发布 2026-08-09**:`admin/scripts/deploy.ps1`(防呆校验 .env.local 指向生产)
+→ 14 路由跟随 trailing-slash 重定向后全 200;线上产物已含本次新增文案(投遞失敗 /
+推送不可用 / 提前一天 / 本次改動通知所有人 / 終局失敗),确证非旧构建缓存。
+
+**余 ⏳**:①App UI 端到端走查(设计 §12.4 十二项);②真机矩阵四场景 + 生产冒烟
+(设计 §12.5/§12.6)——可与 P2.1-4 iOS TestFlight、P8.5 的 T-PROD-02 真机通知闭环**同批做**。
 ⚠️ **旧版 App 兼容**:生产 App 尚不认识 `event_reminder` 类型,通知中心会走 default 分支
 显示原始 type 名;首批提醒到点前需发新版,或加一个补 title/body 兜底文案的 migration。
 
