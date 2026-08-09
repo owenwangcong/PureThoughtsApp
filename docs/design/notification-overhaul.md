@@ -1001,10 +1001,19 @@ actOccRestored, notifyOnChangeSwitch
 
 ## 11. 实施清单（执行跟踪；完成即勾选，并同步 PLAN §1 计数）
 
-> **当前进度（2026-08-08）**：A–G 七组代码全部完成并验证，H 组余三项需要真机 / 生产环境。
+> **当前进度（2026-08-08）**：A–G 七组代码全部完成并验证；**服务端已发布生产**
+> （migration 0023–0027 推送并记账，记账数 22→27；push-dispatch 容器已 `--force-recreate`
+> 重建，鉴权 405/403/403、`invoke_push_dispatch` 外呼 200 均验证通过）。
 > 自动化底线全绿：`npx supabase test db` **198**（原 124 + 本次 74）· `flutter analyze` **0 issue**
 > · `flutter test` **194**（原 161 + 本次 33）· admin `lint` + `build`（14 路由）。
-> 剩余：H-4 App UI 端到端走查、H-5 生产发布、H-6 真机矩阵 + 生产冒烟（§12.4/§12.5/§12.6）。
+> 剩余：H-4 App UI 端到端走查、H-6 真机矩阵 + 生产冒烟（§12.4/§12.5/§12.6）、admin 站重发布。
+>
+> **生产发布记录（2026-08-08）**：发布前打了快照 `~/pre-notification-overhaul-20260808-2357.dump`
+> （1.3M，`pg_restore -l` 校验可读）—— ⚠️ 发现生产的每日定时备份**从未运行**（`pt-backup.sh`
+> 在但 crontab 为空），属 PLAN P0.4 未竟项，需尽快补。旧函数备份在
+> `~/push-dispatch-old-20260809-0023.ts`。发布后核对：5 个 cron job、Realtime publication
+> 含 notifications、anon 读 `notification_prefs` 为 401、25 个存量活动补齐 75 行提醒档位、
+> 生成 24 条未来提醒且**无一条会立即投递**（不会惊动用户）。
 
 ### A. 文档与计划（P2.12-0）
 - [x] A-1 PRD 升 v0.5.21，按 §10.1 逐章改
@@ -1073,7 +1082,7 @@ actOccRestored, notifyOnChangeSwitch
 - [x] H-2 `npx supabase test db` 全绿
 - [x] H-3 admin `npm run lint && npm run build` 全绿
 - [ ] H-4 §12.4 本地栈端到端手工联测通过
-- [ ] H-5 生产发布（migration 记账 + 函数重建 + admin 重发布）
+- [x] H-5 生产发布（migration 0023–0027 已推并记账 2026-08-08；push-dispatch 已重建部署并验证；admin 站待重发布）
 - [ ] H-6 §12.5 真机矩阵 + §12.6 生产冒烟
 - [x] H-7 PLAN 勾选 + §1 计数刷新 + 本文档 §11/§12 全勾
 
