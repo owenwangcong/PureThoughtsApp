@@ -38,29 +38,43 @@ void main() {
       member.dispose();
     });
 
-    // 建群 + 入群(复用已验证的流程)
+    // v0.6.0 去群化:注册即入会,没有建群/申请/审核三步(PRD §3.1)
     await owner.auth.signUp(email: 'lowner_$ts@test.local', password: 'secret-123456');
-    final gid = (await owner
-        .from('groups')
-        .insert({'name': '報數測試群 $ts', 'owner_id': owner.auth.currentUser!.id})
-        .select('id')
-        .single())['id'] as String;
-    final code = await owner.rpc('get_group_join_code', params: {'p_group_id': gid});
     await member.auth.signUp(email: 'lmember_$ts@test.local', password: 'secret-123456');
-    await member.rpc('join_group', params: {'p_code': code, 'p_message': 'hi'});
     final memberId = member.auth.currentUser!.id;
-    await owner
-        .from('group_members')
-        .update({'status': 'approved'})
-        .eq('group_id', gid)
-        .eq('user_id', memberId);
+    final gid = (await member
+        .from('groups')
+        .select('id')
+        .eq('is_default', true)
+        .single())['id'] as String;
 
-    // 可报功课项 = 全局 5 项(or 过滤查询模式)
+    // v0.6.0:共修体是全站共用的,seed 与其它冒烟测试的数据都在里面 ——
+    // 断言一律用**基线 + 增量**,不能再写绝对值。
+    Future<int> dailyEntries() async {
+      final rows = await member
+          .from('daily_group_stats')
+          .select('entries')
+          .eq('group_id', gid);
+      return rows.fold<int>(0, (s, r) => s + (r['entries'] as int));
+    }
+
+    Future<int> totalEntries() async {
+      final rows = await member
+          .from('group_practice_totals')
+          .select('entries')
+          .eq('group_id', gid);
+      return rows.fold<int>(0, (s, r) => s + (r['entries'] as int));
+    }
+
+    final baseDaily = await dailyEntries();
+    final baseTotal = await totalEntries();
+
+    // 可报功课项 = 全局主清单 + 我自己的自定义项(设计 Q8「可选」口径)
     final types = await member
         .from('practice_types')
         .select('id, name_hans, unit')
         .eq('active', true)
-        .or('group_id.is.null,group_id.eq.$gid');
+        .or('group_id.is.null,created_by.eq.$memberId');
     expect(types.length, greaterThanOrEqualTo(5));
     final jingangjing = types.firstWhere((t) => t['name_hans'] == '金刚经')['id'] as String;
     final dabeizhou = types.firstWhere((t) => t['name_hans'] == '大悲咒')['id'] as String;
@@ -141,13 +155,8 @@ void main() {
         .eq('type', 'proxy_log');
     expect(notifs.length, 1);
 
-    // 群统计:5 条记录进统计(自报 1 + 批量 2 + 自由名字 1 + 代报 1)
-    final stats = await member
-        .from('daily_group_stats')
-        .select('entries')
-        .eq('group_id', gid);
-    expect(
-        stats.fold<int>(0, (s, r) => s + (r['entries'] as int)), 5);
+    // 共修统计:本轮 +5 条进统计(自报 1 + 批量 2 + 自由名字 1 + 代报 1)
+    expect(await dailyEntries(), baseDaily + 5);
 
     // owner(被代报人)经 RPC 删除自己名下记录 → 统计扣减
     final proxyLog = await owner
@@ -157,12 +166,7 @@ void main() {
         .eq('subject_user_id', owner.auth.currentUser!.id)
         .single();
     await owner.rpc('delete_practice_log', params: {'p_log_id': proxyLog['id']});
-    final stats2 = await member
-        .from('daily_group_stats')
-        .select('entries')
-        .eq('group_id', gid);
-    expect(
-        stats2.fold<int>(0, (s, r) => s + (r['entries'] as int)), 4);
+    expect(await dailyEntries(), baseDaily + 4);
 
     // 累计视图(P1.8):个人只见自己的(金刚经/心经/静坐,不含自由名字/已删),群见全部
     final myTotals = await member
@@ -173,11 +177,7 @@ void main() {
         double.parse(
             '${myTotals.firstWhere((r) => r['practice_type_id'] == jingangjing)['total']}'),
         3);
-    final groupTotals = await member
-        .from('group_practice_totals')
-        .select('total, entries')
-        .eq('group_id', gid);
-    expect(groupTotals.fold<int>(0, (s, r) => s + (r['entries'] as int)), 4);
+    expect(await totalEntries(), baseTotal + 4);
 
     // 发愿进度(P2.5):member 对金刚经发愿 5 部,进度 = 自报 3(不含自由名字/被删)
     final vow = await member
@@ -199,6 +199,6 @@ void main() {
     expect(othersVows, isEmpty);
 
     // 清理:解散测试群
-    await owner.rpc('dissolve_group', params: {'p_group_id': gid});
+    // 去群化后没有解散群这一步:测试数据随共修体留在本地栈,由 db reset 清理
   });
 }

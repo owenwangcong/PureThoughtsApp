@@ -4,15 +4,15 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/error_text.dart';
-import '../../core/prefs.dart';
 import '../../core/settings.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../community/community_providers.dart';
 import '../dashboard/dashboard_providers.dart';
-import '../groups/groups_providers.dart';
+import '../logs/logs_providers.dart';
 import '../logs/offline_queue.dart';
 
 /// 工具 → 报数桥(PRD §9):计时/计数结果一键转为报数。
-/// 弹窗选群(默认上次报数的群)与功课(默认给定分类的全局项),确认即写入。
+/// v0.6.0 去群化:不再选群,弹窗只选功课(默认给定分类的项),确认即写入。
 Future<void> toolResultToLog(
   BuildContext context,
   WidgetRef ref, {
@@ -26,30 +26,19 @@ Future<void> toolResultToLog(
     messenger.showSnackBar(SnackBar(content: Text(l10n.authSignIn)));
     return;
   }
-  final groups = (ref.read(myGroupsProvider).value ?? const [])
-      .where((m) => m['status'] == 'approved')
-      .map((m) => m['groups'] as Map<String, dynamic>)
-      .toList();
-  if (groups.isEmpty) {
-    messenger.showSnackBar(SnackBar(content: Text(l10n.emptyList)));
+  final groupId = ref.read(communityIdProvider);
+  if (groupId == null) {
+    messenger.showSnackBar(SnackBar(content: Text(l10n.loadFailed)));
     return;
   }
   final locale = ref.read(localeProvider);
-  final types = (ref.read(allPracticeTypesMapProvider).value ?? {})
-      .values
-      .where((t) => t['active'] == true)
+  // 「可选」清单:全局主清单 + 我自己的自定义项(不能是别人的,设计 Q8)
+  final types = (ref.read(reportablePracticeTypesProvider).value ?? const [])
       .toList()
     ..sort((a, b) =>
         (a['sort_order'] as int? ?? 0).compareTo(b['sort_order'] as int? ?? 0));
   if (types.isEmpty) return;
 
-  final prefs = ref.read(sharedPrefsProvider);
-  final lastGroup = prefs.getString(PrefKeys.lastReportGroup);
-  var groupId = groups
-          .map((g) => g['id'] as String)
-          .contains(lastGroup)
-      ? lastGroup!
-      : groups.first['id'] as String;
   var typeId = (types.firstWhere(
     (t) => t['category'] == preferredCategory,
     orElse: () => types.first,
@@ -63,18 +52,6 @@ Future<void> toolResultToLog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (groups.length > 1)
-              DropdownButtonFormField<String>(
-                value: groupId,
-                decoration: InputDecoration(labelText: l10n.chooseGroup),
-                items: [
-                  for (final g in groups)
-                    DropdownMenuItem(
-                        value: g['id'] as String, child: Text(g['name'] as String)),
-                ],
-                onChanged: (v) => setState(() => groupId = v!),
-              ),
-            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: typeId,
               decoration: InputDecoration(labelText: l10n.selectPracticeType),

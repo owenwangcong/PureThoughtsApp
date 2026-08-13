@@ -11,7 +11,6 @@ import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../dashboard/dashboard_providers.dart';
-import '../groups/groups_providers.dart';
 import 'notifications_providers.dart';
 
 /// 通知中心(P2.3 · P2.17 改造):按类型渲染本地化文案 + 深链。
@@ -68,14 +67,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final notifications = ref.watch(visibleNotificationsProvider);
     ref.watch(notificationRealtimeProvider); // 新通知即时进列表
     final types = ref.watch(allPracticeTypesMapProvider).value ?? const {};
-    final groupNames = <String, String>{
-      for (final m in ref.watch(myGroupsProvider).value ?? const [])
-        (m['groups'] as Map)['id'] as String: (m['groups'] as Map)['name'] as String,
-    };
 
     (String, String) render(Map<String, dynamic> n) {
+      // v0.6.0 去群化:通知文案不再带群名前缀(全 App 只有一个共修体)
       final payload = (n['payload'] as Map?) ?? const {};
-      final groupName = groupNames[payload['group_id']] ?? '';
       switch (n['type']) {
         case 'proxy_log':
           final t = types[payload['practice_type_id']];
@@ -84,9 +79,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               : (locale.scriptCode == 'Hans' ? t['name_hans'] : t['name_hant']) as String;
           final qty = payload['quantity'];
           final unit = t == null ? '' : unitLabel(l10n, t['unit'] as String);
-          return (l10n.notifProxyLog, '$groupName · $typeName $qty $unit');
+          return (l10n.notifProxyLog, '$typeName $qty $unit');
         case 'announcement':
-          return (l10n.notifAnnouncement, '$groupName · ${payload['text'] ?? ''}');
+          return (l10n.notifAnnouncement, (payload['text'] as String?) ?? '');
         case 'live_started':
           return (l10n.notifLiveStarted, (payload['title'] as String?) ?? 'YouTube');
         // 活动提醒(PRD v0.5.21 §5,默认三档 1440/30/0)

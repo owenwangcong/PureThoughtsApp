@@ -34,6 +34,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _pre_community_log_groups: {
+        Row: {
+          log_id: string
+          moved_at: string
+          old_group_id: string
+        }
+        Insert: {
+          log_id: string
+          moved_at?: string
+          old_group_id: string
+        }
+        Update: {
+          log_id?: string
+          moved_at?: string
+          old_group_id?: string
+        }
+        Relationships: []
+      }
       almanac_days: {
         Row: {
           festival_ids: string[]
@@ -417,6 +435,7 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           id: string
+          is_default: boolean
           name: string
           owner_id: string | null
         }
@@ -426,6 +445,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           id?: string
+          is_default?: boolean
           name: string
           owner_id?: string | null
         }
@@ -435,6 +455,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           id?: string
+          is_default?: boolean
           name?: string
           owner_id?: string | null
         }
@@ -738,6 +759,7 @@ export type Database = {
           active: boolean
           category: Database["public"]["Enums"]["practice_category"]
           created_at: string
+          created_by: string | null
           group_id: string | null
           id: string
           is_custom: boolean
@@ -750,6 +772,7 @@ export type Database = {
           active?: boolean
           category?: Database["public"]["Enums"]["practice_category"]
           created_at?: string
+          created_by?: string | null
           group_id?: string | null
           id?: string
           is_custom?: boolean
@@ -762,6 +785,7 @@ export type Database = {
           active?: boolean
           category?: Database["public"]["Enums"]["practice_category"]
           created_at?: string
+          created_by?: string | null
           group_id?: string | null
           id?: string
           is_custom?: boolean
@@ -771,6 +795,13 @@ export type Database = {
           unit?: Database["public"]["Enums"]["practice_unit"]
         }
         Relationships: [
+          {
+            foreignKeyName: "practice_types_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "practice_types_group_id_fkey"
             columns: ["group_id"]
@@ -1169,6 +1200,7 @@ export type Database = {
       }
       daily_user_stats: {
         Row: {
+          entries: number | null
           group_id: string | null
           local_date: string | null
           practice_type_id: string | null
@@ -1390,6 +1422,13 @@ export type Database = {
         Returns: boolean
       }
       reset_group_join_code: { Args: { p_group_id: string }; Returns: string }
+      search_members: {
+        Args: { p_limit?: number; p_q: string }
+        Returns: {
+          display_name: string
+          user_id: string
+        }[]
+      }
       transfer_group_ownership: {
         Args: { p_group_id: string; p_new_owner: string }
         Returns: undefined

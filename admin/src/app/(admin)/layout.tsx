@@ -17,7 +17,7 @@ const NAV = [
   { href: "/qa", label: "學修問答" },
   { href: "/reports", label: "舉報處理" },
   { href: "/users", label: "用戶管理" },
-  { href: "/groups", label: "群組總覽" },
+  { href: "/community", label: "共修報數" },
   { href: "/content", label: "內容上架" },
   { href: "/almanac", label: "佛曆與設定" },
 ];

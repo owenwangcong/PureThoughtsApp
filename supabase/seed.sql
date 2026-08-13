@@ -70,16 +70,9 @@ from auth.users u where u.email like '%@test.local';
 update public.profiles set is_app_admin = true
  where id = '00000000-0000-4000-8000-000000000001';
 
--- 测试群(触发器自动加群主成员并生成 join code,改为固定值便于测试)
-insert into public.groups (id, name, description, owner_id) values
-  ('00000000-0000-4000-8000-0000000000d0', '測試共修群', '本地開發測試用群組',
-   '00000000-0000-4000-8000-000000000002');
-update public.group_join_codes set code = 'TESTGRP2'
- where group_id = '00000000-0000-4000-8000-0000000000d0';
-
-insert into public.group_members (group_id, user_id, status, apply_message, approved_at) values
-  ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000003',
-   'approved', '弟子請求加入', now());
+-- 去群化(PRD v0.6.0 §3):不再有测试群与 join code。
+-- 共修体由 migration 0028 建立(唯一 is_default 行),四个测试账号由 handle_new_user
+-- 触发器自动入会 —— 注册即可报数,无需申请与审核。
 
 -- 在线经本(E9 定案;管理员可继续添加具体经文页)
 insert into public.scriptures (title, web_url, sort_order) values
@@ -103,10 +96,10 @@ insert into public.event_agenda_items (event_id, day_index, start_time, end_time
 
 -- 示例报数(local_date/unit 由触发器补全;含自由名字代报 → proxy_names 自动生成)
 insert into public.practice_logs (group_id, reporter_id, practice_type_id, quantity) values
-  ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000003',
+  ((select id from public.groups where is_default), '00000000-0000-4000-8000-000000000003',
    (select id from public.practice_types where name_hans = '金刚经' and group_id is null), 2),
-  ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000002',
+  ((select id from public.groups where is_default), '00000000-0000-4000-8000-000000000002',
    (select id from public.practice_types where name_hans = '静坐' and group_id is null), 30);
 insert into public.practice_logs (group_id, reporter_id, subject_name, practice_type_id, quantity) values
-  ('00000000-0000-4000-8000-0000000000d0', '00000000-0000-4000-8000-000000000003', '王阿姨',
+  ((select id from public.groups where is_default), '00000000-0000-4000-8000-000000000003', '王阿姨',
    (select id from public.practice_types where name_hans = '大悲咒' and group_id is null), 108);

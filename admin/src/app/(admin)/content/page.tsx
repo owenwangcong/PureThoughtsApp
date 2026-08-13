@@ -586,6 +586,136 @@ function LiveStreamsTab() {
   );
 }
 
+
+/**
+ * 自訂功課治理(PRD v0.6.0 §4.1 / 設計 Q8)。
+ *
+ * 自訂項只有創建者自己能選用,但名稱對所有人可讀(否則他用它報的記錄在共修流水
+ * 裡會是無名條目)。管理員在這裡看得到全部,可停用、改名、或「提升為主清單」
+ * (清掉 group_id / is_custom / created_by 三列即轉正,全體可選)。
+ */
+function CustomTypesTab() {
+  const queryClient = useQueryClient();
+  const { data, isPending, error } = useQuery({
+    queryKey: ["custom-practice-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("practice_types")
+        .select(
+          "id, name_hant, name_hans, category, unit, active, created_at, creator:profiles!practice_types_created_by_fkey(display_name)",
+        )
+        .eq("is_custom", true)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data as unknown as (PTypeRow & {
+        created_at: string;
+        creator: { display_name: string } | null;
+      })[];
+    },
+  });
+
+  function refresh() {
+    void queryClient.invalidateQueries({ queryKey: ["custom-practice-types"] });
+    void queryClient.invalidateQueries({ queryKey: ["global-practice-types"] });
+  }
+
+  async function toggle(id: string, active: boolean) {
+    const { error } = await supabase
+      .from("practice_types")
+      .update({ active })
+      .eq("id", id);
+    if (error) {
+      toast.error(`操作失敗:${error.message}`);
+      return;
+    }
+    toast.success(active ? "已啟用" : "已停用");
+    refresh();
+  }
+
+  async function promote(id: string) {
+    // 三列同時清空:表上有 check (is_custom = (group_id is not null))
+    const { error } = await supabase
+      .from("practice_types")
+      .update({ group_id: null, is_custom: false, created_by: null })
+      .eq("id", id);
+    if (error) {
+      toast.error(`轉正失敗:${error.message}`);
+      return;
+    }
+    toast.success("已提升為主清單項(全體可選)");
+    refresh();
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        用戶自己加的功課項(v0.6.0 起<strong>僅創建者可選用</strong>,不進公共清單)。
+        名稱仍對所有人可讀,以便渲染共修報數記錄。同一功課若被多人各建一份,
+        總量會按項分行;需要歸口時,把其中一項「提升為主清單」再停用其餘。
+      </p>
+      {isPending && <p className="text-muted-foreground">載入中…</p>}
+      {error && <p className="text-destructive">載入失敗:{error.message}</p>}
+      {data && (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>名稱(繁)</TableHead>
+              <TableHead>名稱(簡)</TableHead>
+              <TableHead>分類</TableHead>
+              <TableHead>單位</TableHead>
+              <TableHead>創建者</TableHead>
+              <TableHead>狀態</TableHead>
+              <TableHead />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((t) => (
+              <TableRow key={t.id} className={t.active ? "" : "opacity-60"}>
+                <TableCell className="font-medium">{t.name_hant}</TableCell>
+                <TableCell>{t.name_hans}</TableCell>
+                <TableCell>{CATEGORY_LABEL[t.category] ?? t.category}</TableCell>
+                <TableCell>{UNIT_LABEL[t.unit] ?? t.unit}</TableCell>
+                <TableCell>{t.creator?.display_name ?? "(已刪號)"}</TableCell>
+                <TableCell>
+                  {t.active ? (
+                    <Badge variant="outline">啟用</Badge>
+                  ) : (
+                    <Badge variant="secondary">停用</Badge>
+                  )}
+                </TableCell>
+                <TableCell className="space-x-2 whitespace-nowrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggle(t.id, !t.active)}
+                  >
+                    {t.active ? "停用" : "啟用"}
+                  </Button>
+                  <ConfirmButton
+                    label="提升為主清單"
+                    title={`把「${t.name_hant}」提升為主清單項?`}
+                    description="轉正後全體同修都能選用,且不再屬於任何人;已產生的報數不受影響。"
+                    confirmLabel="確認提升"
+                    onConfirm={() => promote(t.id)}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  尚無自訂功課
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      )}
+    </div>
+  );
+}
+
 export default function ContentPage() {
   return (
     <div className="space-y-4">
@@ -594,11 +724,13 @@ export default function ContentPage() {
         <TabsList>
           <TabsTrigger value="media">音訊 / 媒體</TabsTrigger>
           <TabsTrigger value="ptypes">功課主清單</TabsTrigger>
+          <TabsTrigger value="custom">自訂功課</TabsTrigger>
           <TabsTrigger value="scriptures">經本</TabsTrigger>
           <TabsTrigger value="live">直播場次</TabsTrigger>
         </TabsList>
         <TabsContent value="media"><MediaTab /></TabsContent>
         <TabsContent value="ptypes"><PracticeTypesTab /></TabsContent>
+        <TabsContent value="custom"><CustomTypesTab /></TabsContent>
         <TabsContent value="scriptures"><ScripturesTab /></TabsContent>
         <TabsContent value="live"><LiveStreamsTab /></TabsContent>
       </Tabs>

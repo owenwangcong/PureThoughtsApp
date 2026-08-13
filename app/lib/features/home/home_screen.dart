@@ -4,14 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/almanac/almanac.dart';
 import '../../core/channels.dart';
-import '../../core/prefs.dart';
 import '../../core/push_service.dart';
 import '../../core/settings.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../auth/auth_providers.dart';
 import '../dashboard/quick_report_section.dart';
-import '../groups/groups_providers.dart';
 import '../live/live_providers.dart';
 import '../logs/offline_queue.dart';
 import '../notifications/notifications_providers.dart';
@@ -49,7 +47,15 @@ class HomeScreen extends ConsumerWidget {
     PushService.instance.onRoute = (route) {
       if (!context.mounted) return;
       // 账号类页面需要登录;未登录先去登录页(router 本身不做守卫)
-      const needAuth = ['/dashboard', '/study-qa', '/groups', '/notifications'];
+      // ⚠️ 含旧版服务端仍在发的 /groups 深链(设计 §5.9,router 会重定向到 /community)
+      const needAuth = [
+        '/dashboard',
+        '/study-qa',
+        '/community',
+        '/groups',
+        '/report',
+        '/notifications'
+      ];
       final target = user == null && needAuth.any(route.startsWith) ? '/auth' : route;
       WidgetsBinding.instance
           .addPostFrameCallback((_) => context.push(target));
@@ -94,8 +100,9 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.edit_note,
                     label: l10n.reportLog,
                     emphasis: _TileEmphasis.primary,
+                    // 去群化后没有选群这一步:登录即成员,直接进表单(PRD v0.6.0 §4.2)
                     onTap: () =>
-                        _guard(context, ref, () => _startReport(context, ref)),
+                        _guard(context, ref, () => context.push('/report')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -154,9 +161,9 @@ class HomeScreen extends ConsumerWidget {
                     Expanded(
                       child: _BigTile(
                         icon: Icons.groups,
-                        label: l10n.groupsTitle,
+                        label: l10n.communityTitle,
                         onTap: () =>
-                            _guard(context, ref, () => context.push('/groups')),
+                            _guard(context, ref, () => context.push('/community')),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -275,52 +282,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// 報數直达:0 群 → 去入群;1 群 → 直进表单;多群 → 底部选择器(上次的排最前)
-  Future<void> _startReport(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final groups = (ref.read(myGroupsProvider).value ?? const [])
-        .where((m) => m['status'] == 'approved')
-        .map((m) => m['groups'] as Map<String, dynamic>)
-        .toList();
-    if (groups.isEmpty) {
-      context.push('/groups');
-      return;
-    }
-    final prefs = ref.read(sharedPrefsProvider);
-    if (groups.length == 1) {
-      final gid = groups.single['id'] as String;
-      prefs.setString(PrefKeys.lastReportGroup, gid);
-      context.push('/groups/$gid/report');
-      return;
-    }
-    final last = prefs.getString(PrefKeys.lastReportGroup);
-    groups.sort((a, b) => (b['id'] == last ? 1 : 0) - (a['id'] == last ? 1 : 0));
-    final picked = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(l10n.chooseGroup,
-                  style: Theme.of(context).textTheme.titleMedium),
-            ),
-            for (final g in groups)
-              ListTile(
-                leading: const Icon(Icons.groups),
-                title: Text(g['name'] as String),
-                trailing: g['id'] == last ? const Icon(Icons.history) : null,
-                onTap: () => Navigator.pop(context, g['id'] as String),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (picked == null || !context.mounted) return;
-    prefs.setString(PrefKeys.lastReportGroup, picked);
-    context.push('/groups/$picked/report');
-  }
 }
 
 enum _TileEmphasis { surface, container, primary }

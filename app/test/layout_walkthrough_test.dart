@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPicker;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,10 +10,11 @@ import 'package:pure_thoughts/features/events/calendar_screen.dart';
 import 'package:pure_thoughts/features/moderation/admin_notify_screen.dart';
 import 'package:pure_thoughts/features/events/event_agenda_editor.dart';
 import 'package:pure_thoughts/features/events/event_detail_models.dart';
+import 'package:pure_thoughts/features/community/community_providers.dart';
+import 'package:pure_thoughts/features/community/community_screen.dart';
 import 'package:pure_thoughts/features/dashboard/dashboard_providers.dart';
 import 'package:pure_thoughts/features/events/event_detail_screen.dart';
 import 'package:pure_thoughts/features/events/events_providers.dart';
-import 'package:pure_thoughts/features/groups/groups_providers.dart';
 import 'package:pure_thoughts/features/events/occurrence_utils.dart';
 import 'package:pure_thoughts/features/notifications/notification_prefs.dart';
 import 'package:pure_thoughts/features/notifications/notifications_providers.dart';
@@ -24,6 +26,7 @@ import 'package:pure_thoughts/features/study_qa/study_qa_list_screen.dart';
 import 'package:pure_thoughts/features/study_qa/study_qa_providers.dart';
 import 'package:pure_thoughts/features/settings/settings_screen.dart';
 import 'package:pure_thoughts/features/study_qa/study_qa_thread_screen.dart';
+import 'package:pure_thoughts/features/tools/timer_screen.dart';
 import 'package:pure_thoughts/l10n/gen/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show User;
@@ -80,6 +83,62 @@ void main() {
         await tester.tap(find.byType(FilledButton));
         await tester.pumpAndSettle();
       }
+      expect(tester.takeException(), isNull);
+    });
+
+    // 共修報數(P9.2):今日/累计双栏 + 双系列趋势 + 我的自訂功課,
+    // 双栏在大字号下须自动堆叠(设计 §5.7),否则两列会被挤爆
+    testWidgets('共修報數 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      final now = DateTime.now();
+      final day =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      Map<String, dynamic> row(num total, int entries) => {
+            'practice_type_id': 't1',
+            'unit': 'volume',
+            'local_date': day,
+            'total': total,
+            'entries': entries,
+          };
+
+      await pumpScreen(tester, const CommunityScreen(), locale, overrides: [
+        communityProvider.overrideWith((ref) async => {
+              'id': 'c1',
+              'name': '共修報數',
+              'announcement': '本週六共修改為線上,請提前十分鐘進入會議室,阿彌陀佛。',
+            }),
+        myDailyStatsProvider.overrideWith((ref) async => [row(3, 1)]),
+        communityDailyStatsProvider.overrideWith((ref) async => [row(1204, 96)]),
+        myTotalsProvider.overrideWith((ref) async => [row(128, 40)]),
+        communityTotalsProvider.overrideWith((ref) async => [row(98765, 3210)]),
+        communityTodayReportersProvider.overrideWith((ref) async => 128),
+        allPracticeTypesMapProvider.overrideWith((ref) async => {
+              't1': {
+                'id': 't1',
+                'name_hant': '八十八佛大懺悔文',
+                'name_hans': '八十八佛大忏悔文',
+                'unit': 'volume',
+                'category': 'repentance',
+                'sort_order': 1,
+                'active': true,
+              }
+            }),
+        myCustomPracticeTypesProvider.overrideWith((ref) async => [
+              {
+                'id': 'c9',
+                'name_hant': '我自己加的長名稱功課項',
+                'name_hans': '我自己加的长名称功课项',
+                'category': 'other',
+                'unit': 'count',
+                'active': true,
+                'sort_order': 900,
+              }
+            ]),
+        communityLogsRealtimeProvider.overrideWithValue(null),
+      ]);
       expect(tester.takeException(), isNull);
     });
 
@@ -336,7 +395,6 @@ void main() {
         overrides: [
           currentUserProvider.overrideWith((ref) => null),
           allPracticeTypesMapProvider.overrideWith((ref) async => {}),
-          myGroupsProvider.overrideWith((ref) async => []),
           notificationFeedProvider.overrideWith(() => StubNotificationFeed([
                 row('n1', 'event_reminder', {
                   'event_id': 'e1',
@@ -384,6 +442,21 @@ void main() {
               .overrideWith((ref) async => const NotificationPrefs()),
         ],
       );
+      expect(tester.takeException(), isNull);
+    });
+
+    // P2.18:自訂时长对话框内是两列滚轮,大字号下最易挤爆
+    testWidgets('打坐計時自訂时长 · $tag · 字号 2.0 不溢出', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      await pumpScreen(tester, const TimerScreen(), locale);
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.byType(ChoiceChip).last); // 自訂
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoPicker), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     });
   }

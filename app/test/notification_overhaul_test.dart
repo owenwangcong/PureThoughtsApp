@@ -12,7 +12,6 @@ import 'package:pure_thoughts/features/auth/auth_providers.dart';
 import 'package:pure_thoughts/features/dashboard/dashboard_providers.dart';
 import 'package:pure_thoughts/features/events/event_reminder_options.dart';
 import 'package:pure_thoughts/features/events/occurrence_utils.dart';
-import 'package:pure_thoughts/features/groups/groups_providers.dart';
 import 'package:pure_thoughts/features/notifications/notification_prefs.dart';
 import 'package:pure_thoughts/features/notifications/notifications_providers.dart';
 import 'package:pure_thoughts/features/notifications/notifications_screen.dart';
@@ -74,7 +73,7 @@ void main() {
           '/study-qa/t1');
       expect(routeOfNotification(n('qa_question', payload: {'thread_id': 't1'})),
           '/study-qa/t1?as=admin');
-      expect(routeOfNotification(n('announcement', targetId: 'g1')), '/groups/g1');
+      expect(routeOfNotification(n('announcement', targetId: 'g1')), '/community');
       expect(routeOfNotification(n('proxy_log')), '/dashboard');
       expect(routeOfNotification(n('general')), isNull);
     });
@@ -252,7 +251,6 @@ void main() {
           sharedPrefsProvider.overrideWithValue(prefs),
           currentUserProvider.overrideWith((ref) => null),
           allPracticeTypesMapProvider.overrideWith((ref) async => {}),
-          myGroupsProvider.overrideWith((ref) async => []),
           notificationFeedProvider.overrideWith(() => StubNotificationFeed(rows)),
         ],
         child: MaterialApp.router(

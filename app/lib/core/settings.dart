@@ -11,7 +11,8 @@ abstract final class PrefKeys {
   static const fontScale = 'font_scale';
   static const region = 'region'; // 'cn' | 'other'
   static const onboardingDone = 'onboarding_done';
-  static const lastReportGroup = 'last_report_group'; // 多群时記住上次报数的群
+  // v0.6.0 去群化:'last_report_group' 键已废弃(不再有选群这一步),
+  // 老设备上残留的值无人读取,随卸载自然消失,不必写迁移清理。
   static const themeMode = 'theme_mode'; // system | light | dark
   static const debugEnv = 'debug_env'; // 'local' | 'prod'(仅 debug 版环境切换器)
   static const mindfulnessSchedule = 'mindfulness_schedule'; // 正念提醒配置 JSON(P2.8,本地不入云)

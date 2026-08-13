@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,9 +10,9 @@ import '../../core/error_text.dart';
 import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../community/add_practice_type_dialog.dart';
+import '../community/community_providers.dart';
 import '../dashboard/dashboard_providers.dart';
-import '../groups/add_practice_type_dialog.dart';
-import '../groups/groups_providers.dart';
 import 'batch_utils.dart';
 import 'logs_providers.dart';
 import 'offline_queue.dart';
@@ -28,9 +30,7 @@ String _fmtNum(Object? n) {
 /// - 对象默认自己,「替他人報數」展开三来源;备注与对象对整批生效
 /// - 提交栏固定底部;成功后随喜反馈 + 本次摘要
 class ReportLogScreen extends ConsumerStatefulWidget {
-  const ReportLogScreen({super.key, required this.groupId});
-
-  final String groupId;
+  const ReportLogScreen({super.key});
 
   @override
   ConsumerState<ReportLogScreen> createState() => _ReportLogScreenState();
@@ -42,7 +42,15 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
   final List<String> _selectedOrder = [];
   var _showSubject = false; // 「替他人報數」展开
   var _mode = _SubjectMode.self;
+
+  // 代报来源①「同修」:改为搜索(v0.6.0 去群化,成员规模变成全站,不再全量下拉)
+  final _memberQuery = TextEditingController();
+  Timer? _memberDebounce;
+  List<Map<String, dynamic>> _memberResults = const [];
+  var _memberSearching = false;
   String? _memberId;
+  String? _memberName;
+
   final _name = TextEditingController();
   final _note = TextEditingController();
   var _busy = false;
@@ -52,9 +60,42 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
     for (final c in _qtyByType.values) {
       c.dispose();
     }
+    _memberDebounce?.cancel();
+    _memberQuery.dispose();
     _name.dispose();
     _note.dispose();
     super.dispose();
+  }
+
+  /// 同修搜索(防抖 300ms;空关键词不发请求 —— 与 search_members 的服务端约束一致)
+  void _onMemberQueryChanged(String q) {
+    _memberDebounce?.cancel();
+    if (q.trim().isEmpty) {
+      setState(() {
+        _memberResults = const [];
+        _memberSearching = false;
+      });
+      return;
+    }
+    setState(() => _memberSearching = true);
+    _memberDebounce = Timer(const Duration(milliseconds: 300), () async {
+      try {
+        final res = await Supabase.instance.client
+            .rpc('search_members', params: {'p_q': q.trim(), 'p_limit': 20});
+        if (!mounted) return;
+        setState(() {
+          _memberResults =
+              (res as List).cast<Map<String, dynamic>>().toList(growable: false);
+          _memberSearching = false;
+        });
+      } catch (_) {
+        if (!mounted) return;
+        setState(() {
+          _memberResults = const [];
+          _memberSearching = false;
+        });
+      }
+    });
   }
 
   /// 点选/取消功课项;新选中时数量默认上次报过的值
@@ -68,10 +109,8 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
       }
       final c = TextEditingController();
       final recent = ref.read(myRecentSelfLogsProvider).value;
-      final last = recent
-          ?.where((r) =>
-              r['group_id'] == widget.groupId && r['practice_type_id'] == typeId)
-          .firstOrNull;
+      final last =
+          recent?.where((r) => r['practice_type_id'] == typeId).firstOrNull;
       if (last != null) c.text = _fmtNum(last['quantity']);
       _qtyByType[typeId] = c;
       _selectedOrder.add(typeId);
@@ -123,6 +162,13 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
     if (mode == _SubjectMode.member && _memberId == null) return;
     if (mode == _SubjectMode.name && _name.text.trim().isEmpty) return;
 
+    // 共修体 id 是落库必需字段;未就绪(冷启动/离线首开)时不静默丢失,给可读提示
+    final gid = ref.read(communityIdProvider);
+    if (gid == null) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.loadFailed)));
+      return;
+    }
+
     setState(() => _busy = true);
     try {
       final uid = Supabase.instance.client.auth.currentUser!.id;
@@ -131,7 +177,7 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
       final result = await submitPracticeLogs(ref, [
         for (final id in _selectedOrder)
           {
-            'group_id': widget.groupId,
+            'group_id': gid,
             'reporter_id': uid,
             'practice_type_id': id,
             'quantity': quantities[id],
@@ -147,8 +193,8 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
         if (mounted) context.pop();
         return;
       }
-      ref.invalidate(groupLogsProvider(widget.groupId));
-      ref.invalidate(proxyNamesProvider(widget.groupId));
+      ref.invalidate(communityLogsProvider);
+      ref.invalidate(proxyNamesProvider);
       ref.invalidate(myRecentSelfLogsProvider);
       ref.invalidate(myDailyStatsProvider);
       ref.invalidate(myTotalsProvider);
@@ -188,11 +234,9 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeProvider);
-    final types = ref.watch(reportablePracticeTypesProvider(widget.groupId));
-    final members = ref.watch(groupMembersProvider(widget.groupId));
-    final proxyNames = ref.watch(proxyNamesProvider(widget.groupId));
+    final types = ref.watch(reportablePracticeTypesProvider);
+    final proxyNames = ref.watch(proxyNamesProvider);
     final recent = ref.watch(myRecentSelfLogsProvider).value ?? const [];
-    final myId = Supabase.instance.client.auth.currentUser?.id;
 
     final typeById = <String, Map<String, dynamic>>{
       for (final t in types.value ?? const []) t['id'] as String: t,
@@ -200,8 +244,8 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
     String nameOfType(Map<String, dynamic> t) =>
         (locale.scriptCode == 'Hans' ? t['name_hans'] : t['name_hant']) as String;
 
-    final lastBatch = latestBatch(recent.cast<Map<String, dynamic>>(), widget.groupId);
-    final frequent = frequentTypeIds(recent.cast<Map<String, dynamic>>(), widget.groupId)
+    final lastBatch = latestBatch(recent.cast<Map<String, dynamic>>());
+    final frequent = frequentTypeIds(recent.cast<Map<String, dynamic>>())
         .where(typeById.containsKey)
         .toList();
 
@@ -300,11 +344,11 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
                       avatar: const Icon(Icons.add, size: 18),
                       label: Text(l10n.addPracticeType),
                       onPressed: () async {
-                        final newId = await showAddPracticeTypeDialog(context,
-                            groupId: widget.groupId);
+                        final newId =
+                            await showAddPracticeTypeDialog(context, ref);
                         if (newId == null) return;
-                        ref.invalidate(reportablePracticeTypesProvider(widget.groupId));
-                        ref.invalidate(groupPracticeTypesProvider(widget.groupId));
+                        ref.invalidate(reportablePracticeTypesProvider);
+                        ref.invalidate(myCustomPracticeTypesProvider);
                         ref.invalidate(allPracticeTypesMapProvider);
                         _toggleType(newId); // 建完即选中,直接填数量
                       },
@@ -409,26 +453,67 @@ class _ReportLogScreenState extends ConsumerState<ReportLogScreen> {
               onSelectionChanged: (s) => setState(() => _mode = s.first),
             ),
             const SizedBox(height: 12),
+            // 来源①「同修」:搜索(v0.6.0;原为群成员全量下拉,全站规模下不可用)
             if (_mode == _SubjectMode.member)
-              members.when(
-                loading: () => const LinearProgressIndicator(),
-                error: (_, _) => Text(l10n.loadFailed),
-                data: (list) {
-                  final others = list.where((m) => m['user_id'] != myId).toList();
-                  return DropdownButtonFormField<String>(
-                    value: _memberId,
-                    hint: Text(l10n.subjectMember),
-                    items: [
-                      for (final m in others)
-                        DropdownMenuItem(
-                          value: m['user_id'] as String,
-                          child: Text(m['display_name'] as String? ?? ''),
+              if (_memberId != null)
+                // 已选中:收起结果列表,只留「已選:某某」+ 清除
+                InputChip(
+                  avatar: const Icon(Icons.person_outline, size: 18),
+                  label: Text(_memberName ?? ''),
+                  onDeleted: () => setState(() {
+                    _memberId = null;
+                    _memberName = null;
+                    _memberQuery.clear();
+                    _memberResults = const [];
+                  }),
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _memberQuery,
+                      onChanged: _onMemberQueryChanged,
+                      decoration: InputDecoration(
+                        labelText: l10n.searchMemberHint,
+                        prefixIcon: const Icon(Icons.search),
+                      ),
+                    ),
+                    if (_memberSearching)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: LinearProgressIndicator(),
+                      )
+                    else if (_memberQuery.text.trim().isNotEmpty &&
+                        _memberResults.isEmpty)
+                      // 无结果不留死路:直接引导到来源③「任意名字」
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          l10n.searchMemberEmpty,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant),
                         ),
-                    ],
-                    onChanged: (v) => setState(() => _memberId = v),
-                  );
-                },
-              ),
+                      )
+                    else
+                      for (final m in _memberResults)
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.person_outline),
+                          title: Text(m['display_name'] as String? ?? ''),
+                          onTap: () => setState(() {
+                            _memberId = m['user_id'] as String;
+                            _memberName = m['display_name'] as String? ?? '';
+                            _memberResults = const [];
+                          }),
+                        ),
+                  ],
+                ),
             if (_mode == _SubjectMode.name) ...[
               TextField(
                 controller: _name,

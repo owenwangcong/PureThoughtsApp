@@ -1,8 +1,8 @@
 # 善护念 PureThoughts · 执行计划与进度 (PLAN)
 
-> **本文件是执行计划与进度的唯一事实来源**;需求细节一律以 [`PRD.md`](PRD.md)(v0.5.1)为准,本文只负责"做什么、什么顺序、现在到哪了"。
+> **本文件是执行计划与进度的唯一事实来源**;需求细节一律以 [`PRD.md`](PRD.md)(v0.6.1)为准,本文只负责"做什么、什么顺序、现在到哪了"。
 > **使用规则见 §8**:开工先看 §1;任务完成即勾选并更新总览;新任务先写进本文再动手。
-> 最后更新:2026-08-08
+> 最后更新:2026-08-12
 
 ---
 
@@ -12,13 +12,14 @@
 |---|---|---|:---:|---|
 | **P0** | 基础设施:本地开发栈 + 自托管 Supabase + 工程骨架 + DB schema | 🔄 进行中 | 5/9(P0.1 ✅ 新加坡;P0.2 进行中——EC2 已开待跑脚本;P0.3 待 E5 SMTP) | — |
 | **P1** | MVP:核心闭环(群 + 报数 + 统计)+ 上架合规 | 🔄 进行中 | 11/13(P1.1/P1.10 部分完成,余项全待外部依赖) | — |
-| **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | 🔄 进行中 | 6/18(P2.11 ✅;P2.1 代码完成待 iOS 真机/生产;**P2.2 不再被 E5 阻塞**——E5 已于 2026-07-11 配通,总览旧标注 ⛔ 已订正;P2.7 部分依赖 E6;P2.8 正念提醒 ⏸ 暂缓,入口已下架;P2.9 佛历 / P2.10 活动时区 🔄 2026-07-16 新增;**P2.12–P2.17 通知系统改造 🔄 2026-08-08 新增**,设计 [`design/notification-overhaul.md`](design/notification-overhaul.md)) | — |
+| **P2** | 通知 / 活动 / 日历 + 发愿 + 工具 | 🔄 进行中 | 7/19(P2.11 ✅;**P2.18 打坐計時任意时长 ✅ 2026-08-12**;P2.1 代码完成待 iOS 真机/生产;**P2.2 不再被 E5 阻塞**——E5 已于 2026-07-11 配通,总览旧标注 ⛔ 已订正;P2.7 部分依赖 E6;P2.8 正念提醒 ⏸ 暂缓,入口已下架;P2.9 佛历 / P2.10 活动时区 🔄 2026-07-16 新增;**P2.12–P2.17 通知系统改造 🔄 2026-08-08 新增**,设计 [`design/notification-overhaul.md`](design/notification-overhaul.md)) | — |
 | **P3** | 视频 + 在线经本 | 🔄 进行中 | 2/3(余 P3.3 大陆降级,依赖 E6 实测) | — |
 | **P4** | 念诵导引音频 | ⬜ 未开始 | 0/4 | — |
 | **P5** | 打磨 + 正式上架 | 🔄 进行中 | 5/7(P5.3 打磨可做;P5.4 待 E1/E13) | — |
 | **P6** | 后续(待外部输入) | 🔄 进行中 | 0/3(P6.1 客户端已完成 2/3 子项;仅余 P6.1.1 后端 E14 简繁改造,不在本仓库) | — |
 | **P7** | 管理后台(Web,`admin/`,PRD §15) | 🔄 进行中 | 4/5(P7.1-P7.4 ✅ 2026-07-20;余 P7.5 生产冒烟一项) | — |
 | **P8** | 学修问答(私密提问,PRD §16,设计 `design/study-qa.md`) | 🔄 进行中 | 4/6(P8.1–P8.4 ✅ 2026-07-30;余 P8.5 联测发布、P8.6 角色语义修复 2026-08-01 新增) | — |
+| **P9** | **去群化(单一共修体,PRD v0.6.0 §3,设计 `design/single-community.md`)** | 🔄 进行中 | 5/6(2026-08-11 完成 P9.1/P9.2/P9.4/P9.5;**2026-08-12 服务端已发布生产**——migration 0028-0029 + admin 站,总量守恒 290.00,冒烟全过;**余 P9.7 的 App 发版与真机走查**;P9.3 邀请功能已取消)| — |
 
 状态图例:⬜ 未开始 · 🔄 进行中 · ✅ 完成 · ⛔ 阻塞(在 §7 记录原因) · ⏸ 待定
 
@@ -167,6 +168,8 @@ crontab 为空)——本次发布前手工打了快照 `~/pre-notification-overh
 ⚠️ **旧版 App 兼容**:生产 App 尚不认识 `event_reminder` 类型,通知中心会走 default 分支
 显示原始 type 名;首批提醒到点前需发新版,或加一个补 title/body 兜底文案的 migration。
 
+- [x] **P2.18** 打坐計時任意时长(S,2026-08-12 用户需求,PRD v0.6.1 §9.1)— 时长区在预设 chips 之外新增「自訂」:时 / 分双滚轮(1 分钟 ~ 12 小时,不用键盘避免长者误输);所选时长本地持久化(`timer_minutes`),下次进入沿用(自訂值直接显示在 chip 上);运行中 ≥1 小时显示 `H:MM:SS`(`formatHms`,超长数字 FittedBox 缩放);结束转报数按自订分钟数提交。验收 ✅ 2026-08-12:`flutter analyze` 0 issue、`flutter test` **203**(tools 8 项新增:formatHms / formatMinutesLabel / 自訂 chip 回显 / 对话框确认持久化 / 滚轮选到 ≥1 小时;layout 走查 +2 简繁大字号对话框)。⏳ 真机:滚轮手感与 60 分钟以上长计时息屏行为待走查。
+
 **P2 DoD**:推送矩阵四种场景全部验证可达;共修流程演练通过;工具离线可用;佛历日历离线可读且锚点日期正确(设计 §9);**通知改造 §14 DoD 达成(含三个 P0 缺陷回归用例)**。**P2 完成后启动正式上架申请(见 §6 P5.4 前置)。**
 
 ---
@@ -240,6 +243,24 @@ crontab 为空)——本次发布前手工打了快照 `~/pre-notification-overh
 
 **P8 DoD**:`design/study-qa.md` §7/§8 清单全部勾选;用户隔离与双端回复经端到端验证;生产冒烟通过;P8.6 四缺陷真机复测通过。
 
+### P9 · 去群化(单一共修体,PRD v0.6.0 §3,2026-08-11 立项)
+
+**立项背景**(用户 2026-08-11):加入报数群要「拿群 ID → 输码 → 写申请 → 等审核」四步,群 ID 不便在微信/Line 传播、年长用户记不住;而实际只有善护念一个每日报数群。定案:**产品层面取消"群"概念**——单一共修体「善護念共修」,注册即入,传播改为 App 下载链接 + 二维码;群主角色并入 App 管理员。**数据层保留 `group_id` 单例(不做破坏性重构),以保"将来真要分组"的可逆性**。
+
+**已定案**(设计 §2,含用户 2026-08-11 三条批复):保留 group_id 单例(Q1)· 现有成员最多的群升格为共修体、其余合并后软删(Q2/Q3)· 注册触发器自动入会(Q4)· 邀请卡片含分享/复制/二维码(Q5)· 代报"同修"改搜索 RPC(Q6)· 共修报数记录全体注册用户可见(Q7)· **自定义功课项仅创建者可选**(名称仍可读、报数照常计入共修总量,Q8/Q8-a/Q8-b)· 取消群主(Q9)· 保留常驻共修公告(Q10)· **共修体与页面统一叫「共修報數」**(Q11)· 旧版 App 优雅降级(Q12)· **「我的」与「全體」统计并排双栏**(用户要求)。**详细设计与逐项跟踪见 [`design/single-community.md`](design/single-community.md)**,其 §11(实施)/ §12(测试)是本 Phase 的清单。
+
+**依赖**:无新增外部依赖(邀请页链接指向官网下载页,属 P5.4,不阻塞)。⚠️ **P9.7 生产发布前必须先手工全量备份**(P0.4 未竟项:生产 crontab 为空,定时备份从未运行;本次是首个改动存量业务数据的 migration)。
+
+- [x] **P9.1** 数据层(M)✅ 2026-08-11 — migration `20260811000028_single_community.sql`:`groups.is_default` + 唯一索引;`handle_new_group` null-owner 容错;确定/升格共修体;其余群合并(logs / proxy_names / 自定义功课项 / vows 置 null)后软删 + **`_pre_community_log_groups` 旧值备份表**;全员补 approved 成员 + `handle_new_user` 自动入会(共修体缺失时静默跳过,注册永不失败);关闭建群(删 `groups_insert` + revoke insert)与 `join_group`;新增 `search_members(q, limit)` definer RPC;**`practice_types.created_by`**(Q8:自定义功课仅创建者可选)+ 触发器落 auth.uid() + 存量按首条引用报数回填。`seed.sql` 去测试群 + `CLAUDE.md` 删 TESTGRP2 说明。**验收 ✅**:新增 `community.test.sql`(15 编号 / 17 断言)、`rls.test.sql` 按新模型重写(35 项,删掉建群/join code/审核/转让/解散/退群六组)、`notification_prefs.test.sql` T-DB-18 改用共修体构造 `left` 边界;`npx supabase db reset` + `test db` **10 文件 200 项全绿**。要点:①`handle_new_user` 在 auth 链路上,共修体缺失必须静默跳过否则注册整体失败(T-DB-03 守住);②`before_insert_practice_log` 增加「不得用他人自定义功课项报数」,把 Q8 从 UI 过滤变成真规则;③旧 `group_id` 留档在 `_pre_community_log_groups`(零策略 RLS + revoke,客户端不可达)。
+- [x] **P9.2** App 客户端(L)✅ 2026-08-11(`flutter analyze` 0 issue · `flutter test` **197** 全绿 · pgTAP 仍 200 全绿)— 新建 `features/community/`(`community_providers.dart` 单例 id + `community_screen.dart` 公告 / **今日·趋势·累计三处均为「我的 / 全體」双栏** / 我的自訂功課 / 记录入口);功课选择器加 `created_by` 过滤而名称映射保持全量(可选 vs 可读两层);删 `features/groups/` 三文件;`logs_providers`/`dashboard_providers` family 去参数;`community_logs_screen`(条目菜单加「封鎖此人」);`report_log_screen` 去 groupId + 同修搜索;`quick_report_section`/`report_bridge`/`vows_screen`/`home_screen`/`add_practice_type_dialog` 适配;`router.dart` 新路由 + 5 条旧路由重定向;客户端 route 表把 `/groups/<id>` 导向 `/community`(**服务端 `push-dispatch` 本次不动** —— 设计 §5.9 双向兼容定案,旧版 App 认不得新路由)。**按设计 §5.10 的九步顺序做**。三处只有跑起来才暴露的坑:①`_TwoColumn` 的 `Row + stretch` 在 `ListView` 里拿到无限高约束直接崩,必须包 `IntrinsicHeight`(T-APP-08 抓到);②`report_bridge`/`vows_screen` 原本用**不过滤**的 `allPracticeTypesMapProvider` 当选择器数据源,去群化后会把别人的自定义项列进来,须改 `reportablePracticeTypesProvider`;③记录页原先全量拉成员表取显示名,全站规模下不可行,改 `logDisplayNamesProvider` 按当屏出现的 id 反查。另补 migration **0029**(`daily_user_stats` 加 `entries`),否则趋势图两条系列口径不一致(数量跨单位不能相加)。
+- [x] ~~**P9.3** 邀请与传播~~ — **取消 2026-08-11**(用户定案,设计 §6/Q5):去群化后已无任何需要转述的东西(注册即成员),而"让人装上 App"本就发生在 App 之外;且官网下载页尚不存在(P5.4),现在做只会指向死链。不引入 `qr_flutter`。将来在 P5.4 上架、下载页真实上线后,于设置页加一个「分享下載連結」即可(`share_plus` 已在依赖里,十几行)。
+- [x] **P9.4** 管理后台(M)✅ 2026-08-11 — `groups/page.tsx` → `community/page.tsx`(共修体信息+名称可改、**公告编辑=唯一入口**、同修人数/总量/建立时间三卡、历史群只读折叠),删「转让群主/解散群」;`content` 页新增「自訂功課」tab(创建者显示名 + 停用/启用 + **提升為主清單**,注意表上有 `check (is_custom = (group_id is not null))`,三列须同一次 update 清);侧栏与首页卡片改「共修報數」,dashboard「活躍群組」→「同修人數」;reports/users 页去群化措辞。`gen:types` + `lint` + `build` 全绿(14 路由)。**偏差(有意)**:设计里的「同修列表」没做 —— 同修 = 全部注册用户,那就是 `/users` 页,重造一遍是纯重复,改为链过去。**踩坑**:`useEffect` 同步表单被 `react-hooks/set-state-in-effect` 拦下,改「草稿覆盖」模式,顺带修掉「查询刷新会冲掉管理员正在输入的公告」这个真 bug。
+- [x] **P9.5** 文案与 l10n(S)✅ 2026-08-11 — 三份 ARB **删 34 / 改 1 / 增 10** 键 + `flutter gen-l10n`;删键前逐个 grep 确认 0 引用(`analyze` 不会因未使用的 getter 报错)。**设计 §8 漏了一类**:除了键的增删,还有 5 条**仍在说「群」的用户可见文案**要改(`subjectMember`「群成員」· `logsEmptyHint`「本群還沒有報數」· `deleteAccountWarn`「保留於群統計中」· `authResetNeedAdmin`「請聯繫群主」· `deleteOwnerBlocked` 整条已不可达连同 settings 特判一并删)——现在三份 ARB 里一个「群」字都没有。`layout_walkthrough_test` 已补 `/community`(简繁 × 2.0 不溢出)。
+- [ ] **P9.6** 文档(S)— PRD 升 v0.6.0(✅ 2026-08-11 已随立项完成)+ PLAN 本节维护。
+- [ ] **P9.7** 🔄 测试与发布(M)— **服务端已发布生产 2026-08-12**:手工全量快照(`pre-single-community-20260812-0503.sql.gz`,已下载本机 `docs/secretFiles/backups/` + gzip 校验)→ 记迁移前计数 → `0028`/`0029` **每个与其记账同事务**推生产(记账 27→29)→ 九条核对全过(**活跃总量 290.00 守恒**、报数 100% 归口、approved 成员 5→7 全员补齐、`_pre_community_log_groups` 留档 10 条 = 从另 3 个群搬来的数量)→ 生产冒烟(anon `search_members`/建群 **401**;新注册即 approved → 报数 **201**;登录用户 `search_members` 200、建群 **403**;冒烟账号已清理、数据回基线)→ admin 站重发布(14 路由 200,`/groups` 已 404,线上 chunk 含新文案确证非旧缓存)→ **补上 root crontab `0 3 * * * pt-backup.sh`**(P0.4 未竟项,已试跑成功)。`push-dispatch` 按设计 §5.9 **本次不动**。**⚠️ 生产实况与设计假设不符**:设计 Q2 以为「1 个群 19 条」,实际 **4 个群(3 活跃)33 条**,真搬了 10 条 —— 幸好 migration 写成通用+幂等且留了档。**踩坑**:`( sudo crontab -l; echo ... ) | sudo crontab -` 管道+sudo 装不进去(退出码 0 但内容空),须写临时文件再 `sudo crontab <file>`;bash `UID` 是只读变量,当变量名用直接报错。**余**:App 发版(用户自行 Codemagic 构建)+ 真机走查。
+
+**P9 DoD**:新用户从注册到第一次报数**全程不出现"群"字且无审核等待**;迁移前后共修总量与个人累计完全一致;`supabase test db` / `flutter analyze` / `flutter test` / admin `lint`+`build` 全绿;旧版 App 仍能正常报数(优雅降级);设计文档 §11 清单全部勾选。
+
 ---
 
 ## 7. 风险与阻塞记录
@@ -253,6 +274,8 @@ crontab 为空)——本次发布前手工打了快照 `~/pre-notification-overh
 | 2026-08-07 | (正确性 P0,非阻塞)**缺陷 B** · push-dispatch | `sent_at` 在发送**之前**抢占写入,失败不回滚/不重试/不留痕;fetch 无 try/catch,网络异常致整批已标「已发送」→ **投递失败即永久静默丢失** | P2.12:租约式抢占 + `attempts` 重试 + `last_error` 落库;回归用例 T-FN-06 / T-E2E-08 | ✅ 已修 2026-08-08(migration 0023 + push-dispatch 重写 + pgTAP T-DB-04/05/06 绿);余生产验证 |
 | 2026-08-07 | (体验 P0,非阻塞)**缺陷 C** · 免打扰未落地 | `almanac-daily` cron 在 UTC+8 次日 00:05 生成并被秒级推送,而 PRD §5.2 的免打扰从无实现(服务端从不读 `profiles.timezone`)→ **P2.1-4 上生产当天,大陆用户凌晨 00:05 被叫醒**;且设置页佛历开关仅客户端过滤,关了照推 | P2.13:`notification_prefs` + `quiet_until()` + 顺延克隆;回归用例 T-DEV-05 | ✅ 已修 2026-08-08(migration 0024 + 本地栈实测克隆行排到用户本地 07:00;**生产已发布**);**余真机 T-DEV-05** |
 | 2026-08-08 | (功能静默失效,非阻塞)P2.17 Realtime 红点 | `supabase_realtime` publication 只含 `practice_logs`(P5.2 加的),不含 `notifications` → 订阅建得起来但永远收不到事件,红点不会实时更新。实施 P2.17 时本地实测发现 | migration 0027 内 `alter publication supabase_realtime add table public.notifications`(带容错,失败仅 warning 并降级为下拉刷新)+ pgTAP T-DB-42c 守住 | ✅ 已修 2026-08-08 |
+| 2026-08-11 | (数据安全,P9.7 硬前置)migration 0028 | 0028 是**首个改写存量业务数据**的 migration(`practice_logs.group_id` 合并、其余群软删),而生产每日定时备份从未运行(`pt-backup.sh` 在、crontab 为空,2026-08-08 发现)。无可用备份时执行属于不可回滚操作 | ①执行前手工 `pg_dump` 全量快照并下载异地保存;②migration 内建 `_pre_community_log_groups` 记录每条报数的旧 group_id(保留 90 天);③顺带补齐 crontab(P0.4 未竟项) | ✅ 已执行 2026-08-12:快照已取并下载本机、0028/0029 同事务推生产、核对全过(总量 290.00 守恒)、crontab 已装并试跑 |
+| 2026-08-12 | (数据安全,非阻塞)P0.4 备份仍非异地 | 补 crontab 时发现:生产的 `pt-backup.sh` 早已被改成**只写本机磁盘** `/root/backups`(保留 14 份),而部署文档 §6 设计的是 `aws s3 cp` 到**异地**对象存储 —— 机器上根本没装 aws cli。等于**磁盘/实例一挂,数据库和备份一起没**。另 P0.4 的「恢复演练」也始终未做 | 需用户提供:异地对象存储(S3/B2/R2)桶 + 凭据或 IAM 角色 → 装 cli、脚本加上传、验证一次;再择期做一次恢复演练 | ⬜ 待用户决策 |
 | —— | —— | 当前无其他阻塞 | —— | —— |
 
 **长期背景风险(来自 PRD §14,开发中随时对照)**:YouTube/Webex 对大陆用户不可达(影响 P3/P4 的 1/3 用户)· 自托管运维责任(P0.4 恢复演练是硬门槛)· 中国区不上架的分发口径待与内容方确认。

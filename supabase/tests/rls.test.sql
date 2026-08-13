@@ -1,14 +1,17 @@
 -- ============================================================================
 -- RLS / 权限验证(pgTAP)· 运行:npx supabase test db
--- 覆盖 PRD §12.3 核心策略:报数仅本群可见、join_code 不可直读、
--- 非报数人只能软删、自由名字自动记忆、代报通知、个人字段保护等。
+-- 覆盖 PRD §12.3 核心策略。**v0.6.0 去群化改写**(PLAN P9.1):
+--   建群 / join code / 入群审核 / 转让 / 解散 / 退群 六组用例已随功能下线删除,
+--   替换为「注册即入会」「建群已关闭」「join_group 已停用」「封禁用户不能报数」。
+--   单一共修体后所有注册用户互为同修,故不再有「非成员」视角 —— 边界测试改由
+--   匿名(anon)与封禁用户承担。去群化专属用例见 community.test.sql。
 -- 全部在事务内执行并回滚,不留数据。
 -- ============================================================================
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 
-select plan(50);
+select plan(35);
 
 -- ---------------------------------------------------------------- 测试辅助
 -- 身份切换(整个文件是一个事务,set_config local 生效到结束)
@@ -31,14 +34,14 @@ begin
   perform set_config('role', 'anon', true);
 end $$;
 
--- 测试专用:绕过 RLS 取 join code(definer=postgres;随事务回滚,不进生产)
-create function tests_code(gid uuid) returns text
-language sql security definer set search_path = public as $$
-  select code from group_join_codes where group_id = gid;
+-- 共修体 id(唯一 is_default 行;definer 以免受调用者 RLS 影响)
+create function tests_gid() returns uuid
+language sql stable security definer set search_path = public as $$
+  select id from public.groups where is_default limit 1;
 $$;
 
 -- ---------------------------------------------------------------- 测试用户
--- A=群主 B=成员 C=外人(handle_new_user 触发器自动建 profiles)
+-- A / B / C 三个普通注册用户(handle_new_user 触发器自动建 profiles 并自动入会)
 insert into auth.users (instance_id, id, aud, role, email)
 values
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-00000000000a', 'authenticated', 'authenticated', 'alice@test.local'),
@@ -50,82 +53,44 @@ select is(
     ('00000000-0000-0000-0000-00000000000a','00000000-0000-0000-0000-00000000000b','00000000-0000-0000-0000-00000000000c')),
   3, 'handle_new_user 触发器:注册自动创建 profiles');
 
--- ---------------------------------------------------------------- 建群 / 入群
-select tests_login('00000000-0000-0000-0000-00000000000a');
-
-select lives_ok($$
-  insert into public.groups (id, name, owner_id)
-  values ('00000000-0000-0000-0000-0000000000d1', '測試共修群', '00000000-0000-0000-0000-00000000000a')
-$$, '注册用户可建群');
-
+-- 去群化核心:注册即入会(PRD v0.6.0 §3.1)
 select is(
   (select count(*)::int from public.group_members
-   where group_id = '00000000-0000-0000-0000-0000000000d1' and role = 'owner' and status = 'approved'),
-  1, '建群自动成为群主(approved/owner)');
+   where group_id = tests_gid() and status = 'approved'
+     and user_id in ('00000000-0000-0000-0000-00000000000a',
+                     '00000000-0000-0000-0000-00000000000b',
+                     '00000000-0000-0000-0000-00000000000c')),
+  3, '注册即自动成为共修体 approved 成员(无需申请与审核)');
 
-select ok(
-  length(public.get_group_join_code('00000000-0000-0000-0000-0000000000d1')) = 8,
-  '群主经 RPC 可取得 8 位 join code');
-
--- B 申请入群
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000b');
-
-select is(
-  (select count(*)::int from public.group_join_codes),
-  0, '非管理员不可直读 group_join_codes(RLS)');
-
-select lives_ok($$
-  select public.join_group(tests_code('00000000-0000-0000-0000-0000000000d1'), '請通過我')
-$$, 'B 可用 join code 申请入群');
-
--- C 用错误 code 申请失败
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000c');
-select throws_ok($$ select public.join_group('WRONGCOD', 'hi') $$,
-  'P0001', 'invalid join code', '错误 join code 申请被拒');
-
--- 群主审核通过 B
-select tests_logout();
+-- 建群与入群申请已关闭
 select tests_login('00000000-0000-0000-0000-00000000000a');
-update public.group_members set status = 'approved', approved_at = now()
- where group_id = '00000000-0000-0000-0000-0000000000d1'
-   and user_id  = '00000000-0000-0000-0000-00000000000b';
-select is(
-  (select count(*)::int from public.group_members
-   where group_id = '00000000-0000-0000-0000-0000000000d1' and status = 'approved'),
-  2, '群主可审核通过入群申请');
+select throws_ok($$
+  insert into public.groups (name, owner_id)
+  values ('新群', '00000000-0000-0000-0000-00000000000a')
+$$, '42501', null, '建群已关闭:authenticated 无 groups insert 权限');
 
--- 公告更新 → 群成员收到 App 内通知(P2.3);非成员不可见
-update public.groups set announcement = '本週六共修改為線上'
- where id = '00000000-0000-0000-0000-0000000000d1';
+select throws_ok($$ select public.join_group('ANYCODE8', 'hi') $$,
+  'P0001', 'joining is no longer required: every registered user is a member',
+  'join_group 已停用');
+
+-- 公告更新 → 共修体范围通知(管理员维护,此处以 postgres 身份模拟)
 select tests_logout();
+update public.groups set announcement = '本週六共修改為線上' where id = tests_gid();
 select tests_login('00000000-0000-0000-0000-00000000000b');
 select is(
   (select count(*)::int from public.notifications
-   where scope = 'group' and type = 'announcement'
-     and target_id = '00000000-0000-0000-0000-0000000000d1'),
-  1, '公告更新生成群范围通知,成员可见');
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000c');
-select is(
-  (select count(*)::int from public.notifications where type = 'announcement'),
-  0, '非成员看不到群公告通知');
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000a');
+   where scope = 'group' and type = 'announcement' and target_id = tests_gid()),
+  1, '公告更新生成共修体范围通知,成员可见');
 
 -- ---------------------------------------------------------------- 报数与可见性
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000b');
-
 select lives_ok($$
   insert into public.practice_logs (id, group_id, reporter_id, practice_type_id, quantity)
   values ('00000000-0000-0000-0000-0000000000e1',
-          '00000000-0000-0000-0000-0000000000d1',
+          tests_gid(),
           '00000000-0000-0000-0000-00000000000b',
           (select id from public.practice_types where name_hans = '金刚经'),
           3)
-$$, '成员可自报功课');
+$$, '注册用户可直接报数(无需审核)');
 
 select is(
   (select unit::text from public.practice_logs where id = '00000000-0000-0000-0000-0000000000e1'),
@@ -139,53 +104,41 @@ select ok(
 -- 代报:自由名字 → proxy_names 自动记忆
 select lives_ok($$
   insert into public.practice_logs (group_id, reporter_id, subject_name, practice_type_id, quantity)
-  values ('00000000-0000-0000-0000-0000000000d1',
+  values (tests_gid(),
           '00000000-0000-0000-0000-00000000000b',
-          '王阿姨',
+          '陳阿姨',
           (select id from public.practice_types where name_hans = '大悲咒'),
           108)
 $$, '可用自由名字代报');
 
 select is(
   (select use_count from public.proxy_names
-   where group_id = '00000000-0000-0000-0000-0000000000d1' and name = '王阿姨'),
-  1, '自由名字自动记入本群代报名单');
+   where group_id = tests_gid() and name = '陳阿姨'),
+  1, '自由名字自动记入代报名单');
 
--- 代报群成员 A → A 收到通知
+-- 代报同修 A → A 收到通知
 select lives_ok($$
   insert into public.practice_logs (group_id, reporter_id, subject_user_id, practice_type_id, quantity)
-  values ('00000000-0000-0000-0000-0000000000d1',
+  values (tests_gid(),
           '00000000-0000-0000-0000-00000000000b',
           '00000000-0000-0000-0000-00000000000a',
           (select id from public.practice_types where name_hans = '念佛'),
           1000)
-$$, '可代报群成员');
+$$, '可代报同修');
 
 select tests_logout();
 select tests_login('00000000-0000-0000-0000-00000000000a');
 select is(
   (select count(*)::int from public.notifications
    where scope = 'user' and target_id = '00000000-0000-0000-0000-00000000000a' and type = 'proxy_log'),
-  1, '被代报的群成员收到 App 内通知');
+  1, '被代报的同修收到 App 内通知');
 
 select is(
   (select count(*)::int from public.practice_logs
-   where group_id = '00000000-0000-0000-0000-0000000000d1'),
-  3, '群成员可见本群全部报数');
+   where reporter_id = '00000000-0000-0000-0000-00000000000b'),
+  3, '同修可见彼此的共修报数');
 
--- 外人 C 什么都看不到、不能报
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000c');
-select is((select count(*)::int from public.practice_logs), 0, '非成员看不到任何报数(RLS)');
-select is((select count(*)::int from public.groups), 0, '非成员看不到群');
-select throws_ok($$
-  insert into public.practice_logs (group_id, reporter_id, practice_type_id, quantity)
-  values ('00000000-0000-0000-0000-0000000000d1',
-          '00000000-0000-0000-0000-00000000000c',
-          (select id from public.practice_types where name_hans = '金刚经'), 1)
-$$, '42501', null, '非成员不能报数');
-
--- 匿名(未登录)
+-- ---------------------------------------------------------------- 匿名(未登录)
 select tests_logout();
 select tests_anon();
 select lives_ok($$ select count(*) from public.scriptures $$, '匿名可访问公开内容表');
@@ -213,12 +166,12 @@ select throws_ok($$
   where id = '00000000-0000-0000-0000-0000000000e1'
 $$, 'P0001', 'use delete_practice_log() to delete', '直接置 deleted_at 被拒,删除须走 RPC');
 
--- C(外人)不能删除任何记录
+-- C(同修,但既非报数人也非被代报人、更非管理员)不能删别人的记录
 select tests_logout();
 select tests_login('00000000-0000-0000-0000-00000000000c');
 select throws_ok($$
   select public.delete_practice_log('00000000-0000-0000-0000-0000000000e1')
-$$, 'P0001', 'not allowed to delete this record', '非成员不能删除报数');
+$$, 'P0001', 'not allowed to delete this record', '无关同修不能删除他人报数');
 
 -- A(非报数人,是被代报人):改数量不生效(RLS 0 行命中),但可经 RPC 删自己名下记录
 select tests_logout();
@@ -236,19 +189,23 @@ select lives_ok($$
      where subject_user_id = '00000000-0000-0000-0000-00000000000a'))
 $$, '被代报人可经 RPC 删除自己名下的记录');
 
--- 群统计随软删即时扣减(B 视角:剩 2 条记录进统计)
+-- 共修统计随软删即时扣减(B 本轮新增 3 条、软删 1 条 → 净增 2)
 select tests_logout();
 select tests_login('00000000-0000-0000-0000-00000000000b');
+-- seed 3 条 + 本轮 B 报 3 条 - 软删 1 条 = 5
 select is(
-  (select sum(entries)::int from public.daily_group_stats
-   where group_id = '00000000-0000-0000-0000-0000000000d1'),
-  2, '软删后群统计即时扣减');
+  (select sum(entries)::int from public.daily_group_stats where group_id = tests_gid()),
+  5, '软删后共修统计即时扣减');
 
--- 成员显示名视图(代报选择器用)
+-- 成员显示名视图(管理后台用;客户端已改走 search_members)
+select ok(
+  (select count(*)::int from public.group_member_display where group_id = tests_gid()) >= 3,
+  '成员可经视图看到同修显示名');
+
+-- 同修搜索 RPC(客户端代报选择器,PRD v0.6.0 §4.2)
 select is(
-  (select count(*)::int from public.group_member_display
-   where group_id = '00000000-0000-0000-0000-0000000000d1'),
-  2, '成员可经视图看到本群成员显示名');
+  (select count(*)::int from public.search_members('ali')),
+  1, 'search_members 按显示名片段搜到同修(代报选择器数据源)');
 
 -- 个人字段保护
 select throws_ok($$
@@ -275,7 +232,6 @@ select is(
 select tests_logout();
 update public.events set title = '測試活動通知(改)' where title = '測試活動通知';
 select tests_login('00000000-0000-0000-0000-00000000000c');
--- 只数本测试活动的通知(seed 的週六共修/週三打坐各有一条 created)
 select is(
   (select count(*)::int from public.notifications
    where type = 'event_changed' and payload->>'title' like '測試活動通知%'),
@@ -291,66 +247,16 @@ select is(
    where type = 'event_changed' and payload->>'action' = 'updated'
      and payload->>'title' = '測試活動通知(再改)'),
   1, '修改活动生成全员通知');
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000a');
 
--- ---------------------------------------------------------------- 群生命周期(P1.4)
--- 群主 A 不能直接退群(须先转让)
+-- ---------------------------------------------------------------- 封禁用户
 select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000a');
+update public.profiles set banned_at = now() where id = '00000000-0000-0000-0000-00000000000c';
+select tests_login('00000000-0000-0000-0000-00000000000c');
 select throws_ok($$
-  update public.group_members set status = 'left'
-  where group_id = '00000000-0000-0000-0000-0000000000d1'
-    and user_id  = '00000000-0000-0000-0000-00000000000a'
-$$, 'P0001', 'owner must transfer ownership before leaving', '群主不能直接退群');
-
--- 转让给 B(approved 成员)
-select lives_ok($$
-  select public.transfer_group_ownership(
-    '00000000-0000-0000-0000-0000000000d1',
-    '00000000-0000-0000-0000-00000000000b')
-$$, '群主可转让给 approved 成员');
-
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000b');
-select is(
-  (select owner_id from public.groups where id = '00000000-0000-0000-0000-0000000000d1'),
-  '00000000-0000-0000-0000-00000000000b'::uuid, '转让后 owner_id 更新');
-select is(
-  (select role::text from public.group_members
-   where group_id = '00000000-0000-0000-0000-0000000000d1'
-     and user_id  = '00000000-0000-0000-0000-00000000000b'),
-  'owner', '转让后新群主 role=owner');
-
--- 新群主 B 重置 join code(旧码失效,返回 8 位新码)
-select ok(
-  length(public.reset_group_join_code('00000000-0000-0000-0000-0000000000d1')) = 8,
-  '群主可重置 join code(8 位新码)');
-
--- A(已转为普通成员)可退群
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000a');
-select lives_ok($$
-  update public.group_members set status = 'left'
-  where group_id = '00000000-0000-0000-0000-0000000000d1'
-    and user_id  = '00000000-0000-0000-0000-00000000000a'
-$$, '普通成员可退群');
-select is(
-  (select status::text from public.group_members
-   where group_id = '00000000-0000-0000-0000-0000000000d1'
-     and user_id  = '00000000-0000-0000-0000-00000000000a'),
-  'left', '退群后状态为 left');
-
--- 新群主 B 解散群(经 RPC,软删),之后对成员不可见
-select tests_logout();
-select tests_login('00000000-0000-0000-0000-00000000000b');
-select lives_ok($$
-  select public.dissolve_group('00000000-0000-0000-0000-0000000000d1')
-$$, '群主可解散群');
-select is(
-  (select count(*)::int from public.groups
-   where id = '00000000-0000-0000-0000-0000000000d1'),
-  0, '解散后群对成员不可见(软删)');
+  insert into public.practice_logs (group_id, reporter_id, practice_type_id, quantity)
+  values (tests_gid(), '00000000-0000-0000-0000-00000000000c',
+          (select id from public.practice_types where name_hans = '金刚经'), 1)
+$$, '42501', null, '封禁用户不能报数(is_active_user 拦截)');
 
 -- ---------------------------------------------------------------- 账号删除匿名化(P1.9)
 -- 模拟删号(delete-account Edge Function 最终执行 auth.users 删除)
@@ -369,7 +275,7 @@ select is(
 
 select ok(
   (select sum(quantity) from public.practice_logs where deleted_at is null) is not null,
-  '删号后群总量数据仍在(功德保留)');
+  '删号后共修总量数据仍在(功德保留)');
 
 select * from finish();
 rollback;

@@ -8,7 +8,6 @@ import 'package:pure_thoughts/core/prefs.dart';
 import 'package:pure_thoughts/core/theme/app_theme.dart';
 import 'package:pure_thoughts/features/auth/auth_providers.dart';
 import 'package:pure_thoughts/features/dashboard/dashboard_providers.dart';
-import 'package:pure_thoughts/features/groups/groups_providers.dart';
 import 'package:pure_thoughts/features/notifications/notifications_providers.dart';
 import 'package:pure_thoughts/features/notifications/notifications_screen.dart';
 import 'package:pure_thoughts/features/study_qa/study_qa_compose_screen.dart';
@@ -348,7 +347,6 @@ void main() {
     await pump(tester, const SizedBox.shrink(), router: router, overrides: [
       currentUserProvider.overrideWith((ref) => testUser),
       allPracticeTypesMapProvider.overrideWith((ref) async => {}),
-      myGroupsProvider.overrideWith((ref) async => []),
       // 已读(notification_reads 非空)→ 不触发标记已读的触网路径
       notificationFeedProvider.overrideWith(() => StubNotificationFeed([
             {

@@ -15,7 +15,7 @@ const LIVE = [
   { href: "/notifications", title: "通知發佈", description: "立即/定時發佈、排程佇列、撤回" },
   { href: "/reports", title: "舉報處理", description: "舉報流轉、封禁/解封" },
   { href: "/users", title: "用戶管理", description: "搜尋、重置密碼、封禁、設/撤管理員、代刪帳號" },
-  { href: "/groups", title: "群組總覽", description: "全部群、成員數與總量、轉讓/解散" },
+  { href: "/community", title: "共修報數", description: "共修體名稱、公告、同修人數與總量" },
   { href: "/content", title: "內容上架", description: "音訊媒體、功課主清單、經本、直播場次" },
   { href: "/almanac", title: "佛曆與設定", description: "佛曆數據瀏覽、app_settings 維護" },
 ];

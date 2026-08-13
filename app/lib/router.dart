@@ -5,20 +5,18 @@ import 'core/settings.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
-import 'features/dashboard/group_stats_screen.dart';
+import 'features/community/community_screen.dart';
 import 'features/events/calendar_screen.dart';
 import 'features/events/event_agenda_editor.dart';
 import 'features/events/event_detail_screen.dart';
 import 'features/events/event_types_screen.dart';
 import 'features/events/occurrence_utils.dart';
 import 'features/dashboard/my_dashboard_screen.dart';
-import 'features/groups/group_detail_screen.dart';
-import 'features/groups/groups_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/live/live_screen.dart';
 import 'features/live/video_player_screen.dart';
 import 'features/live/web_view_screen.dart';
-import 'features/logs/group_logs_screen.dart';
+import 'features/logs/community_logs_screen.dart';
 import 'features/logs/report_log_screen.dart';
 import 'features/moderation/admin_notify_screen.dart';
 import 'features/moderation/admin_reports_screen.dart';
@@ -52,27 +50,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
       GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
-      GoRoute(path: '/groups', builder: (context, state) => const GroupsScreen()),
+      // ---- 共修報數(PRD v0.6.0 §3:去群化后的单一共修体) ----
+      GoRoute(path: '/community', builder: (context, state) => const CommunityScreen()),
       GoRoute(
-        path: '/groups/:gid',
-        builder: (context, state) =>
-            GroupDetailScreen(groupId: state.pathParameters['gid']!),
-      ),
-      GoRoute(
-        path: '/groups/:gid/report',
-        builder: (context, state) =>
-            ReportLogScreen(groupId: state.pathParameters['gid']!),
-      ),
-      GoRoute(
-        path: '/groups/:gid/logs',
-        builder: (context, state) =>
-            GroupLogsScreen(groupId: state.pathParameters['gid']!),
-      ),
-      GoRoute(
-        path: '/groups/:gid/stats',
-        builder: (context, state) =>
-            GroupStatsScreen(groupId: state.pathParameters['gid']!),
-      ),
+          path: '/community/logs',
+          builder: (context, state) => const CommunityLogsScreen()),
+      GoRoute(path: '/report', builder: (context, state) => const ReportLogScreen()),
+
+      // 旧「群」路由的兼容重定向:线上旧版 App 的收藏、以及服务端仍在发的
+      // `announcement → /groups/<id>` 深链都会落到这里(设计 §5.9 双向兼容)。
+      // 新版普及后随 P9.8 一并撤除。
+      GoRoute(path: '/groups', redirect: (_, _) => '/community'),
+      GoRoute(path: '/groups/:gid', redirect: (_, _) => '/community'),
+      GoRoute(path: '/groups/:gid/report', redirect: (_, _) => '/report'),
+      GoRoute(path: '/groups/:gid/logs', redirect: (_, _) => '/community/logs'),
+      GoRoute(path: '/groups/:gid/stats', redirect: (_, _) => '/community'),
       GoRoute(path: '/dashboard', builder: (context, state) => const MyDashboardScreen()),
       GoRoute(path: '/privacy', builder: (context, state) => const PrivacyScreen()),
       GoRoute(

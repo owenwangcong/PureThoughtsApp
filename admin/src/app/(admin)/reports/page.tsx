@@ -55,7 +55,7 @@ const UNIT_LABEL: Record<string, string> = {
 
 const TARGET_LABEL: Record<string, string> = {
   user: "用戶",
-  group: "群組",
+  group: "群組(歷史)",
   log: "報數記錄",
 };
 
@@ -125,7 +125,7 @@ function targetText(r: ReportRow, ctx: TargetContext | undefined): string {
   }
   if (r.target_type === "group") {
     const g = ctx.groups[r.target_id];
-    if (!g) return "(群不存在)";
+    if (!g) return "(群不存在;v0.6.0 去群化後不再產生此類舉報)";
     return `${g.name}${g.deleted_at ? " · 已解散" : ""}`;
   }
   const l = ctx.logs[r.target_id];
@@ -225,7 +225,7 @@ function ReportTable({ status }: { status: "open" | "resolved" }) {
                     label="封禁"
                     destructive
                     title="封禁此用戶?"
-                    description="封禁後該用戶無法報數、建群、舉報(banned_at 生效);可隨時解封。"
+                    description="封禁後該用戶無法報數、提問、舉報(banned_at 生效);可隨時解封。"
                     onConfirm={async () => {
                       await setBanned(r.target_id, true);
                       if (r.status === "open") await setStatus(r, "resolved");
@@ -244,7 +244,7 @@ function ReportTable({ status }: { status: "open" | "resolved" }) {
                     label="刪除記錄"
                     destructive
                     title="刪除這條報數記錄?"
-                    description="軟刪除,群總量隨之扣減。"
+                    description="軟刪除,共修總量隨之扣減。"
                     onConfirm={() => deleteLog(r.target_id)}
                   />
                 )}

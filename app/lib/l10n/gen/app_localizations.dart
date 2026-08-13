@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'分鐘'**
   String get unitMinute;
 
+  /// No description provided for @unitHour.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'小時'**
+  String get unitHour;
+
   /// No description provided for @authSignIn.
   ///
   /// In zh_Hant, this message translates to:
@@ -239,7 +245,7 @@ abstract class AppLocalizations {
   /// No description provided for @authResetNeedAdmin.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'此帳號未綁定郵箱,請聯繫群主或管理員重置密碼'**
+  /// **'此帳號未綁定郵箱,請聯繫管理員重置密碼'**
   String get authResetNeedAdmin;
 
   /// No description provided for @authToSignUp.
@@ -338,48 +344,6 @@ abstract class AppLocalizations {
   /// **'其他地區'**
   String get regionOther;
 
-  /// No description provided for @groupsTitle.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'我的群組'**
-  String get groupsTitle;
-
-  /// No description provided for @createGroup.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'建立群組'**
-  String get createGroup;
-
-  /// No description provided for @joinGroup.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'申請入群'**
-  String get joinGroup;
-
-  /// No description provided for @groupName.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'群組名稱'**
-  String get groupName;
-
-  /// No description provided for @groupDescription.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'群組簡介'**
-  String get groupDescription;
-
-  /// No description provided for @joinCodeLabel.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'群 ID'**
-  String get joinCodeLabel;
-
-  /// No description provided for @applyMessageLabel.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'申請說明'**
-  String get applyMessageLabel;
-
   /// No description provided for @submit.
   ///
   /// In zh_Hant, this message translates to:
@@ -392,137 +356,11 @@ abstract class AppLocalizations {
   /// **'取消'**
   String get cancel;
 
-  /// No description provided for @statusPending.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'審核中'**
-  String get statusPending;
-
-  /// No description provided for @roleOwner.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'群主'**
-  String get roleOwner;
-
-  /// No description provided for @members.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'成員'**
-  String get members;
-
-  /// No description provided for @pendingApplications.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'入群審核'**
-  String get pendingApplications;
-
-  /// No description provided for @approve.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'通過'**
-  String get approve;
-
-  /// No description provided for @reject.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'拒絕'**
-  String get reject;
-
   /// No description provided for @copied.
   ///
   /// In zh_Hant, this message translates to:
   /// **'已複製'**
   String get copied;
-
-  /// No description provided for @joinRequested.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'已提交申請,等待群主審核'**
-  String get joinRequested;
-
-  /// No description provided for @groupCreated.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'群組已建立'**
-  String get groupCreated;
-
-  /// No description provided for @announcement.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'公告'**
-  String get announcement;
-
-  /// No description provided for @editAnnouncement.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'編輯公告'**
-  String get editAnnouncement;
-
-  /// No description provided for @leaveGroup.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'退出群組'**
-  String get leaveGroup;
-
-  /// No description provided for @removeMember.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'移除成員'**
-  String get removeMember;
-
-  /// No description provided for @transferOwner.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'轉讓群主'**
-  String get transferOwner;
-
-  /// No description provided for @dissolveGroup.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'解散群組'**
-  String get dissolveGroup;
-
-  /// No description provided for @resetJoinCode.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'重置群 ID'**
-  String get resetJoinCode;
-
-  /// No description provided for @confirmLeave.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'確定退出此群組?歷史報數將保留。'**
-  String get confirmLeave;
-
-  /// No description provided for @confirmRemove.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'確定移除該成員?其歷史報數將保留。'**
-  String get confirmRemove;
-
-  /// No description provided for @confirmTransfer.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'確定將群主轉讓給此成員?轉讓後您將成為普通成員。'**
-  String get confirmTransfer;
-
-  /// No description provided for @confirmDissolve.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'解散後群組對所有成員不可見,且無法恢復。確定解散?'**
-  String get confirmDissolve;
-
-  /// No description provided for @confirmResetCode.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'舊群 ID 將立即失效,確定重置?'**
-  String get confirmResetCode;
-
-  /// No description provided for @groupPracticeTypes.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'本群功課項'**
-  String get groupPracticeTypes;
 
   /// No description provided for @addPracticeType.
   ///
@@ -575,7 +413,7 @@ abstract class AppLocalizations {
   /// No description provided for @subjectMember.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'群成員'**
+  /// **'同修'**
   String get subjectMember;
 
   /// No description provided for @subjectName.
@@ -710,12 +548,6 @@ abstract class AppLocalizations {
   /// **'個人統計'**
   String get myStats;
 
-  /// No description provided for @groupStats.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'群統計'**
-  String get groupStats;
-
   /// No description provided for @todayTitle.
   ///
   /// In zh_Hant, this message translates to:
@@ -770,12 +602,6 @@ abstract class AppLocalizations {
   /// **'檢舉'**
   String get reportAction;
 
-  /// No description provided for @reportGroup.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'檢舉群組'**
-  String get reportGroup;
-
   /// No description provided for @reportReasonLabel.
   ///
   /// In zh_Hant, this message translates to:
@@ -827,14 +653,8 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountWarn.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?'**
+  /// **'帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於共修統計中。確定刪除?'**
   String get deleteAccountWarn;
-
-  /// No description provided for @deleteOwnerBlocked.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'您仍是群組群主,請先轉讓或解散群組,再刪除帳號。'**
-  String get deleteOwnerBlocked;
 
   /// No description provided for @adminReports.
   ///
@@ -872,12 +692,6 @@ abstract class AppLocalizations {
   /// **'常用'**
   String get frequentGroup;
 
-  /// No description provided for @chooseGroup.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'選擇群組'**
-  String get chooseGroup;
-
   /// No description provided for @notificationsTitle.
   ///
   /// In zh_Hant, this message translates to:
@@ -893,7 +707,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifAnnouncement.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'群公告更新'**
+  /// **'共修公告更新'**
   String get notifAnnouncement;
 
   /// No description provided for @vowsTitle.
@@ -919,18 +733,6 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'期限'**
   String get vowPeriod;
-
-  /// No description provided for @vowScope.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'範圍'**
-  String get vowScope;
-
-  /// No description provided for @scopeAllGroups.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'全部群組'**
-  String get scopeAllGroups;
 
   /// No description provided for @daysUnit.
   ///
@@ -1022,16 +824,10 @@ abstract class AppLocalizations {
   /// **'深色'**
   String get themeDark;
 
-  /// No description provided for @groupsEmptyHint.
-  ///
-  /// In zh_Hant, this message translates to:
-  /// **'輸入群 ID 申請加入,或建立新群組,與同修一起精進。'**
-  String get groupsEmptyHint;
-
   /// No description provided for @logsEmptyHint.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'本群還沒有報數,點右下角「報數」開始。'**
+  /// **'還沒有人報數,從首頁「報數」開始吧。'**
   String get logsEmptyHint;
 
   /// No description provided for @vowsEmptyHint.
@@ -1249,6 +1045,24 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'打坐計時'**
   String get timerTitle;
+
+  /// No description provided for @timerDuration.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'時長'**
+  String get timerDuration;
+
+  /// No description provided for @customDuration.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'自訂'**
+  String get customDuration;
+
+  /// No description provided for @customDurationTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'自訂時長'**
+  String get customDurationTitle;
 
   /// No description provided for @counterTitle.
   ///
@@ -2395,6 +2209,72 @@ abstract class AppLocalizations {
   /// In zh_Hant, this message translates to:
   /// **'提前 {n} 小時'**
   String reminderOffsetHours(int n);
+
+  /// No description provided for @communityTitle.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共修報數'**
+  String get communityTitle;
+
+  /// No description provided for @communityLogs.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共修報數紀錄'**
+  String get communityLogs;
+
+  /// No description provided for @communityAnnouncement.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'共修公告'**
+  String get communityAnnouncement;
+
+  /// No description provided for @communityEmptyToday.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'今日還沒有人報數 · 隨喜您先行'**
+  String get communityEmptyToday;
+
+  /// No description provided for @myCustomTypes.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'我的自訂功課'**
+  String get myCustomTypes;
+
+  /// No description provided for @statsMine.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'我的'**
+  String get statsMine;
+
+  /// No description provided for @statsAll.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'全體'**
+  String get statsAll;
+
+  /// No description provided for @statsScaledNote.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'各自比例'**
+  String get statsScaledNote;
+
+  /// No description provided for @searchMemberHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'輸入姓名搜尋同修'**
+  String get searchMemberHint;
+
+  /// No description provided for @searchMemberEmpty.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'找不到這位同修,可改用「任意名字」代報'**
+  String get searchMemberEmpty;
+
+  /// No description provided for @customTypePrivateHint.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'自訂功課僅自己可見,別的同修看不到你的清單。'**
+  String get customTypePrivateHint;
 }
 
 class _AppLocalizationsDelegate

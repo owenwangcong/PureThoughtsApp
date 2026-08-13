@@ -66,12 +66,13 @@ export default function DashboardPage() {
   const { data: counts } = useQuery({
     queryKey: ["dash-counts"],
     queryFn: async () => {
-      const [users, groups, backlog, pending, failed] = await Promise.all([
+      const [users, members, backlog, pending, failed] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
+        // v0.6.0 去群化:「活躍群組」恒为 1 已无信息量,改统计共修体的同修人数
         supabase
-          .from("groups")
+          .from("group_members")
           .select("*", { count: "exact", head: true })
-          .is("deleted_at", null),
+          .eq("status", "approved"),
         // 積壓 = 已到點未投遞**且未終局失敗**(v0.5.21:失敗有獨立狀態,不該再算積壓)
         supabase
           .from("notifications")
@@ -93,12 +94,12 @@ export default function DashboardPage() {
           .select("*", { count: "exact", head: true })
           .not("failed_at", "is", null),
       ]);
-      for (const r of [users, groups, backlog, pending, failed]) {
+      for (const r of [users, members, backlog, pending, failed]) {
         if (r.error) throw r.error;
       }
       return {
         users: users.count ?? 0,
-        groups: groups.count ?? 0,
+        members: members.count ?? 0,
         backlog: backlog.count ?? 0,
         pending: pending.count ?? 0,
         failed: failed.count ?? 0,
@@ -159,7 +160,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="註冊用戶" value={counts ? String(counts.users) : "…"} />
-        <StatCard label="活躍群組" value={counts ? String(counts.groups) : "…"} />
+        <StatCard label="同修人數" value={counts ? String(counts.members) : "…"} />
         <StatCard
           label="近 30 日報數"
           value={thirtyDayEntries === null ? "…" : `${thirtyDayEntries} 條`}

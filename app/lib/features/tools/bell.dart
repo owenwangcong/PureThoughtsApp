@@ -40,3 +40,25 @@ String formatMmSs(Duration d) {
   final s = (d.inSeconds % 60).toString().padLeft(2, '0');
   return '$m:$s';
 }
+
+/// 倒计时显示:≥1 小时用 h:mm:ss,否则 mm:ss(自订时长可长达 12 小时,PRD §9.1)
+String formatHms(Duration d) {
+  if (d.inHours < 1) return formatMmSs(d);
+  final h = d.inHours.toString();
+  final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+  final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+  return '$h:$m:$s';
+}
+
+/// 分钟数 → 可读时长标签:75 →「1 小時 15 分鐘」、60 →「1 小時」、45 →「45 分鐘」
+String formatMinutesLabel(
+  int minutes, {
+  required String hourUnit,
+  required String minuteUnit,
+}) {
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  if (h == 0) return '$m $minuteUnit';
+  if (m == 0) return '$h $hourUnit';
+  return '$h $hourUnit $m $minuteUnit';
+}

@@ -151,8 +151,10 @@ String? routeOfNotification(Map<String, dynamic> n) {
       final t = p['thread_id'];
       return t == null ? '/study-qa' : '/study-qa/$t?as=admin';
     case 'announcement':
-      final g = n['target_id'];
-      return g == null ? '/groups' : '/groups/$g';
+      // v0.6.0:服务端 push-dispatch 仍在发 `/groups/<id>`(设计 §5.9 双向兼容:
+      // 线上旧版 App 认不得 /community);客户端这一侧统一落到共修報數页,
+      // router 里那 5 条旧路由 redirect 兜住旧报文。P9.8 再把服务端切过来。
+      return '/community';
     case 'proxy_log':
       return '/dashboard';
     default:

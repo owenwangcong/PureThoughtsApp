@@ -7,7 +7,8 @@
 -- ⚠️ 免打扰依赖 now(),而测试运行的钟点不可控。这里不断言「现在是否处于免打扰」,
 --    而是用**互补窗口**构造:任意时刻必然落在 [a,b) 与其补集之一,断言「恰好命中一个」。
 --    这样既与运行时刻无关,又真正验证了跨午夜/同日两种窗口的分支逻辑。
--- seed:admin=…0001,owner=…0002,member(B)=…0003,user(A)=…0004,测试群=…00d0
+-- seed:admin=…0001,owner=…0002,member(B)=…0003,user(A)=…0004
+-- (v0.6.0 去群化后测试群已取消,scope=group 的 target 为唯一共修体 groups.is_default)
 -- ============================================================================
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -138,11 +139,16 @@ update public.profiles set banned_at = null
  where id = '00000000-0000-4000-8000-000000000004';
 
 -- T-DB-18 scope=group 只覆盖 approved 成员
+-- v0.6.0 去群化后 target 恒为共修体、注册即 approved,故这里把 A 置为 left 来构造边界
+select np_reset();
+update public.group_members set status = 'left'
+ where group_id = (select id from public.groups where is_default)
+   and user_id = '00000000-0000-4000-8000-000000000004';
 insert into public.notifications (id, scope, target_id, type, title, channels)
-values ('00000000-0000-4000-9100-000000000005', 'group',
-        '00000000-0000-4000-8000-0000000000d0', 'announcement', '群公告', '{inapp,push}');
+select '00000000-0000-4000-9100-000000000005', 'group', id, 'announcement', '共修公告', '{inapp,push}'
+from public.groups where is_default;
 select is((select count(*) from public.push_audience('00000000-0000-4000-9100-000000000005')),
-  1::bigint, 'T-DB-18 scope=group 只覆盖 approved 成员(B 在群内,A 不在)');
+  1::bigint, 'T-DB-18 scope=group 只覆盖 approved 成员(B 在会内,A 已 left)');
 
 select * from finish();
 rollback;

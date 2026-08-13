@@ -9,7 +9,7 @@ import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../dashboard/dashboard_providers.dart';
-import '../groups/groups_providers.dart';
+import '../logs/logs_providers.dart';
 import 'vows_providers.dart';
 
 String _fmtNum(Object? n) {
@@ -80,20 +80,14 @@ class _VowsScreenState extends ConsumerState<VowsScreen> {
   Future<void> _createVow() async {
     final l10n = AppLocalizations.of(context);
     final locale = ref.read(localeProvider);
-    final types = (ref.read(allPracticeTypesMapProvider).value ?? {})
-        .values
-        .where((t) => t['active'] == true)
+    // 「可选」清单:全局主清单 + 我自己的自定义项(设计 Q8)
+    final types = (ref.read(reportablePracticeTypesProvider).value ?? const [])
         .toList()
       ..sort((a, b) => (a['sort_order'] as int? ?? 0)
           .compareTo(b['sort_order'] as int? ?? 0));
-    final groups = (ref.read(myGroupsProvider).value ?? const [])
-        .where((m) => m['status'] == 'approved')
-        .map((m) => m['groups'] as Map<String, dynamic>)
-        .toList();
     if (types.isEmpty) return;
 
     String? typeId;
-    String? groupId; // null = 全部群
     var days = 49;
     final target = TextEditingController();
 
@@ -140,21 +134,6 @@ class _VowsScreenState extends ConsumerState<VowsScreen> {
                       ),
                   ],
                 ),
-                if (groups.length > 1) ...[
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String?>(
-                    value: groupId,
-                    decoration: InputDecoration(labelText: l10n.vowScope),
-                    items: [
-                      DropdownMenuItem(value: null, child: Text(l10n.scopeAllGroups)),
-                      for (final g in groups)
-                        DropdownMenuItem(
-                            value: g['id'] as String,
-                            child: Text(g['name'] as String)),
-                    ],
-                    onChanged: (v) => setState(() => groupId = v),
-                  ),
-                ],
               ],
             ),
           ),
@@ -178,7 +157,8 @@ class _VowsScreenState extends ConsumerState<VowsScreen> {
       await Supabase.instance.client.from('vows').insert({
         'user_id': Supabase.instance.client.auth.currentUser!.id,
         'practice_type_id': typeId,
-        'group_id': groupId,
+        // v0.6.0 去群化:范围选择器取消,发愿一律跨全部(group_id 恒 null)
+        'group_id': null,
         'target_qty': qty,
         'start_date': DateFormat('yyyy-MM-dd').format(today),
         'end_date':

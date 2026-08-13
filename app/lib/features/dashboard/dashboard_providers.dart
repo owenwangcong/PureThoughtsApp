@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../auth/auth_providers.dart';
+import '../community/community_providers.dart';
+import '../logs/logs_providers.dart';
 
 /// 我最近的自报记录(快捷报数来源 + 记忆上次数量;PRD §4.2 快捷报数)
 final myRecentSelfLogsProvider =
@@ -28,7 +30,7 @@ final myDailyStatsProvider =
       '${since.year}-${since.month.toString().padLeft(2, '0')}-${since.day.toString().padLeft(2, '0')}';
   return Supabase.instance.client
       .from('daily_user_stats')
-      .select('group_id, practice_type_id, unit, local_date, total')
+      .select('group_id, practice_type_id, unit, local_date, total, entries')
       .gte('local_date', sinceStr)
       .order('local_date', ascending: false);
 });
@@ -68,39 +70,44 @@ final allPracticeTypesMapProvider =
   return {for (final r in rows) r['id'] as String: r};
 });
 
-/// 群按日统计(近 14 天)
-final groupDailyStatsProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, groupId) async {
+/// 共修按日统计(近 14 天)
+final communityDailyStatsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final gid = ref.watch(communityIdProvider);
+  if (gid == null) return const [];
   final since = DateTime.now().subtract(const Duration(days: 14));
   final sinceStr =
       '${since.year}-${since.month.toString().padLeft(2, '0')}-${since.day.toString().padLeft(2, '0')}';
   return Supabase.instance.client
       .from('daily_group_stats')
       .select('practice_type_id, unit, local_date, total, entries')
-      .eq('group_id', groupId)
+      .eq('group_id', gid)
       .gte('local_date', sinceStr)
       .order('local_date', ascending: false);
 });
 
-/// 群历史累计(按功课项)
-final groupTotalsProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, groupId) async {
+/// 共修历史累计(按功课项)
+final communityTotalsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final gid = ref.watch(communityIdProvider);
+  if (gid == null) return const [];
   return Supabase.instance.client
       .from('group_practice_totals')
       .select('practice_type_id, unit, total, entries')
-      .eq('group_id', groupId);
+      .eq('group_id', gid);
 });
 
-/// 群今日已报人数(聚合指标,不排名;PRD §4.3 群主视角)
-final groupTodayReportersProvider =
-    FutureProvider.family<int, String>((ref, groupId) async {
+/// 今日已报人数(聚合指标,不排名;PRD §4.3)
+final communityTodayReportersProvider = FutureProvider<int>((ref) async {
+  final gid = ref.watch(communityIdProvider);
+  if (gid == null) return 0;
   final now = DateTime.now();
   final today =
       '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   final rows = await Supabase.instance.client
       .from('practice_logs')
       .select('reporter_id, subject_user_id, subject_name')
-      .eq('group_id', groupId)
+      .eq('group_id', gid)
       .eq('local_date', today);
   final users = <String>{};
   for (final r in rows) {
@@ -111,12 +118,14 @@ final groupTodayReportersProvider =
   return users.length;
 });
 
-/// Realtime 订阅(P5.2):本群报数变更 → 实时刷新统计与记录
+/// Realtime 订阅(P5.2):共修报数变更 → 实时刷新统计与记录
 /// (RLS 保证只收到有权限的行;页面存续期间保持订阅)
-final groupLogsRealtimeProvider = Provider.family<void, String>((ref, groupId) {
+final communityLogsRealtimeProvider = Provider<void>((ref) {
+  final gid = ref.watch(communityIdProvider);
+  if (gid == null) return; // 共修体未就绪:不建频道,取到 id 后本 provider 会重建
   final client = Supabase.instance.client;
   final channel = client
-      .channel('realtime-logs-$groupId')
+      .channel('realtime-logs-$gid')
       .onPostgresChanges(
         event: PostgresChangeEvent.all,
         schema: 'public',
@@ -124,12 +133,13 @@ final groupLogsRealtimeProvider = Provider.family<void, String>((ref, groupId) {
         filter: PostgresChangeFilter(
           type: PostgresChangeFilterType.eq,
           column: 'group_id',
-          value: groupId,
+          value: gid,
         ),
         callback: (_) {
-          ref.invalidate(groupDailyStatsProvider(groupId));
-          ref.invalidate(groupTotalsProvider(groupId));
-          ref.invalidate(groupTodayReportersProvider(groupId));
+          ref.invalidate(communityDailyStatsProvider);
+          ref.invalidate(communityTotalsProvider);
+          ref.invalidate(communityTodayReportersProvider);
+          ref.invalidate(communityLogsProvider);
         },
       )
       .subscribe();

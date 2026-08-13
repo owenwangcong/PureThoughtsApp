@@ -12,13 +12,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 事实来源(每次会话先读)
 
-- **需求**:`docs/PRD.md`(当前 v0.5.8)是唯一需求事实来源。改需求先改 PRD,再动代码。
+- **需求**:`docs/PRD.md`(当前 v0.6.1)是唯一需求事实来源。改需求先改 PRD,再动代码。
 - **执行计划与进度**:`docs/PLAN.md` 是唯一执行事实来源。**每次会话开工先读其 §1 进度总览**,从当前 Phase 按编号领取任务;完成即勾选并更新总览计数;Phase 需通过 DoD 才能进入下一个;阻塞标 ⛔ 并登记 PLAN §7。**新任务必须先写入 PLAN(需求性变更还要先进 PRD)再实现。**
 - `initial.md` 是最初的原始需求,仅作历史参考,与 PRD 冲突时以 PRD 为准。
 
 ## 已定案决策(勿重新讨论,详见 PRD §14)
 
-- **文化基调:随喜、不攀比** —— 全 App 不做任何成员间排名/对比;个人明细仅本人可见,群只展示总量。连续用功天数仅自己可见,中断不做"断签"提醒。
+- **去群化 / 单一共修体**(v0.6.0):全 App **没有"群"的概念** —— 只有一个共修体(`groups.is_default` 唯一行,App 内叫「共修報數」),**注册即自动入会**,无群 ID、无申请、无审核;群主角色取消并入 App 管理员。数据层保留 `group_id` 单例以保可逆(设计 `docs/design/single-community.md` Q1)。**不要再新增任何"选群 / 建群 / 入群"路径。**
+- **文化基调:随喜、不攀比** —— 全 App 不做任何成员间排名/对比;个人明细仅本人可见,对外只展示共修总量(「我的 / 全體」并排是自己与整体的对照,不是成员间对比)。连续用功天数仅自己可见,中断不做"断签"提醒。
 - **统计口径**:每条报数落库时按报数人时区计算 `local_date`,所有按日统计一律以 `local_date` 聚合(个人与群同一口径)。补报统一计入报数当天,不归属历史日期。
 - **报数记录**:软删除(`deleted_at`);本人可改删,被代报人可删,群主可删本群任意记录。
 - **代报**:对象 = 群成员 / 本群共享代报名单(`proxy_names`,自动记忆自由名字)/ 任意新名字;自由名字仅计入群总量。代报群成员会通知对方。
@@ -63,7 +64,7 @@ npx supabase test db   # 运行 pgTAP 测试(supabase/tests/*.sql,改 schema 后
 npx supabase migration new <name>   # 新建一个 migration 文件
 ```
 
-本地测试账号(seed 自动创建,密码均 `test1234`):`admin@test.local`(App 管理员)、`owner@test.local`(測試共修群群主)、`member@test.local`(已入群成员)、`user@test.local`(未入群)。测试群 join code 固定 `TESTGRP2`。
+本地测试账号(seed 自动创建,密码均 `test1234`):`admin@test.local`(App 管理员)、`owner@test.local`、`member@test.local`、`user@test.local`。**v0.6.0 去群化后没有测试群与 join code** —— 四个账号由注册触发器自动加入唯一共修体(`groups.is_default`),登录即可报数。
 
 ### Flutter(工程创建后适用)
 

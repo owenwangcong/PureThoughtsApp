@@ -8,7 +8,7 @@ import '../../core/settings.dart';
 import '../../core/units.dart';
 import '../../core/widgets/async_states.dart';
 import '../../l10n/gen/app_localizations.dart';
-import '../groups/groups_providers.dart';
+import '../community/community_providers.dart';
 import '../logs/logs_providers.dart';
 import '../logs/offline_queue.dart';
 import 'dashboard_providers.dart';
@@ -28,8 +28,8 @@ Future<void> showQuickReportSheet(BuildContext context) {
   );
 }
 
-/// 快捷报数弹层(PRD v0.5.5 §4.2):最近报过的(群 × 功课)组合**多选**(可跨群),
-/// 选中项在下方核对数量(默认上次值,± 步进),一次提交。
+/// 快捷报数弹层(PRD v0.5.5 §4.2;v0.6.0 去群化后 key 由「群 × 功课」简化为功课):
+/// 最近报过的功课**多选**,选中项在下方核对数量(默认上次值,± 步进),一次提交。
 class QuickReportSheet extends ConsumerStatefulWidget {
   const QuickReportSheet({super.key});
 
@@ -38,7 +38,7 @@ class QuickReportSheet extends ConsumerStatefulWidget {
 }
 
 class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
-  final _selectedOrder = <String>[]; // 'groupId|typeId',保持点选顺序
+  final _selectedOrder = <String>[]; // practice_type_id,保持点选顺序
   final _qty = <String, TextEditingController>{};
   var _busy = false;
 
@@ -82,6 +82,11 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
       }
       quantities[key] = q;
     }
+    final gid = ref.read(communityIdProvider);
+    if (gid == null) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.loadFailed)));
+      return;
+    }
     setState(() => _busy = true);
     try {
       final uid = Supabase.instance.client.auth.currentUser!.id;
@@ -89,7 +94,7 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
       final result = await submitPracticeLogs(ref, [
         for (final key in _selectedOrder)
           {
-            'group_id': itemByKey[key]!['group_id'],
+            'group_id': gid,
             'reporter_id': uid,
             'practice_type_id': itemByKey[key]!['practice_type_id'],
             'quantity': quantities[key],
@@ -104,10 +109,7 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
       ref.invalidate(myRecentSelfLogsProvider);
       ref.invalidate(myDailyStatsProvider);
       ref.invalidate(myTotalsProvider);
-      for (final key in _selectedOrder) {
-        ref.invalidate(
-            groupLogsProvider(itemByKey[key]!['group_id'] as String));
-      }
+      ref.invalidate(communityLogsProvider);
       messenger.showSnackBar(SnackBar(content: Text(l10n.logSubmitted)));
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -123,16 +125,12 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
     final locale = ref.watch(localeProvider);
     final recent = ref.watch(myRecentSelfLogsProvider).value ?? const [];
     final types = ref.watch(allPracticeTypesMapProvider).value ?? const {};
-    final groupNames = <String, String>{
-      for (final m in ref.watch(myGroupsProvider).value ?? const [])
-        (m['groups'] as Map)['id'] as String: (m['groups'] as Map)['name'] as String,
-    };
 
-    // 去重:每个(群 × 功课)取最近一条,最多 8 个
+    // 去重:每个功课取最近一条,最多 8 个
     final seen = <String>{};
     final itemByKey = <String, Map<String, dynamic>>{};
     for (final r in recent) {
-      final key = '${r['group_id']}|${r['practice_type_id']}';
+      final key = r['practice_type_id'] as String;
       if (seen.add(key)) itemByKey[key] = r;
       if (itemByKey.length >= 8) break;
     }
@@ -189,20 +187,10 @@ class _QuickReportSheetState extends ConsumerState<QuickReportSheet> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      nameOf(itemByKey[key]!['practice_type_id']
-                                          as String),
-                                      style:
-                                          Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                    Text(
-                                      groupNames[itemByKey[key]!['group_id']] ?? '',
-                                      style: Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ],
+                                child: Text(
+                                  nameOf(itemByKey[key]!['practice_type_id']
+                                      as String),
+                                  style: Theme.of(context).textTheme.titleMedium,
                                 ),
                               ),
                               IconButton(

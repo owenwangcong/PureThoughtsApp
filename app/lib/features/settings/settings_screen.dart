@@ -357,12 +357,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       } catch (_) {}
       router.go('/');
     } on FunctionException catch (e) {
-      final code = (e.details is Map) ? (e.details as Map)['error'] : null;
-      messenger.showSnackBar(SnackBar(
-        content: Text(code == 'owner_of_active_group'
-            ? l10n.deleteOwnerBlocked
-            : errText(l10n, e)),
-      ));
+      // v0.6.0 去群化:`owner_of_active_group` 这一档已不可达(建群关闭、共修体无群主),
+      // 专属文案随之下线;真出现异常数据时走通用错误文案即可。
+      messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(errText(l10n, e))));
     }

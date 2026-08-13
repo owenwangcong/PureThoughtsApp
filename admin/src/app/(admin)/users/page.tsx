@@ -62,7 +62,7 @@ async function callAdminOps(body: Record<string, unknown>) {
 const OPS_ERROR_TEXT: Record<string, string> = {
   cannot_demote_self: "不能撤銷自己的管理員身份",
   use_delete_account: "刪除自己請在 App 內操作",
-  owner_of_active_group: "該用戶仍是活躍群群主,須先轉讓或解散其群",
+  owner_of_active_group: "資料異常:該用戶仍掛著某個群的群主(v0.6.0 去群化後不應出現)",
   password_too_short: "密碼至少 8 位",
 };
 
@@ -252,7 +252,7 @@ export default function UsersPage() {
                         label="封禁"
                         destructive
                         title={`封禁「${u.display_name || "(未設名)"}」?`}
-                        description="封禁後無法報數、建群、舉報;可隨時解封。"
+                        description="封禁後無法報數、提問、舉報;可隨時解封。"
                         onConfirm={() => setBanned(u, true)}
                       />
                     )
@@ -278,7 +278,7 @@ export default function UsersPage() {
                       label="刪除帳號"
                       destructive
                       title={`刪除「${u.display_name || "(未設名)"}」的帳號?`}
-                      description="不可恢復。報數記錄匿名化保留(群總量不變);若其為活躍群群主會被拒,須先轉讓/解散。"
+                      description="不可恢復。報數記錄匿名化保留(共修總量不變)。"
                       confirmLabel="確認刪除"
                       onConfirm={() => deleteUser(u)}
                     />

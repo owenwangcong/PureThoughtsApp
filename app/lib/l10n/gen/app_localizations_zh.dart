@@ -36,6 +36,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get unitMinute => '分鐘';
 
   @override
+  String get unitHour => '小時';
+
+  @override
   String get authSignIn => '登入';
 
   @override
@@ -78,7 +81,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authRecoveryEmailHint => '僅用於忘記密碼時找回,可不填';
 
   @override
-  String get authResetNeedAdmin => '此帳號未綁定郵箱,請聯繫群主或管理員重置密碼';
+  String get authResetNeedAdmin => '此帳號未綁定郵箱,請聯繫管理員重置密碼';
 
   @override
   String get authToSignUp => '沒有帳號?註冊';
@@ -129,97 +132,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get regionOther => '其他地區';
 
   @override
-  String get groupsTitle => '我的群組';
-
-  @override
-  String get createGroup => '建立群組';
-
-  @override
-  String get joinGroup => '申請入群';
-
-  @override
-  String get groupName => '群組名稱';
-
-  @override
-  String get groupDescription => '群組簡介';
-
-  @override
-  String get joinCodeLabel => '群 ID';
-
-  @override
-  String get applyMessageLabel => '申請說明';
-
-  @override
   String get submit => '提交';
 
   @override
   String get cancel => '取消';
 
   @override
-  String get statusPending => '審核中';
-
-  @override
-  String get roleOwner => '群主';
-
-  @override
-  String get members => '成員';
-
-  @override
-  String get pendingApplications => '入群審核';
-
-  @override
-  String get approve => '通過';
-
-  @override
-  String get reject => '拒絕';
-
-  @override
   String get copied => '已複製';
-
-  @override
-  String get joinRequested => '已提交申請,等待群主審核';
-
-  @override
-  String get groupCreated => '群組已建立';
-
-  @override
-  String get announcement => '公告';
-
-  @override
-  String get editAnnouncement => '編輯公告';
-
-  @override
-  String get leaveGroup => '退出群組';
-
-  @override
-  String get removeMember => '移除成員';
-
-  @override
-  String get transferOwner => '轉讓群主';
-
-  @override
-  String get dissolveGroup => '解散群組';
-
-  @override
-  String get resetJoinCode => '重置群 ID';
-
-  @override
-  String get confirmLeave => '確定退出此群組?歷史報數將保留。';
-
-  @override
-  String get confirmRemove => '確定移除該成員?其歷史報數將保留。';
-
-  @override
-  String get confirmTransfer => '確定將群主轉讓給此成員?轉讓後您將成為普通成員。';
-
-  @override
-  String get confirmDissolve => '解散後群組對所有成員不可見,且無法恢復。確定解散?';
-
-  @override
-  String get confirmResetCode => '舊群 ID 將立即失效,確定重置?';
-
-  @override
-  String get groupPracticeTypes => '本群功課項';
 
   @override
   String get addPracticeType => '新增功課項';
@@ -246,7 +165,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subjectSelf => '自己';
 
   @override
-  String get subjectMember => '群成員';
+  String get subjectMember => '同修';
 
   @override
   String get subjectName => '其他名字';
@@ -315,9 +234,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myStats => '個人統計';
 
   @override
-  String get groupStats => '群統計';
-
-  @override
   String get todayTitle => '今日';
 
   @override
@@ -345,9 +261,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportAction => '檢舉';
 
   @override
-  String get reportGroup => '檢舉群組';
-
-  @override
   String get reportReasonLabel => '原因';
 
   @override
@@ -372,10 +285,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteAccount => '刪除帳號';
 
   @override
-  String get deleteAccountWarn => '帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?';
-
-  @override
-  String get deleteOwnerBlocked => '您仍是群組群主,請先轉讓或解散群組,再刪除帳號。';
+  String get deleteAccountWarn => '帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於共修統計中。確定刪除?';
 
   @override
   String get adminReports => '檢舉處理';
@@ -396,16 +306,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get frequentGroup => '常用';
 
   @override
-  String get chooseGroup => '選擇群組';
-
-  @override
   String get notificationsTitle => '通知';
 
   @override
   String get notifProxyLog => '有同修為您代報';
 
   @override
-  String get notifAnnouncement => '群公告更新';
+  String get notifAnnouncement => '共修公告更新';
 
   @override
   String get vowsTitle => '我的發願';
@@ -418,12 +325,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vowPeriod => '期限';
-
-  @override
-  String get vowScope => '範圍';
-
-  @override
-  String get scopeAllGroups => '全部群組';
 
   @override
   String get daysUnit => '天';
@@ -473,10 +374,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get themeDark => '深色';
 
   @override
-  String get groupsEmptyHint => '輸入群 ID 申請加入,或建立新群組,與同修一起精進。';
-
-  @override
-  String get logsEmptyHint => '本群還沒有報數,點右下角「報數」開始。';
+  String get logsEmptyHint => '還沒有人報數,從首頁「報數」開始吧。';
 
   @override
   String get vowsEmptyHint => '發一個願,讓精進有方向。';
@@ -585,6 +483,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get timerTitle => '打坐計時';
+
+  @override
+  String get timerDuration => '時長';
+
+  @override
+  String get customDuration => '自訂';
+
+  @override
+  String get customDurationTitle => '自訂時長';
 
   @override
   String get counterTitle => '念珠計數';
@@ -1179,6 +1086,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String reminderOffsetHours(int n) {
     return '提前 $n 小時';
   }
+
+  @override
+  String get communityTitle => '共修報數';
+
+  @override
+  String get communityLogs => '共修報數紀錄';
+
+  @override
+  String get communityAnnouncement => '共修公告';
+
+  @override
+  String get communityEmptyToday => '今日還沒有人報數 · 隨喜您先行';
+
+  @override
+  String get myCustomTypes => '我的自訂功課';
+
+  @override
+  String get statsMine => '我的';
+
+  @override
+  String get statsAll => '全體';
+
+  @override
+  String get statsScaledNote => '各自比例';
+
+  @override
+  String get searchMemberHint => '輸入姓名搜尋同修';
+
+  @override
+  String get searchMemberEmpty => '找不到這位同修,可改用「任意名字」代報';
+
+  @override
+  String get customTypePrivateHint => '自訂功課僅自己可見,別的同修看不到你的清單。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1211,6 +1151,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get unitMinute => '分钟';
+
+  @override
+  String get unitHour => '小时';
 
   @override
   String get authSignIn => '登录';
@@ -1255,7 +1198,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get authRecoveryEmailHint => '仅用于忘记密码时找回,可不填';
 
   @override
-  String get authResetNeedAdmin => '此账号未绑定邮箱,请联系群主或管理员重置密码';
+  String get authResetNeedAdmin => '此账号未绑定邮箱,请联系管理员重置密码';
 
   @override
   String get authToSignUp => '没有账号?注册';
@@ -1306,97 +1249,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get regionOther => '其他地区';
 
   @override
-  String get groupsTitle => '我的群组';
-
-  @override
-  String get createGroup => '创建群组';
-
-  @override
-  String get joinGroup => '申请入群';
-
-  @override
-  String get groupName => '群组名称';
-
-  @override
-  String get groupDescription => '群组简介';
-
-  @override
-  String get joinCodeLabel => '群 ID';
-
-  @override
-  String get applyMessageLabel => '申请说明';
-
-  @override
   String get submit => '提交';
 
   @override
   String get cancel => '取消';
 
   @override
-  String get statusPending => '审核中';
-
-  @override
-  String get roleOwner => '群主';
-
-  @override
-  String get members => '成员';
-
-  @override
-  String get pendingApplications => '入群审核';
-
-  @override
-  String get approve => '通过';
-
-  @override
-  String get reject => '拒绝';
-
-  @override
   String get copied => '已复制';
-
-  @override
-  String get joinRequested => '已提交申请,等待群主审核';
-
-  @override
-  String get groupCreated => '群组已创建';
-
-  @override
-  String get announcement => '公告';
-
-  @override
-  String get editAnnouncement => '编辑公告';
-
-  @override
-  String get leaveGroup => '退出群组';
-
-  @override
-  String get removeMember => '移除成员';
-
-  @override
-  String get transferOwner => '转让群主';
-
-  @override
-  String get dissolveGroup => '解散群组';
-
-  @override
-  String get resetJoinCode => '重置群 ID';
-
-  @override
-  String get confirmLeave => '确定退出此群组?历史报数将保留。';
-
-  @override
-  String get confirmRemove => '确定移除该成员?其历史报数将保留。';
-
-  @override
-  String get confirmTransfer => '确定将群主转让给此成员?转让后您将成为普通成员。';
-
-  @override
-  String get confirmDissolve => '解散后群组对所有成员不可见,且无法恢复。确定解散?';
-
-  @override
-  String get confirmResetCode => '旧群 ID 将立即失效,确定重置?';
-
-  @override
-  String get groupPracticeTypes => '本群功课项';
 
   @override
   String get addPracticeType => '新增功课项';
@@ -1423,7 +1282,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get subjectSelf => '自己';
 
   @override
-  String get subjectMember => '群成员';
+  String get subjectMember => '同修';
 
   @override
   String get subjectName => '其他名字';
@@ -1492,9 +1351,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get myStats => '个人统计';
 
   @override
-  String get groupStats => '群统计';
-
-  @override
   String get todayTitle => '今日';
 
   @override
@@ -1522,9 +1378,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get reportAction => '举报';
 
   @override
-  String get reportGroup => '举报群组';
-
-  @override
   String get reportReasonLabel => '原因';
 
   @override
@@ -1549,10 +1402,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get deleteAccount => '删除账号';
 
   @override
-  String get deleteAccountWarn => '账号与个人资料将被永久删除,无法恢复;您的历史报数将匿名保留于群统计中。确定删除?';
-
-  @override
-  String get deleteOwnerBlocked => '您仍是群组群主,请先转让或解散群组,再删除账号。';
+  String get deleteAccountWarn => '账号与个人资料将被永久删除,无法恢复;您的历史报数将匿名保留于共修统计中。确定删除?';
 
   @override
   String get adminReports => '举报处理';
@@ -1573,16 +1423,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get frequentGroup => '常用';
 
   @override
-  String get chooseGroup => '选择群组';
-
-  @override
   String get notificationsTitle => '通知';
 
   @override
   String get notifProxyLog => '有同修为您代报';
 
   @override
-  String get notifAnnouncement => '群公告更新';
+  String get notifAnnouncement => '共修公告更新';
 
   @override
   String get vowsTitle => '我的发愿';
@@ -1595,12 +1442,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get vowPeriod => '期限';
-
-  @override
-  String get vowScope => '范围';
-
-  @override
-  String get scopeAllGroups => '全部群组';
 
   @override
   String get daysUnit => '天';
@@ -1650,10 +1491,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get themeDark => '深色';
 
   @override
-  String get groupsEmptyHint => '输入群 ID 申请加入,或创建新群组,与同修一起精进。';
-
-  @override
-  String get logsEmptyHint => '本群还没有报数,点右下角「报数」开始。';
+  String get logsEmptyHint => '还没有人报数,从首页「报数」开始吧。';
 
   @override
   String get vowsEmptyHint => '发一个愿,让精进有方向。';
@@ -1762,6 +1600,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get timerTitle => '打坐计时';
+
+  @override
+  String get timerDuration => '时长';
+
+  @override
+  String get customDuration => '自定';
+
+  @override
+  String get customDurationTitle => '自定义时长';
 
   @override
   String get counterTitle => '念珠计数';
@@ -2356,6 +2203,39 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String reminderOffsetHours(int n) {
     return '提前 $n 小时';
   }
+
+  @override
+  String get communityTitle => '共修报数';
+
+  @override
+  String get communityLogs => '共修报数记录';
+
+  @override
+  String get communityAnnouncement => '共修公告';
+
+  @override
+  String get communityEmptyToday => '今日还没有人报数 · 随喜您先行';
+
+  @override
+  String get myCustomTypes => '我的自定功课';
+
+  @override
+  String get statsMine => '我的';
+
+  @override
+  String get statsAll => '全体';
+
+  @override
+  String get statsScaledNote => '各自比例';
+
+  @override
+  String get searchMemberHint => '输入姓名搜索同修';
+
+  @override
+  String get searchMemberEmpty => '找不到这位同修,可改用「任意名字」代报';
+
+  @override
+  String get customTypePrivateHint => '自定功课仅自己可见,别的同修看不到你的清单。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2388,6 +2268,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get unitMinute => '分鐘';
+
+  @override
+  String get unitHour => '小時';
 
   @override
   String get authSignIn => '登入';
@@ -2432,7 +2315,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get authRecoveryEmailHint => '僅用於忘記密碼時找回,可不填';
 
   @override
-  String get authResetNeedAdmin => '此帳號未綁定郵箱,請聯繫群主或管理員重置密碼';
+  String get authResetNeedAdmin => '此帳號未綁定郵箱,請聯繫管理員重置密碼';
 
   @override
   String get authToSignUp => '沒有帳號?註冊';
@@ -2483,97 +2366,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get regionOther => '其他地區';
 
   @override
-  String get groupsTitle => '我的群組';
-
-  @override
-  String get createGroup => '建立群組';
-
-  @override
-  String get joinGroup => '申請入群';
-
-  @override
-  String get groupName => '群組名稱';
-
-  @override
-  String get groupDescription => '群組簡介';
-
-  @override
-  String get joinCodeLabel => '群 ID';
-
-  @override
-  String get applyMessageLabel => '申請說明';
-
-  @override
   String get submit => '提交';
 
   @override
   String get cancel => '取消';
 
   @override
-  String get statusPending => '審核中';
-
-  @override
-  String get roleOwner => '群主';
-
-  @override
-  String get members => '成員';
-
-  @override
-  String get pendingApplications => '入群審核';
-
-  @override
-  String get approve => '通過';
-
-  @override
-  String get reject => '拒絕';
-
-  @override
   String get copied => '已複製';
-
-  @override
-  String get joinRequested => '已提交申請,等待群主審核';
-
-  @override
-  String get groupCreated => '群組已建立';
-
-  @override
-  String get announcement => '公告';
-
-  @override
-  String get editAnnouncement => '編輯公告';
-
-  @override
-  String get leaveGroup => '退出群組';
-
-  @override
-  String get removeMember => '移除成員';
-
-  @override
-  String get transferOwner => '轉讓群主';
-
-  @override
-  String get dissolveGroup => '解散群組';
-
-  @override
-  String get resetJoinCode => '重置群 ID';
-
-  @override
-  String get confirmLeave => '確定退出此群組?歷史報數將保留。';
-
-  @override
-  String get confirmRemove => '確定移除該成員?其歷史報數將保留。';
-
-  @override
-  String get confirmTransfer => '確定將群主轉讓給此成員?轉讓後您將成為普通成員。';
-
-  @override
-  String get confirmDissolve => '解散後群組對所有成員不可見,且無法恢復。確定解散?';
-
-  @override
-  String get confirmResetCode => '舊群 ID 將立即失效,確定重置?';
-
-  @override
-  String get groupPracticeTypes => '本群功課項';
 
   @override
   String get addPracticeType => '新增功課項';
@@ -2600,7 +2399,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get subjectSelf => '自己';
 
   @override
-  String get subjectMember => '群成員';
+  String get subjectMember => '同修';
 
   @override
   String get subjectName => '其他名字';
@@ -2669,9 +2468,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get myStats => '個人統計';
 
   @override
-  String get groupStats => '群統計';
-
-  @override
   String get todayTitle => '今日';
 
   @override
@@ -2699,9 +2495,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get reportAction => '檢舉';
 
   @override
-  String get reportGroup => '檢舉群組';
-
-  @override
   String get reportReasonLabel => '原因';
 
   @override
@@ -2726,10 +2519,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get deleteAccount => '刪除帳號';
 
   @override
-  String get deleteAccountWarn => '帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於群統計中。確定刪除?';
-
-  @override
-  String get deleteOwnerBlocked => '您仍是群組群主,請先轉讓或解散群組,再刪除帳號。';
+  String get deleteAccountWarn => '帳號與個人資料將被永久刪除,無法恢復;您的歷史報數將匿名保留於共修統計中。確定刪除?';
 
   @override
   String get adminReports => '檢舉處理';
@@ -2750,16 +2540,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get frequentGroup => '常用';
 
   @override
-  String get chooseGroup => '選擇群組';
-
-  @override
   String get notificationsTitle => '通知';
 
   @override
   String get notifProxyLog => '有同修為您代報';
 
   @override
-  String get notifAnnouncement => '群公告更新';
+  String get notifAnnouncement => '共修公告更新';
 
   @override
   String get vowsTitle => '我的發願';
@@ -2772,12 +2559,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vowPeriod => '期限';
-
-  @override
-  String get vowScope => '範圍';
-
-  @override
-  String get scopeAllGroups => '全部群組';
 
   @override
   String get daysUnit => '天';
@@ -2827,10 +2608,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get themeDark => '深色';
 
   @override
-  String get groupsEmptyHint => '輸入群 ID 申請加入,或建立新群組,與同修一起精進。';
-
-  @override
-  String get logsEmptyHint => '本群還沒有報數,點右下角「報數」開始。';
+  String get logsEmptyHint => '還沒有人報數,從首頁「報數」開始吧。';
 
   @override
   String get vowsEmptyHint => '發一個願,讓精進有方向。';
@@ -2939,6 +2717,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get timerTitle => '打坐計時';
+
+  @override
+  String get timerDuration => '時長';
+
+  @override
+  String get customDuration => '自訂';
+
+  @override
+  String get customDurationTitle => '自訂時長';
 
   @override
   String get counterTitle => '念珠計數';
@@ -3533,4 +3320,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String reminderOffsetHours(int n) {
     return '提前 $n 小時';
   }
+
+  @override
+  String get communityTitle => '共修報數';
+
+  @override
+  String get communityLogs => '共修報數紀錄';
+
+  @override
+  String get communityAnnouncement => '共修公告';
+
+  @override
+  String get communityEmptyToday => '今日還沒有人報數 · 隨喜您先行';
+
+  @override
+  String get myCustomTypes => '我的自訂功課';
+
+  @override
+  String get statsMine => '我的';
+
+  @override
+  String get statsAll => '全體';
+
+  @override
+  String get statsScaledNote => '各自比例';
+
+  @override
+  String get searchMemberHint => '輸入姓名搜尋同修';
+
+  @override
+  String get searchMemberEmpty => '找不到這位同修,可改用「任意名字」代報';
+
+  @override
+  String get customTypePrivateHint => '自訂功課僅自己可見,別的同修看不到你的清單。';
 }

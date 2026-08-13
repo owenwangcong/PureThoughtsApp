@@ -62,23 +62,40 @@ void main() {
     await b.from('user_blocks').delete().eq('user_id', bId).eq('blocked_user_id', aId);
     expect(await b.from('user_blocks').select(), isEmpty);
 
-    // ---- 删号被拒:A 建群成为群主 ----
+    // ---- 删号:报数匿名化保留,共修总量不变(PRD §10.1)----
+    // v0.6.0 去群化后没有「群主须先转让/解散」这一档(建群已关闭,无人是群主),
+    // 删号一步到位;此处改为验证本 test 名字承诺的匿名化口径。
     final gid = (await a
         .from('groups')
-        .insert({'name': '刪號測試群 $ts', 'owner_id': aId})
         .select('id')
+        .eq('is_default', true)
         .single())['id'] as String;
-    try {
-      await a.functions.invoke('delete-account');
-      fail('群主删号应被拒绝');
-    } on FunctionException catch (e) {
-      expect(e.status, 409);
-    }
+    final typeId = (await a
+        .from('practice_types')
+        .select('id')
+        .isFilter('group_id', null)
+        .eq('active', true)
+        .limit(1)
+        .single())['id'] as String;
+    final today = DateTime.now();
+    final logId = (await a.from('practice_logs').insert({
+      'group_id': gid,
+      'reporter_id': aId,
+      'practice_type_id': typeId,
+      'quantity': 7,
+      'local_date':
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}',
+    }).select('id').single())['id'] as String;
 
-    // ---- 解散后删号成功;登录失效 ----
-    await a.rpc('dissolve_group', params: {'p_group_id': gid});
     final res = await a.functions.invoke('delete-account');
     expect((res.data as Map)['ok'], true);
+
+    // B(仍在会)看得到那条记录:数量保留,报数人已置空
+    final kept =
+        await b.from('practice_logs').select('reporter_id, quantity').eq('id', logId);
+    expect(kept.length, 1, reason: '删号后报数记录保留(功德不消失)');
+    expect(kept.single['reporter_id'], isNull, reason: '报数人匿名化');
+    expect(double.parse('${kept.single['quantity']}'), 7);
 
     await expectLater(
       newClient().auth.signInWithPassword(
