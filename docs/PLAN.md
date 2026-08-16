@@ -205,6 +205,9 @@ crontab 为空)——本次发布前手工打了快照 `~/pre-notification-overh
 - [x] **P5.7** 报数记录分组显示 + 活动默认不重复(S,2026-07-13 用户需求,PRD v0.5.10)— (1) 报数记录按「同一次提交」分组:群报数记录页 + 个人统计历史明细,同批(同报数人+同对象+同 `created_at`)多条功课合为一张卡片一起显示,改/删/举报仍按单条 log 生效;新增 `groupByBatch` 纯函数(4 项单测)。(2) 新建活动「每週重複」开关默认关闭(原默认开启),单次活动为主。验收 ✅ 2026-07-13:analyze 0 issue + Flutter 44/44。
 - [ ] **P5.3** 性能与包体(M)— 冷启动、长列表、包体积;大字号下的布局回归。
 - [ ] **P5.4** 正式上架(M)— App Store(海外区,**不上中国区**,PRD §14.4)+ Google Play 材料与审核;App Privacy 如实填报;**官网 APK 下载页**(大陆 Android 分发,依赖 E2 官网域名)。*P2 完成即可启动首次提审,不必等 P5。*
+  - [x] **P5.4-1** 上架资料包 ✅ 2026-08-13 — `release/` 目录:两端逐字段填写清单(Apple 5 篇 / Play 5 篇)+ 繁简英文案库 + 可发布的隐私政策(md + 单页 html)与服务条款 + **34 张商店素材**(iPhone 6.9″ 1290×2796 与 Android 1080×2400 各 8 张 × 繁简,另 Play feature graphic 1024×500 与 512 图标)。截图由 `app/tool/screenshots/store_screenshots_test.dart` 渲染**真实界面**生成(演示数据、系统 CJK 字体 + MaterialIcons 手动加载),改版后重跑 `flutter test tool/screenshots/... --update-goldens` 即可重出;该文件在 `tool/` 下,不进日常 `flutter test`。
+  - [ ] **P5.4-2** 三个提交前阻塞项:①隐私政策发到官网拿到公开 URL(两端强制);②生产环境建 `appreview` 演示账号并铺演示数据;③决定 iPad 支持(现 `TARGETED_DEVICE_FAMILY="1,2"`,留则需补 13″ iPad 2064×2752 截图 + iPad 走查,**建议改 `"1"` 仅 iPhone**)。
+  - [ ] **P5.4-3** Play 封闭测试(个人开发者账号硬性要求):≥12 名测试员连续 14 天在册且有真实使用,达标后才能申请正式发布 —— **需提前两周组织同修**。
 
 **P5 DoD**:双商店过审上线;官网 APK 可下载安装。
 
