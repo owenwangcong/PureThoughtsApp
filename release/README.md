@@ -30,8 +30,10 @@ release/
     ├── apple/                            ASC 按显示尺寸分槽,传错档会报 dimensions wrong
     │   ├── 6.9-1290x2796/zh-Hant|zh-Hans/*.png   iPhone 6.9" 槽,各 8 张
     │   └── 6.5-1284x2778/zh-Hant|zh-Hans/*.png   iPhone 6.5" 槽,各 8 张(任填一档即可)
-    └── google-play/
-        ├── zh-Hant|zh-Hans/*.png         1080×2400,各 8 张
+    └── google-play/                      Play 硬规则:16:9 或 9:16 且长边 ≤ 短边×2
+        ├── phone-1440x2560/zh-Hant|zh-Hans/*.png       手机,各 8 张
+        ├── tablet-7-1080x1920/zh-Hant|zh-Hans/*.png    7" 平板,各 4 张(Console 标 * 必填)
+        ├── tablet-10-1800x3200/zh-Hant|zh-Hans/*.png   10" 平板,各 4 张(同上)
         ├── feature-graphic.png           1024×500(Play 必需)
         └── app-icon-512.png              512×512(Play 必需)
 ```

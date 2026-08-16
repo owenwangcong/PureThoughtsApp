@@ -17,14 +17,20 @@
 
 ## 2. 图形素材(全部已生成)
 
+⚠️ **Play 的尺寸硬规则**(踩过):必须 16:9 或 9:16,而且**长边不能超过短边的 2 倍**。
+所以 1080×2400(2.22 倍)这种现代手机比例**会被拒**,本套素材统一用 9:16(1.78 倍)。
+
 | 素材 | 规格 | 文件 | 必需 |
 |---|---|---|---|
-| App icon | 512×512 PNG,32-bit,无透明 | `release/screenshots/google-play/app-icon-512.png` | ✅ |
-| Feature graphic | 1024×500 PNG/JPG,无透明 | `release/screenshots/google-play/feature-graphic.png` | ✅ |
-| Phone screenshots | 1080×2400 PNG,2–8 张 | `release/screenshots/google-play/zh-Hant/` 与 `zh-Hans/` 各 8 张 | ✅ |
-| 7" 平板截图 | 可选 | 无 | ❌ 不提供则商店页标注「未针对平板优化」 |
-| 10" 平板截图 | 可选 | 无 | ❌ 同上 |
+| App icon | 512×512 PNG,32-bit | `screenshots/google-play/app-icon-512.png` | ✅ |
+| Feature graphic | 1024×500 PNG,无 alpha | `screenshots/google-play/feature-graphic.png` | ✅ |
+| 手机截图 | **1440×2560**(9:16),2–8 张 | `screenshots/google-play/phone-1440x2560/{zh-Hant,zh-Hans}/` 各 8 张 | ✅ |
+| 7" 平板截图 | **1080×1920**(9:16),每边 1080–7680px | `screenshots/google-play/tablet-7-1080x1920/{zh-Hant,zh-Hans}/` 各 4 张 | ✅ Play Console 标 `*` 必填 |
+| 10" 平板截图 | **1800×3200**(9:16) | `screenshots/google-play/tablet-10-1800x3200/{zh-Hant,zh-Hans}/` 各 4 张 | ✅ 同上 |
 | Video | 可选 YouTube 链接 | 无 | ❌ |
+
+> 平板两档各 4 张(首页 / 共修報數 / 個人統計 / 打坐計時)—— Play 要求「至少 4 张」
+> 才有推荐资格,再多的边际收益不大,也避免仓库堆图。
 
 截图建议顺序(前 2 张最重要,列表页只露前 2 张):
 

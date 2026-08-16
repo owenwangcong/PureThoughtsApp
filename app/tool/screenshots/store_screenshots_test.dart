@@ -32,9 +32,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///   cd app
 ///   flutter test tool/screenshots/store_screenshots_test.dart --update-goldens
 ///
-/// 产物:release/screenshots/{apple|google-play}/{zh-Hant|zh-Hans}/NN-页面.png
-///   apple      = 1290×2796(iPhone 6.9",App Store Connect 唯一必需的 iPhone 尺寸)
-///   google-play= 1080×2400(Play 手机截图,9:16,满足 16:9~9:16 与 ≥320px 要求)
+/// 产物:release/screenshots/<平台>/<尺寸档>/{zh-Hant|zh-Hans}/NN-页面.png
+///   apple/6.9-1290x2796         iPhone 6.9" 槽(8 张)
+///   apple/6.5-1284x2778         iPhone 6.5" 槽(8 张,ASC 常默认展示这档)
+///   google-play/phone-1440x2560 Play 手机(8 张)
+///   google-play/tablet-7-1080x1920 与 tablet-10-1800x3200(各 4 张,Play 平板槽必填)
+///
+/// ⚠️ Play 的尺寸校验:必须 16:9 或 9:16,且**长边 ≤ 短边 × 2**
+///    (1080×2400 = 2.22 倍会被拒),手机 320–3840px、平板 1080–7680px。
+///    Apple 不受这条约束,用 Apple 自己的机型尺寸。
 ///
 /// 说明:渲染的是**真实 App 界面**(同一套 Widget 与主题),数据为演示数据,
 /// 不含任何真实用户信息。中文字体从系统 SimHei 加载(测试环境不自带 CJK 字体)。
@@ -115,7 +121,7 @@ void main() {
         proxyNamesProvider.overrideWith((ref) async => const ['李師姐', '陳居士']),
         myRecentSelfLogsProvider.overrideWith((ref) async => _todayLogs()),
         allPracticeTypesMapProvider.overrideWith((ref) async => _typesMap()),
-      ], after: (tester) async {
+      ], tablets: false, after: (tester) async {
         // 选中一项功课 → 露出数量步进器,截图不至于大片留白
         await tester.tap(find.byType(FilterChip).first);
       });
@@ -127,7 +133,7 @@ void main() {
         eventsProvider.overrideWith((ref) async => _events(l)),
         eventOverridesProvider.overrideWith((ref) async => const []),
         eventTypesProvider.overrideWith((ref) async => _eventTypes(l)),
-      ]);
+      ], tablets: false);
 
   // ---- 06 打坐計時(自訂任意时长,P2.18) ----
   _page('06-timer', () => const TimerScreen(), (l) => const [],
@@ -138,7 +144,7 @@ void main() {
         currentUserProvider.overrideWith((ref) => null),
         myProfileProvider.overrideWith((ref) async => {'is_app_admin': false}),
         qaThreadsProvider.overrideWith((ref) async => _threads(l)),
-      ]);
+      ], tablets: false);
 
   // ---- Play 必需的商店图形:1024×500 宣传图 + 512×512 图标 ----
   _brandAssets();
@@ -150,7 +156,7 @@ void main() {
         vowProgressProvider('v1').overrideWith((ref) async => 68),
         vowProgressProvider('v2').overrideWith((ref) async => 21),
         allPracticeTypesMapProvider.overrideWith((ref) async => _typesMap()),
-      ]);
+      ], tablets: false);
 }
 
 // ============================ 基础设施 ============================
@@ -172,9 +178,15 @@ const _devices = [
   // 两档都出:6.9" 是当前主槽,6.5" 是 ASC 默认展示的那一档(1284×2778)。
   _Device('apple/6.9-1290x2796', 1290, 2796, 3.0), // iPhone 6.9"(430×932 @3)
   _Device('apple/6.5-1284x2778', 1284, 2778, 3.0), // iPhone 6.5"(428×926 @3)
-  // iPad 13" 槽:App 的 TARGETED_DEVICE_FAMILY 含 iPad,ASC 就强制要这一组
-  _Device('apple/ipad-13-2048x2732', 2048, 2732, 2.0), // 1024×1366 @2
-  _Device('google-play', 1080, 2400, 3.0), // Android 手机
+  // iPad 档已移除:App 改为仅 iPhone(TARGETED_DEVICE_FAMILY = "1")。
+  // 若日后恢复 iPad 支持,加回:_Device('apple/ipad-13-2048x2732', 2048, 2732, 2.0)
+
+  // Play 的三档都必须是 16:9 / 9:16,且**长边不得超过短边的 2 倍**
+  //(1080×2400 = 2.22 倍会被拒),尺寸范围:手机 320–3840px、平板 1080–7680px。
+  _Device('google-play/phone-1440x2560', 1440, 2560, 3.0), // 480×853 @3
+  _Device('google-play/tablet-7-1080x1920', 1080, 1920, 2.0), // 540×960 @2
+  // 10" 档用 @3:逻辑尺寸 600×1067,内容占比合适;@2(900×1600)下半屏会大片留白
+  _Device('google-play/tablet-10-1800x3200', 1800, 3200, 3.0), // 600×1067 @3
 ];
 
 class _Loc {
@@ -195,8 +207,10 @@ void _page(
   List<dynamic> Function(_Loc) overrides, {
   Map<String, Object> prefs = const {},
   Future<void> Function(WidgetTester)? after,
+  bool tablets = true, // Play 平板槽只需 4 张,次要页面不出平板档以免仓库堆图
 }) {
   for (final device in _devices) {
+    if (!tablets && device.dir.contains('tablet')) continue;
     for (final loc in _locales) {
       testWidgets('${device.dir}/${loc.dir}/$name', (tester) async {
         tester.view.physicalSize = Size(device.width, device.height);
@@ -208,6 +222,18 @@ void _page(
           ...prefs,
         });
         final sp = await SharedPreferences.getInstance();
+
+        // 视口尺寸在各档之间变化时,旧帧像素会残留在新画布未覆盖的区域
+        // (表现为页面底部凭空多出一条 AppBar)。setSurfaceSize 让测试 binding
+        // 按逻辑尺寸重建 surface,再铺一帧不透明底色清干净。
+        await tester.binding.setSurfaceSize(
+            Size(device.width / device.dpr, device.height / device.dpr));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        // 两帧:第一帧让新 surface 尺寸生效,第二帧才真正把底色铺满整块新画布
+        await tester.pumpWidget(const ColoredBox(color: Color(0xFFF6F1E4)));
+        await tester.pump();
+        await tester.pumpWidget(const ColoredBox(color: Color(0xFFF6F1E4)));
+        await tester.pump();
 
         final base = AppTheme.light;
         await tester.pumpWidget(ProviderScope(
