@@ -267,11 +267,13 @@ void _brandAssets() {
         home: Material(
           color: paper,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 72),
+            padding: const EdgeInsets.symmetric(horizontal: 64),
             child: Row(
+              // 整体居中:Play 在不同位置会按不同比例裁切两侧,重要内容留在中间更安全
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.memory(logo, width: 240, height: 240, fit: BoxFit.contain),
-                const SizedBox(width: 56),
+                Image.memory(logo, width: 250, height: 250, fit: BoxFit.contain),
+                const SizedBox(width: 48),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
