@@ -27,7 +27,9 @@ release/
 │   ├── 服务条款-EULA.md
 │   └── 文案库.md                      名称/简介/描述 繁·简·英三套,统一改这里
 └── screenshots/
-    ├── apple/zh-Hant|zh-Hans/*.png       1290×2796,各 8 张
+    ├── apple/                            ASC 按显示尺寸分槽,传错档会报 dimensions wrong
+    │   ├── 6.9-1290x2796/zh-Hant|zh-Hans/*.png   iPhone 6.9" 槽,各 8 张
+    │   └── 6.5-1284x2778/zh-Hant|zh-Hans/*.png   iPhone 6.5" 槽,各 8 张(任填一档即可)
     └── google-play/
         ├── zh-Hant|zh-Hans/*.png         1080×2400,各 8 张
         ├── feature-graphic.png           1024×500(Play 必需)

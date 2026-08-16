@@ -168,7 +168,10 @@ class _Device {
 }
 
 const _devices = [
-  _Device('apple', 1290, 2796, 3.0), // iPhone 6.9"
+  // App Store Connect 的 iPhone 槽位按显示尺寸分组,尺寸不符会被直接判错。
+  // 两档都出:6.9" 是当前主槽,6.5" 是 ASC 默认展示的那一档(1284×2778)。
+  _Device('apple/6.9-1290x2796', 1290, 2796, 3.0), // iPhone 6.9"(430×932 @3)
+  _Device('apple/6.5-1284x2778', 1284, 2778, 3.0), // iPhone 6.5"(428×926 @3)
   _Device('google-play', 1080, 2400, 3.0), // Android 手机
 ];
 
