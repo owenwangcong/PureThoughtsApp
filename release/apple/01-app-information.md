@@ -130,6 +130,6 @@ App 内另有《服务条款》与《社区规范》(见 `../shared/服务条款
 |---|---|
 | 开发者账号主体名称 | 显示在商店页的 Seller,个人账号=本人姓名,公司账号=公司名 |
 | Copyright | 建议 `2026 【運營方名稱】` |
-| Support URL | 必填,建议 `https://www.pure-thoughts.com/support`(可以是一个带联系邮箱的静态页) |
-| Marketing URL | 选填,建议 `https://www.pure-thoughts.com` |
+| Support URL | 必填,**每个本地化(繁/简)都要填** → 用官网现成的「聯系我們」页:`https://www.pure-thoughts.com/%e8%81%af%e7%b3%bb%e6%88%91%e5%80%91/` |
+| Marketing URL | 选填,`https://www.pure-thoughts.com` |
 | Privacy Policy URL | 必填,见 `../shared/隐私政策.md` —— **上线后回填** |

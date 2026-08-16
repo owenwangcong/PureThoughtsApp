@@ -42,7 +42,7 @@ release/
 |---|---|---|---|
 | 1 | **公开的隐私政策 URL** | App 内只有草案文案(`privacy_screen.dart`),**没有网页** | 把 `shared/隐私政策.md` 发到官网,例如 `https://www.pure-thoughts.com/privacy`;两端都强制填 URL,且必须公网可访问、不能要求登录 |
 | 2 | ~~**审核用演示账号**~~ | ✅ **已完成 2026-08-13** | `appreview` 已建在生产库并铺好演示数据(报数/发愿/问答/通知),登录实测通过;账号与密码见 `apple/04-app-review-information.md`。审核期间勿删勿改密 |
-| 3 | **iPad 支持要不要留** | Xcode 现在是 `TARGETED_DEVICE_FAMILY = "1,2"`(iPhone + iPad) | 留着就得再交一套 13" iPad 截图(2064×2752)并做 iPad 走查;**建议改成 `"1"` 仅 iPhone**,省一轮适配与审核风险 |
+| 3 | ~~**iPad 支持要不要留**~~ | ✅ **已改为仅 iPhone 2026-08-16**(`TARGETED_DEVICE_FAMILY = "1"`) | ASC 原本强制要 13" iPad 截图;App 是手机布局,iPad 上大片留白还可能被按 4.0 挑刺,故关掉。**新 build 上传后该要求才消失**。若日后要恢复 iPad:改回 `"1,2"`,iPad 截图素材已备在 `screenshots/apple/ipad-13-2048x2732/` |
 
 ## 两端提交顺序
 

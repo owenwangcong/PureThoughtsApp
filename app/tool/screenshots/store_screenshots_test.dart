@@ -172,6 +172,8 @@ const _devices = [
   // 两档都出:6.9" 是当前主槽,6.5" 是 ASC 默认展示的那一档(1284×2778)。
   _Device('apple/6.9-1290x2796', 1290, 2796, 3.0), // iPhone 6.9"(430×932 @3)
   _Device('apple/6.5-1284x2778', 1284, 2778, 3.0), // iPhone 6.5"(428×926 @3)
+  // iPad 13" 槽:App 的 TARGETED_DEVICE_FAMILY 含 iPad,ASC 就强制要这一组
+  _Device('apple/ipad-13-2048x2732', 2048, 2732, 2.0), // 1024×1366 @2
   _Device('google-play', 1080, 2400, 3.0), // Android 手机
 ];
 
