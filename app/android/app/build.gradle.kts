@@ -38,7 +38,9 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24 // audio_session(just_audio 依赖)要求 Android 7.0+
-        targetSdk = flutter.targetSdkVersion
+        // Play 要求 target API ≥ 36(Android 16),2026-08-31 起不升级就不能发版;
+        // Flutter 3.32 的 flutter.targetSdkVersion 还是 35,故显式写死
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
